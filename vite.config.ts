@@ -103,7 +103,7 @@ export default ({ mode }: { mode: string }) => {
       },
     },
     server: {
-      port: 5173,
+      port: 3000,
       host: "localhost",
       proxy: {
         "/api": proxyConfig,
