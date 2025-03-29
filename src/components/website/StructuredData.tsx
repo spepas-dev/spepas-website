@@ -1,5 +1,5 @@
 interface StructuredDataProps {
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 const StructuredData = ({ data }: StructuredDataProps) => {

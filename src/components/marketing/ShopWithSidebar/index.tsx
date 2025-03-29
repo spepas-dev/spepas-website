@@ -5,7 +5,6 @@ import Breadcrumb from '../Common/Breadcrumb';
 import shopData from '../Shop/shopData';
 import SingleGridItem from '../Shop/SingleGridItem';
 import SingleListItem from '../Shop/SingleListItem';
-import CategoryDropdown from './CategoryDropdown';
 import CustomSelect from './CustomSelect';
 import PriceDropdown from './PriceDropdown';
 
@@ -28,8 +27,6 @@ const ShopWithSidebar = () => {
     { label: 'Old Products', value: '2' }
   ];
 
-
- 
   useEffect(() => {
     window.addEventListener('scroll', handleStickyMenu);
 
@@ -95,7 +92,7 @@ const ShopWithSidebar = () => {
                   </div>
 
                   {/* <!-- category box --> */}
-                  <CategoryDropdown categories={categories} />
+                  {/* <CategoryDropdown categories={categories} /> */}
 
                   {/* <!-- gender box --> */}
                   {/* <GenderDropdown genders={genders} /> */}

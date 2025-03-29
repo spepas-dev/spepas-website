@@ -98,10 +98,3 @@ export function useLocalStorage<T>(
 
   return [storedValue, setValue, remove] as const;
 }
-
-// Example usage type definitions for clarity
-type UseLocalStorageReturn<T> = [
-  T, // Current stored value
-  (value: T | ((val: T) => T)) => void, // Setter function
-  () => void // Remove function
-];

@@ -10,7 +10,7 @@ const testimonialsData: Testimonial[] = [
   },
   {
     review:
-      "I've been using SpePas for a few months now, and I'm impressed by the wide range of auto parts available. Their platform is user-friendly and efficient.",
+      'I have been using SpePas for a few months now, and I am impressed by the wide range of auto parts available. Their platform is user-friendly and efficient.',
     authorName: 'Wilson Addai',
     authorImg: '/images/users/user2.jpg',
     authorRole: 'Rider'
@@ -37,7 +37,7 @@ const testimonialsData: Testimonial[] = [
   },
   {
     review:
-      "I've been a loyal customer of SpePas for over a year now, and their consistent quality and efficient service have kept me coming back.",
+      'I have been a loyal customer of SpePas for over a year now, and their consistent quality and efficient service have kept me coming back.',
     authorName: 'Samuel Baffoe',
     authorImg: '/images/users/user6.jpg',
     authorRole: 'Mechanic'
