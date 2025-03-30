@@ -46,7 +46,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="overflow-hidden pb-10 lg:pb-12.5 xl:pb-15 pt-57.5 sm:pt-45 lg:pt-30 xl:pt-51.5 bg-[#E5EAF4]">
+    <section className="w-full overflow-hidden pb-4 lg:pb-8.5 xl:pb-12   pt-4.5 sm:pt-6 lg:pt-9 xl:pt-16.5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* Carousel */}
         <div className="relative z-1 rounded-[10px] bg-white overflow-hidden">
@@ -54,16 +54,17 @@ const Hero = () => {
           <img src="/images/hero/hero-bg.png" alt="hero bg shapes" className="absolute right-0 bottom-0 -z-1" width={534} height={520} />
           <HeroCarousel />
         </div>
-
+      </div>
+      <div className=" max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15 pr-2">
         {/* Featured Products */}
-        <div className="mt-10">
+        <div className="pt-8 pl-4 sm:pl-8 xl:pl-8">
           <h2 className="text-dark text-xl font-semibold mb-4">Featured Products</h2>
           {/* Relative container to hold scroll container and arrows */}
           <div className="relative">
             {/* Left Arrow */}
             <button
               onClick={handleScrollLeft}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-white-light rounded-full shadow-md hover:bg-gray-100"
+              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#F6F7FB] bg-opacity-0 rounded-full shadow-md hover:bg-gray-100"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -243,7 +244,7 @@ const Hero = () => {
             {/* Right Arrow */}
             <button
               onClick={handleScrollRight}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-white-light rounded-full shadow-md hover:bg-gray-100"
+              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#F6F7FB] bg-opacity-0 rounded-full shadow-md hover:bg-gray-100"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -251,10 +252,9 @@ const Hero = () => {
             </button>
           </div>
         </div>
+        {/* Hero features */}
+        <HeroFeature />
       </div>
-
-      {/* Hero features */}
-      <HeroFeature />
     </section>
   );
 };
