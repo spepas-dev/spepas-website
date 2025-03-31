@@ -55,22 +55,12 @@ const Hero = () => {
           <HeroCarousel />
         </div>
       </div>
-      <div className=" max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15 pr-2">
+      <div className=" max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15">
         {/* Featured Products */}
-        <div className="pt-8 pl-4 sm:pl-8 xl:pl-8">
+        <div className="pt-8 pl-4 sm:pl-8 xl:pl-8 pr-2">
           <h2 className="text-dark text-xl font-semibold mb-4">Featured Products</h2>
           {/* Relative container to hold scroll container and arrows */}
           <div className="relative">
-            {/* Left Arrow */}
-            <button
-              onClick={handleScrollLeft}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#F6F7FB] bg-opacity-0 rounded-full shadow-md hover:bg-gray-100"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-
             {/* Horizontal scroll container */}
             <div
               ref={scrollRef}
@@ -240,17 +230,28 @@ const Hero = () => {
                 </div>
               </div>
             </div>
-
-            {/* Right Arrow */}
-            <button
-              onClick={handleScrollRight}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 p-2 bg-[#F6F7FB] bg-opacity-0 rounded-full shadow-md hover:bg-gray-100"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
           </div>
+        </div>
+        <div className="relative max-w-[1170px] w-full mt-6 mx-auto ">
+          {/* Left Arrow */}
+          <button
+            onClick={handleScrollLeft}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 p-2  rounded-full shadow-md hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          {/* Right Arrow */}
+          <button
+            onClick={handleScrollRight}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 p-2 rounded-full shadow-md hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
         {/* Hero features */}
         <HeroFeature />
