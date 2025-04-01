@@ -43,18 +43,18 @@ const HeroCarousal = () => {
               with strong industry partnerships and a scalable business model driving long-term success.
             </p>
 
-            {/* <a
+            <a
               href="/shop-with-sidebar"
               className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
             >
               Shop Now
-            </a> */}
-            <a
+            </a>
+            {/* <a
               href="/#"
               className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
             >
               Shop Soon
-            </a>
+            </a> */}
           </div>
 
           <div className="py-10 pr-4 mr-4">
