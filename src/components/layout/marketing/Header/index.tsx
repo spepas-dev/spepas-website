@@ -35,16 +35,20 @@ const Header = () => {
   }, []);
 
   return (
-    <header className={`fixed left-0 top-0 w-full z-9999 bg-white transition-all ease-in-out duration-300 ${stickyMenu && 'shadow'}`}>
+    <header
+      className={`fixed left-0 top-0 w-full z-9999 bg-white transition-all ease-in-out duration-300 border-b border-gray-3 ${stickyMenu && 'shadow'}`}
+    >
       <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
         {/* <!-- header top start --> */}
-        <div
+        {/* <div
           className={`flex flex-col lg:flex-row gap-5 items-end lg:items-center xl:justify-between ease-out duration-200 ${
-            stickyMenu ? 'py-4' : 'py-6'
+            stickyMenu ? 'py-4' : 'py-4'
           }`}
-        >
+        > */}
+        <div className={`flex flex-row gap-5 items-center justify-between ease-out duration-200 ${stickyMenu ? 'py-4' : 'py-4'}`}>
           {/* <!-- header top left --> */}
-          <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10">
+          {/* <div className="xl:w-auto flex-col sm:flex-row w-full flex sm:justify-between sm:items-center gap-5 sm:gap-10"> */}
+          <div className="xl:w-auto flex-col sm:flex-row  flex justify-between gap-5 sm:gap-10">
             <Link className="flex-shrink-0 max-[430px]:mx-auto" to="/">
               <img src="/images/logo/logo.png" alt="Logo" width={119} height={36} />
             </Link>
@@ -98,8 +102,8 @@ const Header = () => {
           </div>
 
           {/* <!-- header top right --> */}
-          <div className="flex w-full lg:w-auto items-center gap-7.5">
-            <span className="hidden xl:block w-px h-7.5 bg-gray-4"></span>
+          <div className="flex  lg:w-auto items-center gap-7.5">
+            {/* <span className="hidden xl:block w-px h-7.5 bg-gray-4"></span> */}
 
             <div className="flex w-full lg:w-auto justify-between items-center gap-5">
               {/* <!-- Hamburger Toggle BTN --> */}
@@ -137,6 +141,39 @@ const Header = () => {
                   </span>
                 </span>
               </button>
+
+              <div
+                className={`w-[288px] absolute right-4 top-full xl:static xl:w-auto h-0 xl:h-auto invisible xl:visible xl:flex items-center justify-between ${
+                  navigationOpen &&
+                  '!visible bg-white shadow-lg border border-gray-3 !h-auto max-h-[400px] overflow-y-scroll rounded-md p-5'
+                }`}
+              >
+                {/* <!-- Main Nav Start --> */}
+                <nav>
+                  <ul className="flex xl:items-center flex-col xl:flex-row gap-5 xl:gap-6">
+                    {menuData.map((menuItem, i) =>
+                      menuItem.submenu ? (
+                        <Dropdown key={i} menuItem={menuItem} stickyMenu={stickyMenu} />
+                      ) : (
+                        <li
+                          key={i}
+                          className="group relative before:w-0 before:h-[3px] before:bg-blue before:absolute before:left-0 before:top-0 before:rounded-b-[3px] before:ease-out before:duration-200 hover:before:w-full "
+                        >
+                          <Link
+                            to={menuItem.path || '#'}
+                            className={`hover:text-blue text-custom-sm font-medium text-dark flex ${stickyMenu ? 'xl:py-4' : 'xl:py-4'}`}
+                          >
+                            {menuItem.icon && <img src={menuItem.icon.src} alt={menuItem.icon.alt} className={menuItem.icon.className} />}
+                            {menuItem.title}
+                          </Link>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </nav>
+                {/* //   <!-- Main Nav End --> */}
+              </div>
+
               {/* //   <!-- Hamburger Toggle BTN --> */}
 
               {/* <div className="flex items-center gap-5">
@@ -263,17 +300,18 @@ const Header = () => {
         {/* <!-- header top end --> */}
       </div>
 
-      <div className="border-t border-gray-3">
+      {/* <div className="border-t border-gray-3">
         <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
-          <div className="flex items-center justify-between">
-            {/* <!--=== Main Nav Start ===--> */}
-            <div
+          <div className="flex items-center justify-between"> */}
+      {/* <!--=== Main Nav Start ===--> */}
+      {/* <div
               className={`w-[288px] absolute right-4 top-full xl:static xl:w-auto h-0 xl:h-auto invisible xl:visible xl:flex items-center justify-between ${
                 navigationOpen && '!visible bg-white shadow-lg border border-gray-3 !h-auto max-h-[400px] overflow-y-scroll rounded-md p-5'
               }`}
-            >
-              {/* <!-- Main Nav Start --> */}
-              <nav>
+            > */}
+      {/* <!-- Main Nav Start --> */}
+
+      {/* <nav>
                 <ul className="flex xl:items-center flex-col xl:flex-row gap-5 xl:gap-6">
                   {menuData.map((menuItem, i) =>
                     menuItem.submenu ? (
@@ -285,7 +323,7 @@ const Header = () => {
                       >
                         <Link
                           to={menuItem.path || '#'}
-                          className={`hover:text-blue text-custom-sm font-medium text-dark flex ${stickyMenu ? 'xl:py-4' : 'xl:py-6'}`}
+                          className={`hover:text-blue text-custom-sm font-medium text-dark flex ${stickyMenu ? 'xl:py-4' : 'xl:py-4'}`}
                         >
                           {menuItem.icon && <img src={menuItem.icon.src} alt={menuItem.icon.alt} className={menuItem.icon.className} />}
                           {menuItem.title}
@@ -294,13 +332,14 @@ const Header = () => {
                     )
                   )}
                 </ul>
-              </nav>
-              {/* //   <!-- Main Nav End --> */}
-            </div>
-            {/* // <!--=== Main Nav End ===--> */}
+              </nav> */}
 
-            {/* // <!--=== Nav Right Start ===--> */}
-            {/* <div className="hidden xl:block">
+      {/* //   <!-- Main Nav End --> */}
+      {/* </div> */}
+      {/* // <!--=== Main Nav End ===--> */}
+
+      {/* // <!--=== Nav Right Start ===--> */}
+      {/* <div className="hidden xl:block">
               <ul className="flex items-center gap-5.5">
                 <li className="py-4">
                   <a
@@ -351,10 +390,10 @@ const Header = () => {
                 </li>
               </ul>
             </div> */}
-            {/* <!--=== Nav Right End ===--> */}
-          </div>
+      {/* <!--=== Nav Right End ===--> */}
+      {/* </div>
         </div>
-      </div>
+      </div> */}
     </header>
   );
 };
