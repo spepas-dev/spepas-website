@@ -1,0 +1,192 @@
+spepas-website/
+├── .dockerignore
+├── .editorconfig
+├── .env
+├── .gitignore
+├── .prettierrc.json
+├── components.json
+├── Dockerfile
+├── eslint.config.js
+├── export-tree.js
+├── index.html
+├── index.tsx
+├── nginx.conf
+├── package-lock.json
+├── package.json
+├── pnpm-lock.yaml
+├── README.md
+├── src/
+│   ├── App.tsx
+│   ├── assets/
+│   │   └── logo.svg
+│   ├── components/
+│   │   ├── Auth/
+│   │   │   ├── ActivateAccount.tsx
+│   │   │   ├── ChangePassword.tsx
+│   │   │   ├── ForgotPassword.tsx
+│   │   │   ├── ResetPassword.tsx
+│   │   │   ├── SignIn.tsx
+│   │   │   └── SignUp.tsx
+│   │   ├── common/
+│   │   │   ├── Breadcrumb.tsx
+│   │   │   ├── Carousel.tsx
+│   │   │   ├── LoadingSpinner.tsx
+│   │   │   └── ProductCard.tsx
+│   │   ├── layout/
+│   │   │   ├── auth/
+│   │   │   │   └── AuthLayout.tsx
+│   │   │   ├── index.ts
+│   │   │   └── marketing/
+│   │   │       ├── Footer.tsx
+│   │   │       ├── Header/
+│   │   │       │   ├── CustomSelect.tsx
+│   │   │       │   ├── Dropdown.tsx
+│   │   │       │   ├── DropdownProps.tsx
+│   │   │       │   ├── index.tsx
+│   │   │       │   ├── Menu.ts
+│   │   │       │   └── menuData.ts
+│   │   │       ├── index.ts
+│   │   │       └── MarketingLayout.tsx
+│   │   ├── marketing/
+│   │   │   ├── Common/
+│   │   │   │   ├── Breadcrumb.tsx
+│   │   │   │   ├── Newsletter.tsx
+│   │   │   │   ├── PreLoader.tsx
+│   │   │   │   ├── ProductItem.tsx
+│   │   │   │   └── ScrollToTop.tsx
+│   │   │   ├── Contact/
+│   │   │   │   └── index.tsx
+│   │   │   ├── Error/
+│   │   │   │   └── index.tsx
+│   │   │   ├── extras/
+│   │   │   │   ├── Banner.tsx
+│   │   │   │   ├── Services.tsx
+│   │   │   │   ├── Testimonials.tsx
+│   │   │   │   └── Values.tsx
+│   │   │   ├── Faqs/
+│   │   │   │   └── index.tsx
+│   │   │   ├── Footer/
+│   │   │   │   └── index.tsx
+│   │   │   ├── Home/
+│   │   │   │   ├── BestSeller/
+│   │   │   │   │   ├── index.tsx
+│   │   │   │   │   └── SingleItem.tsx
+│   │   │   │   ├── Categories/
+│   │   │   │   │   ├── categoryData.ts
+│   │   │   │   │   ├── index.tsx
+│   │   │   │   │   └── SingleItem.tsx
+│   │   │   │   ├── Hero/
+│   │   │   │   │   ├── HeroCarousel.tsx
+│   │   │   │   │   ├── HeroFeature.tsx
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── NewArrivals/
+│   │   │   │   │   └── index.tsx
+│   │   │   │   ├── PromoBanner/
+│   │   │   │   │   └── index.tsx
+│   │   │   │   └── Testimonials/
+│   │   │   │       ├── index.tsx
+│   │   │   │       ├── SingleItem.tsx
+│   │   │   │       └── testimonialsData.ts
+│   │   │   ├── MailSuccess/
+│   │   │   │   └── index.tsx
+│   │   │   ├── MapPicker/
+│   │   │   │   └── index.tsx
+│   │   │   ├── PrivacyPolicy/
+│   │   │   │   └── index.tsx
+│   │   │   ├── RefundPolicy/
+│   │   │   │   └── index.tsx
+│   │   │   ├── Shop/
+│   │   │   │   ├── shopData.ts
+│   │   │   │   ├── SingleGridItem.tsx
+│   │   │   │   └── SingleListItem.tsx
+│   │   │   ├── ShopWithoutSidebar/
+│   │   │   │   └── index.tsx
+│   │   │   ├── ShopWithSidebar/
+│   │   │   │   ├── CategoryDropdown.tsx
+│   │   │   │   ├── ColorsDropdwon.tsx
+│   │   │   │   ├── CustomSelect.tsx
+│   │   │   │   ├── GenderDropdown.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── PriceDropdown.tsx
+│   │   │   │   ├── Progress.tsx
+│   │   │   │   └── SizeDropdown.tsx
+│   │   │   └── TermsOfUse/
+│   │   │       └── index.tsx
+│   │   └── website/
+│   │       ├── index.ts
+│   │       ├── SEO.tsx
+│   │       └── StructuredData.tsx
+│   ├── config/
+│   │   ├── api.config.ts
+│   │   ├── app.config.ts
+│   │   ├── env.config.ts
+│   │   ├── index.ts
+│   │   ├── routes.config.ts
+│   │   └── theme.config.ts
+│   ├── css/
+│   │   ├── async-gallery.css
+│   │   └── euclid-circular-a-font.css
+│   ├── features/
+│   │   └── auth/
+│   │       └── index.ts
+│   ├── hooks/
+│   │   ├── use-localhost.tsx
+│   │   ├── use-mobile.ts
+│   │   └── useAnalytics.ts
+│   ├── index.css
+│   ├── lib/
+│   │   ├── auth.ts
+│   │   ├── authZodValidation.ts
+│   │   ├── axios.ts
+│   │   ├── index.ts
+│   │   ├── orderBidsApis.ts
+│   │   ├── orderBidsZodValidation.ts
+│   │   ├── profiling.ts
+│   │   ├── profilingZodValidation.ts
+│   │   ├── react-query.ts
+│   │   ├── toast.ts
+│   │   └── utils.ts
+│   ├── main.tsx
+│   ├── pages/
+│   │   ├── auth/
+│   │   │   ├── activate.tsx
+│   │   │   ├── change-password.tsx
+│   │   │   ├── forgot-password.tsx
+│   │   │   ├── reset-password.tsx
+│   │   │   ├── signin.tsx
+│   │   │   └── signup.tsx
+│   │   ├── ErrorPage.tsx
+│   │   ├── marketing/
+│   │   │   ├── contact/
+│   │   │   │   └── page.tsx
+│   │   │   ├── error/
+│   │   │   │   └── page.tsx
+│   │   │   ├── faq-page/
+│   │   │   │   └── page.tsx
+│   │   │   ├── home/
+│   │   │   │   └── index.tsx
+│   │   │   ├── mail-success/
+│   │   │   │   └── page.tsx
+│   │   │   ├── privacy-policy/
+│   │   │   │   └── page.tsx
+│   │   │   ├── refund-policy/
+│   │   │   │   └── page.tsx
+│   │   │   ├── shop-with-sidebar/
+│   │   │   │   └── page.tsx
+│   │   │   ├── shop-without-sidebar/
+│   │   │   │   └── page.tsx
+│   │   │   └── terms/
+│   │   │       └── page.tsx
+│   │   └── NotFound.tsx
+│   ├── routes/
+│   │   ├── auth.routes.tsx
+│   │   ├── index.tsx
+│   │   └── website.routes.tsx
+│   ├── types/
+│   └── vite-env.d.ts
+├── tree.txt
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+└── vite.config.ts
