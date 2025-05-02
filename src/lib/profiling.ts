@@ -1,4 +1,5 @@
 // src/lib/profiling.ts
+import { log } from 'console';
 import apiClient from './axios';
 import {
   addIdentificationSchema,
@@ -36,8 +37,12 @@ export const createGopaProfileSelf = async (payload: {
   Specialties: string[];
 }) => {
   gopaRegistrationSchema.parse(payload);
+  console.log(payload);
   const { data } = await apiClient.post('/user/gopa-registration-self', payload);
+  console.log('GOPA ', data);
+  console.log('GOPA ', payload);
   return data;
+  console.log('GOPA ', data);
 };
 
 /**

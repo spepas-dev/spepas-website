@@ -24,6 +24,7 @@ const Header = () => {
   console.log("Auth Data:", authData);
 
   const sellerId = authData?.user?.sellerDetails?.Seller_ID;
+  const gopaId   = authData?.user?.gopa?.Gopa_ID;
 
 
   // Sticky menu
@@ -193,6 +194,39 @@ const Header = () => {
                         </button>
                       )}
 
+                      {gopaId && (
+                          <>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/assigned/active`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Assigned
+                            </button>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/assigned/history`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Assigned History
+                            </button>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/unassigned/active`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Unassigned Active
+                            </button>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/unassigned/history`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Unassigned History
+                            </button>
+                          </>
+                        )}
+
                       <button
                         onClick={() => navigate('/buyer/cart')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
@@ -272,6 +306,39 @@ const Header = () => {
                     </button>
                   </div>
                 )}
+
+                  {gopaId && (
+                          <>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/assigned/active`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Assigned
+                            </button>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/assigned/history`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Assigned History
+                            </button>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/unassigned/active`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Unassigned Active
+                            </button>
+                            <button
+                              onClick={() => navigate(`/gopa/${gopaId}/unassigned/history`)}
+                              className="flex items-center …"
+                            >
+                              <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" /> 
+                              Unassigned History
+                            </button>
+                          </>
+                        )}
               </div>
                 
 
