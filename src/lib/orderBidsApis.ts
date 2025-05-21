@@ -50,7 +50,7 @@ export const requestNonInventorySparePartAPI = async (payload: {
 };
 
 /**
- * 3. Assign Request To Seller
+ * 3. Assign Request To Seller GOPA Screen
  */
 export const assignRequestToSellerAPI = async (payload: {
   request_id: string;
@@ -169,7 +169,7 @@ export const getRequestDetailAPI = async (params: { request_id: string }) => {
 };
 
 /**
- * 6. GOPA Sellers For Request
+ * 6. GOPA Sellers For Request GOPA Screen
  */
 export const getGOPASellerForRequestAPI = async (params: {
   gopa_id: string;
@@ -184,7 +184,7 @@ export const getGOPASellerForRequestAPI = async (params: {
 };
 
 /**
- * 7. GOPA Assigned Active Requests
+ * 7. GOPA Assigned Active Requests GOPA Screen
  */
 export const getGOPAAssignedActiveRequestsAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
@@ -194,7 +194,7 @@ export const getGOPAAssignedActiveRequestsAPI = async (params: { user_id: string
 };
 
 /**
- * 8. GOPA Assigned Request History
+ * 8. GOPA Assigned Request History Gopa Screen
  */
 export const getGOPAAssignedRequestHistoryAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
@@ -204,7 +204,7 @@ export const getGOPAAssignedRequestHistoryAPI = async (params: { user_id: string
 };
 
 /**
- * 9. GOPA Unassigned Active Requests
+ * 9. GOPA Unassigned Active Requests GOPA Screen
  */
 export const getGOPAUnassignedActiveRequestsAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
@@ -214,7 +214,7 @@ export const getGOPAUnassignedActiveRequestsAPI = async (params: { user_id: stri
 };
 
 /**
- * 10. GOPA Unassigned Request History
+ * 10. GOPA Unassigned Request History GOPA Screen
  */
 export const getGOPAUnassignedRequestHistoryAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);

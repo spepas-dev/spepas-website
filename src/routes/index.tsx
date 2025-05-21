@@ -12,6 +12,7 @@ import { profilingRoutes } from './profiling.routes';
 import { sellerRoutes } from './seller.routes';
 import { buyerRoutes } from './buyer.routes';
 import { gopaRoutes }   from './gopa.routes';  
+import { gopaInvoiceRoutes } from './gopaInvoices.routes';
 
 export const routes = [
   {
@@ -23,7 +24,8 @@ export const routes = [
       ...profilingRoutes,
       ...buyerRoutes,
       ...sellerRoutes,
-      ...gopaRoutes, 
+      ...gopaRoutes,
+      ...gopaInvoiceRoutes, 
     ],
 
   },

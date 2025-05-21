@@ -1,25 +1,41 @@
+// src/components/Auth/ResetPassword.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import { resetPasswordAPI } from "@/lib/auth";
+import { toast } from "react-hot-toast";
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState<string>("");
   const [otpID] = useState<string>(() => localStorage.getItem("otpID") || "");
   const [newPassword, setNewPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+
+    // show loading toast
+    const toastId = toast.loading("Resetting password…", {
+      position: "bottom-center",
+    });
+
     try {
       await resetPasswordAPI({ otp, otpID, newPassword });
+
+      // success
+      toast.success("Password reset! Please sign in.", {
+        id: toastId,
+        position: "bottom-center",
+      });
       navigate("/auth/signin");
     } catch (err) {
-      setError("Failed to reset password. Please check your details and try again.");
+      // error
+      toast.error("Failed to reset password. Please try again.", {
+        id: toastId,
+        position: "bottom-center",
+      });
     } finally {
       setLoading(false);
     }
@@ -37,7 +53,6 @@ const ResetPassword: React.FC = () => {
             <p>Enter the OTP and a new password below.</p>
           </div>
           <form onSubmit={handleSubmit}>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
             <div className="mb-5">
               <label htmlFor="otp" className="block mb-2.5">
                 OTP <span className="text-red">*</span>
@@ -47,7 +62,9 @@ const ResetPassword: React.FC = () => {
                 id="otp"
                 placeholder="Enter OTP"
                 value={otp}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setOtp(e.target.value)
+                }
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required
               />
@@ -61,7 +78,9 @@ const ResetPassword: React.FC = () => {
                 id="newPassword"
                 placeholder="Enter your new password"
                 value={newPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setNewPassword(e.target.value)
+                }
                 autoComplete="on"
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required

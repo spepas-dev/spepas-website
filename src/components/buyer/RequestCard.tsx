@@ -1,3 +1,4 @@
+// src/components/buyer/RequestCard.tsx 
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -9,20 +10,52 @@ const RequestCard: React.FC<RequestCardProps> = ({ req }) => {
   const img = req.sparePart.images?.[0];
 
   return (
-    <div className="flex items-center p-4 bg-white shadow rounded mb-4">
+    <div
+      className="
+        flex flex-col
+        sm:flex-row
+        items-start sm:items-center
+        bg-white shadow rounded-lg
+        overflow-hidden
+        mb-4
+      "
+    >
       {img && (
-        <img src={img} alt="" className="w-16 h-16 object-cover mr-4 rounded" />
+        <img
+          src={img}
+          alt={req.sparePart.name}
+          className="
+            w-full h-48
+            sm:w-16 sm:h-16
+            object-cover
+          "
+        />
       )}
-      <div className="flex-grow">
-        <h2 className="font-semibold">{req.sparePart.name}</h2>
-        <p>{req.sparePart.description}</p>
+
+      <div className="flex-grow p-4 space-y-2">
+        <h2 className="text-lg sm:text-base font-semibold text-gray-800">
+          {req.sparePart.name}
+        </h2>
+        <p className="text-sm sm:text-xs text-gray-600 line-clamp-3">
+          {req.sparePart.description}
+        </p>
       </div>
-      <Link
-        to={`/buyer/requests/${req.request_ID}/offers`}
-        className="bg-indigo-500 text-white px-3 py-1 rounded"
-      >
-        View Offers
-      </Link>
+
+      <div className="p-4">
+        <Link
+          to={`/buyer/requests/${req.request_ID}/offers`}
+          className="
+            block w-full text-center
+            bg-indigo-500 hover:bg-indigo-600
+            text-white font-medium
+            py-2 px-4 rounded-md
+            transition
+            sm:inline-block sm:w-auto sm:text-sm
+          "
+        >
+          View Offers
+        </Link>
+      </div>
     </div>
   );
 };

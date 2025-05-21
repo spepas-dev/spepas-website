@@ -1,36 +1,29 @@
-'use client';
-// Import Swiper styles
-import 'swiper/css/pagination';
-import 'swiper/css';
+// src/components/HeroCarousel.tsx
+import React from 'react';
+// import 'swiper/css';
+// import 'swiper/css/pagination';
 
 import { Autoplay, Pagination } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import { Swiper, SwiperSlide }   from 'swiper/react';
 
-const HeroCarousal = () => {
+const HeroCarousel: React.FC = () => {
   return (
     <Swiper
       spaceBetween={30}
-      centeredSlides={true}
-      autoplay={{
-        delay: 30000,
-        disableOnInteraction: false
-      }}
-      pagination={{
-        clickable: true
-      }}
+      centeredSlides
+      autoplay={{ delay: 30000, disableOnInteraction: false }}
+      pagination={{ clickable: true }}
       modules={[Autoplay, Pagination]}
       className="hero-carousel w-full"
     >
       <SwiperSlide className="w-full">
-        <div className="flex items-center pt-6 sm:pt-0 flex-col-reverse sm:flex-row">
-          <div className="max-w-[500px] py-10 sm:py-15 lg:py-24.5 pl-4 sm:pl-7.5 lg:pl-12.5">
+      <div className="flex flex-col-reverse lg:flex-row items-center pt-6 lg:pt-0">
+          <div className="w-full lg:w-1/2 max-w-[500px] py-10 pl-4 lg:pl-12">
             <div className="flex items-center gap-4 mb-7.5 sm:mb-10">
-              <span className="block font-semibold text-heading-3 sm:text-heading-1 text-blue">Welcome To SpePas</span>
-              {/* <span className="block text-dark text-sm sm:text-custom-1 sm:leading-[24px]">
-                Sale
-                <br />
-                Off
-              </span> */}
+              <span className="block font-semibold text-3xl sm:text-heading-1 text-blue">
+                <h1>Welcome to SpePas</h1>
+              </span>
+             
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
@@ -38,70 +31,38 @@ const HeroCarousal = () => {
             </h1>
 
             <p>
-              For investors, SpePas presents a unique opportunity to be part of the transformation of the auto parts industry in Ghana and
-              West Africa. By getting in early, investors can support an innovative platform poised for growth in an underserved market,
-              with strong industry partnerships and a scalable business model driving long-term success.
+            For investors, SpePas presents a unique opportunity to be part of the transformation of the auto parts industry in Ghana and West Africa. By getting in early, investors can support an innovative platform poised for growth in an underserved market, with strong industry partnerships and a scalable business model driving long-term success.
             </p>
 
             <a
-              href="/shop-with-sidebar"
-              className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
-            >
-              Shop Now
-            </a>
-            {/* <a
-              href="/#"
-              className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
-            >
-              Shop Soon
-            </a> */}
-          </div>
-
-          <div className="py-10 pr-4 mr-4">
-            <img src="/images/hero/image1.png" alt="image" width={351 * 2} height={358 * 2} />
-          </div>
-        </div>
-      </SwiperSlide>
-      {/* <SwiperSlide>
-        {" "}
-        <div className="flex items-center pt-6 sm:pt-0 flex-col-reverse sm:flex-row">
-          <div className="max-w-[394px] py-10 sm:py-15 lg:py-26 pl-4 sm:pl-7.5 lg:pl-12.5">
-            <div className="flex items-center gap-4 mb-7.5 sm:mb-10">
-              <span className="block font-semibold text-heading-3 sm:text-heading-1 text-blue">
-                SPEPAS
-              </span>
-              
-            </div>
-
-            <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
-              <a href="#">A nice catchy slogan</a>
-            </h1>
-
-            <p>
-              Lorem ipsum dolor sit, consectetur elit nunc suscipit non ipsum
-              nec suscipit.
-            </p>
-
-            <a
-              href="#"
+              href="/shop"
               className="inline-flex font-medium text-white text-custom-sm rounded-md bg-dark py-3 px-9 ease-out duration-200 hover:bg-blue mt-10"
             >
               Shop Now
             </a>
           </div>
 
-          <div>
-            <Image
-              src="/images/hero/image2.png"
-              alt="headphone"
-              width={351}
-              height={358}
+          <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
+            <img
+              src="/images/hero/image1.png"
+              alt="Investor opportunities"
+              className="
+              w-full          
+              max-w-md      
+              h-auto
+              object-contain
+              lg:max-w-none  
+              "
             />
           </div>
         </div>
-      </SwiperSlide> */}
+      </SwiperSlide>
+
+      {/*
+        // You can duplicate <SwiperSlide> here for more slides…
+      */}
     </Swiper>
   );
 };
 
-export default HeroCarousal;
+export default HeroCarousel;

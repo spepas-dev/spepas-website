@@ -1,28 +1,41 @@
+// src/components/Auth/ForgotPassword.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import { forgotPasswordAPI } from "@/lib/auth";
+import { toast } from "react-hot-toast";
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
     setLoading(true);
+
+    // Show a loading toast
+    const toastId = toast.loading("Sending reset link…", {
+      position: "bottom-center",
+    });
+
     try {
       const result = await forgotPasswordAPI({ email });
-      // Assume result.data contains an OTP ID or similar identifier
+      // Save OTP ID if needed
       localStorage.setItem("otpID", result.data);
-      setMessage("Reset link sent successfully. Please check your email.");
+
+      // Update toast to success
+      toast.success("Reset link sent! Check your email.", {
+        id: toastId,
+        position: "bottom-center",
+      });
+
       navigate("/auth/reset-password");
     } catch (err) {
-      setError("Failed to send reset link. Please try again.");
+      toast.error("Failed to send reset link. Please try again.", {
+        id: toastId,
+        position: "bottom-center",
+      });
     } finally {
       setLoading(false);
     }
@@ -40,8 +53,6 @@ const ForgotPassword: React.FC = () => {
             <p>Enter your email to receive a password reset link.</p>
           </div>
           <form onSubmit={handleSubmit}>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            {message && <p className="text-green-500 mb-4">{message}</p>}
             <div className="mb-5">
               <label htmlFor="email" className="block mb-2.5">
                 Email Address <span className="text-red">*</span>
@@ -51,7 +62,9 @@ const ForgotPassword: React.FC = () => {
                 id="email"
                 placeholder="Enter your email address"
                 value={email}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setEmail(e.target.value)
+                }
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required
               />
@@ -63,6 +76,12 @@ const ForgotPassword: React.FC = () => {
             >
               {loading ? "Sending..." : "Send Reset Link"}
             </button>
+            <p className="text-center mt-6">
+              Remembered?{" "}
+              <Link to="/auth/signin" className="text-dark hover:text-blue">
+                Sign In
+              </Link>
+            </p>
           </form>
         </div>
       </section>

@@ -5,6 +5,7 @@ import CartPage from '@/pages/buyer/CartPage';
 import CheckoutPage from '@/pages/buyer/CheckoutPage';
 import PostRequestPage from '@/pages/buyer/PostRequestPage';
 import MyRequestsPage from '@/pages/buyer/MyRequestsPage';
+import MyRequestsOffersPage from '@/pages/buyer/MyRequestsOffersPage'
 import OffersPage from '@/pages/buyer/OffersPage';
 
 export const buyerRoutes: RouteObject[] = [
@@ -23,6 +24,10 @@ export const buyerRoutes: RouteObject[] = [
   {
     path: 'buyer/requests',
     element: <MyRequestsPage />,
+  },
+  {
+    path: 'buyer/requests/offers-all',
+    element: <MyRequestsOffersPage />,
   },
   {
     path: 'buyer/requests/:requestId/offers',

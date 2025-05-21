@@ -1,4 +1,4 @@
-import { Testimonial } from '@/types';
+import { Testimonial } from "./testimonialsData"; 
 
 const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
   return (

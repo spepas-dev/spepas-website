@@ -18,7 +18,11 @@ spepas-website/
 ├── src/
 │   ├── App.tsx
 │   ├── assets/
-│   │   └── logo.svg
+│   │   ├── logo.svg
+│   │   └── lottie/
+│   │       ├── empty-cart.json
+│   │       ├── loading-cart.json
+│   │       └── loading-spinner.json
 │   ├── components/
 │   │   ├── Auth/
 │   │   │   ├── ActivateAccount.tsx
@@ -27,26 +31,49 @@ spepas-website/
 │   │   │   ├── ResetPassword.tsx
 │   │   │   ├── SignIn.tsx
 │   │   │   └── SignUp.tsx
+│   │   ├── buyer/
+│   │   │   ├── CartItem.tsx
+│   │   │   ├── CartList.tsx
+│   │   │   ├── CheckoutForm.tsx
+│   │   │   ├── OfferCard.tsx
+│   │   │   ├── OffersList.tsx
+│   │   │   ├── PostRequestForm.tsx
+│   │   │   ├── RequestCard.tsx
+│   │   │   ├── RequestList.tsx
+│   │   │   ├── RequestsWithOffersList.tsx
+│   │   │   └── RequestWithOffersCard.tsx
 │   │   ├── common/
 │   │   │   ├── Breadcrumb.tsx
 │   │   │   ├── Carousel.tsx
 │   │   │   ├── LoadingSpinner.tsx
-│   │   │   └── ProductCard.tsx
+│   │   │   ├── ProductCard.tsx
+│   │   │   └── ProtectedRoute.tsx
+│   │   ├── gopa/
+│   │   │   ├── AssignSellerModal.tsx
+│   │   │   ├── RequestCard.tsx
+│   │   │   └── RequestList.tsx
+│   │   ├── gopaInvoices/
+│   │   │   ├── AcceptInvoice.tsx
+│   │   │   ├── GopaAcceptedInvoiceDetails.tsx
+│   │   │   ├── GopaAcceptedInvoiceItemDetails.tsx
+│   │   │   ├── GopaAcceptedInvoices.tsx
+│   │   │   └── InvoiceListToAccept.tsx
 │   │   ├── layout/
 │   │   │   ├── auth/
 │   │   │   │   └── AuthLayout.tsx
 │   │   │   ├── index.ts
-│   │   │   └── marketing/
-│   │   │       ├── Footer.tsx
-│   │   │       ├── Header/
-│   │   │       │   ├── CustomSelect.tsx
-│   │   │       │   ├── Dropdown.tsx
-│   │   │       │   ├── DropdownProps.tsx
-│   │   │       │   ├── index.tsx
-│   │   │       │   ├── Menu.ts
-│   │   │       │   └── menuData.ts
-│   │   │       ├── index.ts
-│   │   │       └── MarketingLayout.tsx
+│   │   │   ├── marketing/
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   ├── Header/
+│   │   │   │   │   ├── CustomSelect.tsx
+│   │   │   │   │   ├── Dropdown.tsx
+│   │   │   │   │   ├── DropdownProps.tsx
+│   │   │   │   │   ├── index.tsx
+│   │   │   │   │   ├── Menu.ts
+│   │   │   │   │   └── menuData.ts
+│   │   │   │   ├── index.ts
+│   │   │   │   └── MarketingLayout.tsx
+│   │   │   └── profiling/
 │   │   ├── marketing/
 │   │   │   ├── Common/
 │   │   │   │   ├── Breadcrumb.tsx
@@ -92,6 +119,17 @@ spepas-website/
 │   │   │   │   └── index.tsx
 │   │   │   ├── MapPicker/
 │   │   │   │   └── index.tsx
+│   │   │   ├── MyAccount/
+│   │   │   │   ├── AddressDetails.tsx
+│   │   │   │   ├── DeliverProfileTab.tsx
+│   │   │   │   ├── GeneralDetails.tsx
+│   │   │   │   ├── GopaProfileTab.tsx
+│   │   │   │   ├── GroupsRolesTab.tsx
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── MepaProfileTab.tsx
+│   │   │   │   ├── PaymentAccountsTab.tsx
+│   │   │   │   ├── SellerDetailsTab.tsx
+│   │   │   │   └── WalletDetails.tsx
 │   │   │   ├── PrivacyPolicy/
 │   │   │   │   └── index.tsx
 │   │   │   ├── RefundPolicy/
@@ -113,6 +151,19 @@ spepas-website/
 │   │   │   │   └── SizeDropdown.tsx
 │   │   │   └── TermsOfUse/
 │   │   │       └── index.tsx
+│   │   ├── profiling/
+│   │   │   ├── AddIdentification.tsx
+│   │   │   ├── GopaRegistrationForm.tsx
+│   │   │   ├── MepaRegistrationForm.tsx
+│   │   │   ├── PaymentAccountForm.tsx
+│   │   │   ├── RegistrationSelection.tsx
+│   │   │   ├── RiderRegistrationForm.tsx
+│   │   │   └── SellerRegistrationForm.tsx
+│   │   ├── seller/
+│   │   │   ├── BidCard.tsx
+│   │   │   ├── BidList.tsx
+│   │   │   ├── Filters.tsx
+│   │   │   └── SubmitBidModal.tsx
 │   │   └── website/
 │   │       ├── index.ts
 │   │       ├── SEO.tsx
@@ -136,17 +187,25 @@ spepas-website/
 │   │   └── useAnalytics.ts
 │   ├── index.css
 │   ├── lib/
+│   │   ├── addressApis.ts
+│   │   ├── addressZodValidation.ts
 │   │   ├── auth.ts
 │   │   ├── authZodValidation.ts
 │   │   ├── axios.ts
+│   │   ├── gopaInvoiceApis.ts
+│   │   ├── gopaInvoiceZodValidation.ts
 │   │   ├── index.ts
+│   │   ├── inventoryApis.ts
+│   │   ├── inventoryZodValidation.ts
 │   │   ├── orderBidsApis.ts
 │   │   ├── orderBidsZodValidation.ts
 │   │   ├── profiling.ts
 │   │   ├── profilingZodValidation.ts
 │   │   ├── react-query.ts
 │   │   ├── toast.ts
-│   │   └── utils.ts
+│   │   ├── utils.ts
+│   │   ├── walletApis.ts
+│   │   └── walletZodValidation.ts
 │   ├── main.tsx
 │   ├── pages/
 │   │   ├── auth/
@@ -156,7 +215,26 @@ spepas-website/
 │   │   │   ├── reset-password.tsx
 │   │   │   ├── signin.tsx
 │   │   │   └── signup.tsx
+│   │   ├── buyer/
+│   │   │   ├── CartPage.tsx
+│   │   │   ├── CheckoutPage.tsx
+│   │   │   ├── MyRequestsOffersPage.tsx
+│   │   │   ├── MyRequestsPage.tsx
+│   │   │   ├── OffersPage.tsx
+│   │   │   └── PostRequestPage.tsx
 │   │   ├── ErrorPage.tsx
+│   │   ├── gopa/
+│   │   │   ├── AssignedActiveRequestsPage.tsx
+│   │   │   ├── AssignedHistoryPage.tsx
+│   │   │   ├── RequestSellersPage.tsx
+│   │   │   ├── UnassignedActiveRequestsPage.tsx
+│   │   │   └── UnassignedHistoryPage.tsx
+│   │   ├── gopaInvoices/
+│   │   │   ├── AcceptInvoicePage.tsx
+│   │   │   ├── GopaAcceptedInvoiceDetailsPage.tsx
+│   │   │   ├── GopaAcceptedInvoiceItemDetailsPage.tsx
+│   │   │   ├── GopaAcceptedInvoicesPage.tsx
+│   │   │   └── InvoiceListToAcceptPage.tsx
 │   │   ├── marketing/
 │   │   │   ├── contact/
 │   │   │   │   └── page.tsx
@@ -168,6 +246,8 @@ spepas-website/
 │   │   │   │   └── index.tsx
 │   │   │   ├── mail-success/
 │   │   │   │   └── page.tsx
+│   │   │   ├── my-account/
+│   │   │   │   └── page.tsx
 │   │   │   ├── privacy-policy/
 │   │   │   │   └── page.tsx
 │   │   │   ├── refund-policy/
@@ -178,14 +258,30 @@ spepas-website/
 │   │   │   │   └── page.tsx
 │   │   │   └── terms/
 │   │   │       └── page.tsx
-│   │   └── NotFound.tsx
+│   │   ├── NotFound.tsx
+│   │   ├── profiling/
+│   │   │   ├── AddIdentificationPage.tsx
+│   │   │   ├── AddPaymentAccountPage.tsx
+│   │   │   ├── GopaRegistrationPage.tsx
+│   │   │   ├── MepaRegistrationPage.tsx
+│   │   │   ├── RegistrationSelectionPage.tsx
+│   │   │   ├── RiderRegistrationPage.tsx
+│   │   │   └── SellerRegistrationPage.tsx
+│   │   └── seller/
+│   │       ├── ActiveBidsPage.tsx
+│   │       ├── BidHistoryPage.tsx
+│   │       └── RequestDetailPage.tsx
 │   ├── routes/
 │   │   ├── auth.routes.tsx
+│   │   ├── buyer.routes.tsx
+│   │   ├── gopa.routes.tsx
+│   │   ├── gopaInvoices.routes.tsx
 │   │   ├── index.tsx
+│   │   ├── profiling.routes.tsx
+│   │   ├── seller.routes.tsx
 │   │   └── website.routes.tsx
 │   ├── types/
 │   └── vite-env.d.ts
-├── tree.txt
 ├── tsconfig.app.json
 ├── tsconfig.json
 ├── tsconfig.node.json

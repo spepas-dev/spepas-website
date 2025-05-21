@@ -1,7 +1,9 @@
+// src/components/Auth/ChangePassword.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import { changePasswordAPI } from "@/lib/auth";
+import { toast } from "react-hot-toast";
 
 const ChangePassword: React.FC = () => {
   const navigate = useNavigate();
@@ -14,10 +16,27 @@ const ChangePassword: React.FC = () => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    // show loading toast
+    const toastId = toast.loading("Changing password…", {
+      position: "bottom-center",
+    });
+
     try {
       await changePasswordAPI({ oldPassword, newPassword });
+      toast.success("Password changed successfully!", {
+        id: toastId,
+        position: "bottom-center",
+      });
       navigate("/my-account");
     } catch (err) {
+      toast.error(
+        "Failed to change password. Please check your details and try again.",
+        {
+          id: toastId,
+          position: "bottom-center",
+        }
+      );
       setError("Failed to change password. Please check your details and try again.");
     } finally {
       setLoading(false);
@@ -46,7 +65,9 @@ const ChangePassword: React.FC = () => {
                 id="oldPassword"
                 placeholder="Enter your current password"
                 value={oldPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setOldPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setOldPassword(e.target.value)
+                }
                 autoComplete="on"
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required
@@ -61,7 +82,9 @@ const ChangePassword: React.FC = () => {
                 id="newPassword"
                 placeholder="Enter your new password"
                 value={newPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setNewPassword(e.target.value)
+                }
                 autoComplete="on"
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required

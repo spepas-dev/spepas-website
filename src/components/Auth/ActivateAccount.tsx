@@ -2,26 +2,39 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Breadcrumb from "@/components/common/Breadcrumb";
-import { useAuth } from '@/features/auth';
+import { useAuth } from "@/features/auth";
+import { toast } from "react-hot-toast";
 
 const ActivateAccount: React.FC = () => {
   const navigate = useNavigate();
-//   const [otp, setOtp] = useState<string>("");
-//   const [otpID, setOtpID] = useState<string>(() => localStorage.getItem("otpID") || "");
   const { activateAccount } = useAuth();
-  const [otp,    setOtp]    = useState("");
-  const [otpID, setOtpID] = useState(() => localStorage.getItem("otpID") || "");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [otp, setOtp] = useState("");
+  const [otpID] = useState(() => localStorage.getItem("otpID") || "");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    // show loading toast
+    const toastId = toast.loading("Verifying…", {
+      position: "bottom-center",
+    });
+
     try {
-        await activateAccount({ otp, otpID });
+      await activateAccount({ otp, otpID });
+      toast.success("Account activated!", {
+        id: toastId,
+        position: "bottom-center",
+      });
       navigate("/add-identification");
-    } catch (err) {
+    } catch {
+      toast.error("Activation failed. Please check your OTP and try again.", {
+        id: toastId,
+        position: "bottom-center",
+      });
       setError("Activation failed. Please check your OTP and try again.");
     } finally {
       setLoading(false);
@@ -50,7 +63,9 @@ const ActivateAccount: React.FC = () => {
                 id="otp"
                 placeholder="Enter OTP"
                 value={otp}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setOtp(e.target.value)
+                }
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required
               />
@@ -64,7 +79,10 @@ const ActivateAccount: React.FC = () => {
             </button>
             <p className="text-center mt-6">
               Didn’t receive an OTP?{" "}
-              <Link to="/auth/forgot-password" className="text-dark hover:text-blue">
+              <Link
+                to="/auth/forgot-password"
+                className="text-dark hover:text-blue"
+              >
                 Resend OTP
               </Link>
             </p>

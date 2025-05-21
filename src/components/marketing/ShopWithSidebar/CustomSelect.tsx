@@ -1,52 +1,82 @@
+// src/components/marketing/ShopWithSidebar/CustomSelect.tsx
 import React, { useEffect, useRef, useState } from 'react';
 
-const CustomSelect = ({ options }) => {
+export interface Option {
+  label: string;
+  value: string | number;
+}
+
+interface CustomSelectProps {
+  options: Option[];
+  /** Called whenever the user picks a new option */
+  onChange?: (option: Option) => void;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(options[0]);
-  const selectRef = useRef(null);
+  const [selectedOption, setSelectedOption] = useState<Option>(options[0]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Function to close the dropdown when a click occurs outside the component
-  const handleClickOutside = (event) => {
-    if (selectRef.current && !selectRef.current.contains(event.target)) {
-      setIsOpen(false);
-    }
-  };
-
+  // Close dropdown on outside clicks
   useEffect(() => {
-    // Add a click event listener to the document
-    document.addEventListener('click', handleClickOutside);
-
-    // Clean up the event listener when the component unmounts
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current && 
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
     };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggle = () => setIsOpen(open => !open);
 
-  const handleOptionClick = (option) => {
-    setSelectedOption(option);
-    toggleDropdown();
+  const handleSelect = (opt: Option) => {
+    setSelectedOption(opt);
+    onChange?.(opt);
+    setIsOpen(false);
   };
 
   return (
-    <div className="custom-select custom-select-2 flex-shrink-0 relative" ref={selectRef}>
-      <div className={`select-selected whitespace-nowrap ${isOpen ? 'select-arrow-active' : ''}`} onClick={toggleDropdown}>
-        {selectedOption.label}
-      </div>
-      <div className={`select-items ${isOpen ? '' : 'select-hide'}`}>
-        {options.slice(1).map((option, index) => (
-          <div
-            key={index}
-            onClick={() => handleOptionClick(option)}
-            className={`select-item ${selectedOption === option ? 'same-as-selected' : ''}`}
-          >
-            {option.label}
-          </div>
-        ))}
-      </div>
+    <div className="relative inline-block" ref={containerRef}>
+      <button
+        type="button"
+        className="select-selected px-4 py-2 border rounded cursor-pointer flex items-center justify-between w-48"
+        onClick={toggle}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <span>{selectedOption.label}</span>
+        <span
+          className="ml-2 transform transition-transform"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          
+        </span>
+      </button>
+
+      {isOpen && (
+        <ul
+          role="listbox"
+          className="select-items absolute z-10 mt-1 w-48 bg-white border rounded shadow"
+        >
+          {options.map((opt, idx) => (
+            <li
+              key={idx}
+              role="option"
+              aria-selected={opt.value === selectedOption.value}
+              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
+                opt.value === selectedOption.value ? 'bg-gray-200' : ''
+              }`}
+              onClick={() => handleSelect(opt)}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
