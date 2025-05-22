@@ -229,19 +229,19 @@ const Header = () => {
                   {gopaId && (
                     <>
                       <button onClick={() => navigate(`/gopa/${gopaId}/assigned/active`)} className="flex items-center …">
-                        <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
+                        <img src="/gopa.jpg" className="w-4 h-4 mr-1" />
                         Assigned
                       </button>
                       <button onClick={() => navigate(`/gopa/${gopaId}/assigned/history`)} className="flex items-center …">
-                        <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
+                        <img src="/gopa.jpg" className="w-4 h-4 mr-1" />
                         Assigned History
                       </button>
                       <button onClick={() => navigate(`/gopa/${gopaId}/unassigned/active`)} className="flex items-center …">
-                        <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
+                        <img src="/gopa.jpg" className="w-4 h-4 mr-1" />
                         Unassigned Active
                       </button>
                       <button onClick={() => navigate(`/gopa/${gopaId}/unassigned/history`)} className="flex items-center …">
-                        <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
+                        <img src="/gopa.jpg" className="w-4 h-4 mr-1" />
                         Unassigned History
                       </button>
                     </>
