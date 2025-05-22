@@ -361,7 +361,7 @@ const Header = () => {
                             }}
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            <img src="/gopa.jpg" className="w-4 h-4 mr-2" />
                             Assigned History
                           </button>
                           <button
