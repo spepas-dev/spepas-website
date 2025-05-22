@@ -6,7 +6,8 @@
 
 @theme {
   /* Fonts */
-  --font-family-euclid: "Euclid Circular A";
+  /* --font-family-euclid: "Euclid Circular A"; */
+  --font-family-sans-serif: "poppins", sans-serif;
 
   /* Container */
   --container-padding: 1rem;

@@ -1,23 +1,42 @@
+// src/routes/index.tsx
 import { createBrowserRouter } from 'react-router-dom';
 
 import { MarketingLayout } from '@/components/layout/marketing';
+import { AuthLayout } from '@/components/layout/auth/AuthLayout'; // New dedicated auth layout
 import ErrorPage from '@/pages/ErrorPage';
 import NotFound from '@/pages/NotFound';
 
 import { websiteRoutes } from './website.routes';
+import { authRoutes } from './auth.routes';
+import { profilingRoutes } from './profiling.routes';
+import { sellerRoutes } from './seller.routes';
+import { buyerRoutes } from './buyer.routes';
+import { gopaRoutes }   from './gopa.routes';  
 
 export const routes = [
   {
     path: '/',
     element: <MarketingLayout />,
-    ErrorPage: <ErrorPage />,
-    children: websiteRoutes
-  },
+    errorElement: <ErrorPage />,
+    children: [
+      ...websiteRoutes,
+      ...profilingRoutes,
+      ...buyerRoutes,
+      ...sellerRoutes,
+      ...gopaRoutes, 
+    ],
 
+  },
+  {
+    path: '/auth/',
+    element: <AuthLayout />, // Auth pages now use AuthLayout
+    errorElement: <ErrorPage />,
+    children: authRoutes,
+  },
   {
     path: '/*',
-    element: <NotFound />
-  }
+    element: <NotFound />,
+  },
 ];
 
 export const router = createBrowserRouter(routes);
