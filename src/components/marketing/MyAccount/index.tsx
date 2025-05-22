@@ -1,28 +1,20 @@
 // src/components/marketing/MyAccount/index.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '@/features/auth';
 
+import AddressDetails from './AddressDetails';
+import DeliverProfileTab from './DeliverProfileTab';
 import GeneralDetails from './GeneralDetails';
 import GopaProfileTab from './GopaProfileTab';
-import MepaProfileTab from './MepaProfileTab';
-import SellerDetailsTab from './SellerDetailsTab';
-import DeliverProfileTab from './DeliverProfileTab';
-import PaymentAccountsTab from './PaymentAccountsTab';
 import GroupsRolesTab from './GroupsRolesTab';
-import AddressDetails from './AddressDetails';
+import MepaProfileTab from './MepaProfileTab';
+import PaymentAccountsTab from './PaymentAccountsTab';
+import SellerDetailsTab from './SellerDetailsTab';
 import WalletDetails from './WalletDetails';
 
-type TabKey =
-  | 'general'
-  | 'gopa'
-  | 'mepa'
-  | 'seller'
-  | 'deliver'
-  | 'payments'
-  | 'groups'
-  | 'address'
-  | 'wallet';
+type TabKey = 'general' | 'gopa' | 'mepa' | 'seller' | 'deliver' | 'payments' | 'groups' | 'address' | 'wallet';
 
 const MyAccount: React.FC = () => {
   const { authData, logout } = useAuth();
@@ -32,19 +24,19 @@ const MyAccount: React.FC = () => {
   const createdDate = new Date(user.createdAt);
   const createdMonthYear = createdDate.toLocaleString('default', {
     month: 'long',
-    year: 'numeric',
+    year: 'numeric'
   });
 
   const tabs = [
     { key: 'general' as const, label: 'General Profile' },
-    user.gopa &&    { key: 'gopa'    as const, label: 'My GOPA Profile' },
-    user.mepa &&    { key: 'mepa'    as const, label: 'My MEPA Profile' },
-    user.sellerDetails && { key: 'seller'  as const, label: 'My Seller Profile' },
+    user.gopa && { key: 'gopa' as const, label: 'My GOPA Profile' },
+    user.mepa && { key: 'mepa' as const, label: 'My MEPA Profile' },
+    user.sellerDetails && { key: 'seller' as const, label: 'My Seller Profile' },
     user.deliver && { key: 'deliver' as const, label: 'My Delivery Profile' },
     (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments' as const, label: 'My Payment Accounts' },
     ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups' as const, label: 'Groups/Roles' },
     { key: 'address' as const, label: 'My Addresses' },
-    { key: 'wallet' as const, label: 'My Wallet' },
+    { key: 'wallet' as const, label: 'My Wallet' }
   ].filter(Boolean) as Array<{ key: TabKey; label: string }>;
 
   const [activeTab, setActiveTab] = useState<TabKey>('general');
@@ -89,7 +81,10 @@ const MyAccount: React.FC = () => {
               </div>
               <div className="mt-6 px-4 xl:px-9">
                 <button
-                  onClick={() => { logout(); navigate('/'); }}
+                  onClick={() => {
+                    logout();
+                    navigate('/');
+                  }}
                   className="w-full flex justify-center items-center gap-2 py-2.5 px-4 bg-red-100 text-red-700 rounded-2xl"
                 >
                   Sign Out
@@ -99,15 +94,15 @@ const MyAccount: React.FC = () => {
           </aside>
           <main className="xl:flex-1 w-full">
             <div className="bg-gray-75 rounded-2xl shadow-[0_6px_30px_rgba(92,124,250,0.1)] py-10 px-6 sm:px-10 xl:px-12">
-              {activeTab === 'general'  && <GeneralDetails user={user} />}
-              {activeTab === 'gopa'     && <GopaProfileTab profile={user.gopa} />}
-              {activeTab === 'mepa'     && <MepaProfileTab profile={user.mepa} />}
-              {activeTab === 'seller'   && <SellerDetailsTab details={user.sellerDetails} />}
-              {activeTab === 'deliver'  && <DeliverProfileTab deliver={user.deliver} />}
+              {activeTab === 'general' && <GeneralDetails user={user} />}
+              {activeTab === 'gopa' && <GopaProfileTab profile={user.gopa} />}
+              {activeTab === 'mepa' && <MepaProfileTab profile={user.mepa} />}
+              {activeTab === 'seller' && <SellerDetailsTab details={user.sellerDetails} />}
+              {activeTab === 'deliver' && <DeliverProfileTab deliver={user.deliver} />}
               {activeTab === 'payments' && <PaymentAccountsTab accounts={user.paymentAccounts!} />}
-              {activeTab === 'groups'   && <GroupsRolesTab groups={user.user_groups!} roles={user.user_roles!} />}
-              {activeTab === 'address'  && <AddressDetails />}
-              {activeTab === 'wallet'   && <WalletDetails />}
+              {activeTab === 'groups' && <GroupsRolesTab groups={user.user_groups!} roles={user.user_roles!} />}
+              {activeTab === 'address' && <AddressDetails />}
+              {activeTab === 'wallet' && <WalletDetails />}
             </div>
           </main>
         </div>

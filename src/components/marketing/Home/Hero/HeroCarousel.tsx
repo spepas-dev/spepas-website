@@ -2,9 +2,8 @@
 import React from 'react';
 // import 'swiper/css';
 // import 'swiper/css/pagination';
-
 import { Autoplay, Pagination } from 'swiper/modules';
-import { Swiper, SwiperSlide }   from 'swiper/react';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 const HeroCarousel: React.FC = () => {
   return (
@@ -17,13 +16,12 @@ const HeroCarousel: React.FC = () => {
       className="hero-carousel w-full"
     >
       <SwiperSlide className="w-full">
-      <div className="flex flex-col-reverse lg:flex-row items-center pt-6 lg:pt-0">
+        <div className="flex flex-col-reverse lg:flex-row items-center pt-6 lg:pt-0">
           <div className="w-full lg:w-1/2 max-w-[500px] py-10 pl-4 lg:pl-12">
             <div className="flex items-center gap-4 mb-7.5 sm:mb-10">
               <span className="block font-semibold text-3xl sm:text-heading-1 text-blue">
                 <h1>Welcome to SpePas</h1>
               </span>
-             
             </div>
 
             <h1 className="font-semibold text-dark text-xl sm:text-3xl mb-3">
@@ -31,7 +29,9 @@ const HeroCarousel: React.FC = () => {
             </h1>
 
             <p>
-            For investors, SpePas presents a unique opportunity to be part of the transformation of the auto parts industry in Ghana and West Africa. By getting in early, investors can support an innovative platform poised for growth in an underserved market, with strong industry partnerships and a scalable business model driving long-term success.
+              For investors, SpePas presents a unique opportunity to be part of the transformation of the auto parts industry in Ghana and
+              West Africa. By getting in early, investors can support an innovative platform poised for growth in an underserved market,
+              with strong industry partnerships and a scalable business model driving long-term success.
             </p>
 
             <a

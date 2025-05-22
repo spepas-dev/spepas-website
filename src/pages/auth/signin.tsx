@@ -1,5 +1,6 @@
-import React from "react";
-import Signin from "@/components/Auth/SignIn";
+import React from 'react';
+
+import Signin from '@/components/Auth/SignIn';
 
 const SigninPage: React.FC = () => {
   return (

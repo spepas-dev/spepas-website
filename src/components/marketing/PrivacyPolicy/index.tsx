@@ -1,4 +1,5 @@
 import React from 'react';
+
 import Breadcrumb from '../Common/Breadcrumb';
 
 const PrivacyPolicy: React.FC = () => (
@@ -9,11 +10,10 @@ const PrivacyPolicy: React.FC = () => (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Intro */}
         <header className="text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">
-            SpePas Privacy Policy
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">SpePas Privacy Policy</h1>
           <p className="text-gray-700 sm:text-lg">
-            We’re committed to protecting your privacy and keeping our marketplace safe. Below is how we collect, use, and safeguard your data.
+            We’re committed to protecting your privacy and keeping our marketplace safe. Below is how we collect, use, and safeguard your
+            data.
           </p>
         </header>
 
@@ -25,10 +25,18 @@ const PrivacyPolicy: React.FC = () => (
               <>
                 <p>We gather:</p>
                 <ul className="list-disc list-inside space-y-2">
-                  <li><strong>Personal Info:</strong> Name, email, phone, address from signup.</li>
-                  <li><strong>Payment Data:</strong> Mobile Money or bank info for transactions.</li>
-                  <li><strong>Activity Logs:</strong> Order history, browser/device metadata.</li>
-                  <li><strong>Fraud Prevention:</strong> ID verifications & dispute reports.</li>
+                  <li>
+                    <strong>Personal Info:</strong> Name, email, phone, address from signup.
+                  </li>
+                  <li>
+                    <strong>Payment Data:</strong> Mobile Money or bank info for transactions.
+                  </li>
+                  <li>
+                    <strong>Activity Logs:</strong> Order history, browser/device metadata.
+                  </li>
+                  <li>
+                    <strong>Fraud Prevention:</strong> ID verifications & dispute reports.
+                  </li>
                 </ul>
               </>
             )
@@ -48,9 +56,15 @@ const PrivacyPolicy: React.FC = () => (
             title: '3. Data Security & Protection',
             content: (
               <ul className="list-disc list-inside space-y-2">
-                <li><strong>Encryption:</strong> All sensitive data in transit & at rest.</li>
-                <li><strong>Access Control:</strong> Only authorized teams can view PII.</li>
-                <li><strong>Monitoring:</strong> 24/7 fraud detection & incident response.</li>
+                <li>
+                  <strong>Encryption:</strong> All sensitive data in transit & at rest.
+                </li>
+                <li>
+                  <strong>Access Control:</strong> Only authorized teams can view PII.
+                </li>
+                <li>
+                  <strong>Monitoring:</strong> 24/7 fraud detection & incident response.
+                </li>
               </ul>
             )
           },
@@ -78,17 +92,14 @@ const PrivacyPolicy: React.FC = () => (
             title: '6. Third-Party Services & Links',
             content: (
               <p>
-                We integrate payment and logistics partners—please review their privacy policies separately. SpePas is not responsible for third-party data practices.
+                We integrate payment and logistics partners—please review their privacy policies separately. SpePas is not responsible for
+                third-party data practices.
               </p>
             )
           },
           {
             title: '7. Changes to This Policy',
-            content: (
-              <p>
-                We may update this policy occasionally. Continued use of SpePas means you accept any updates.
-              </p>
-            )
+            content: <p>We may update this policy occasionally. Continued use of SpePas means you accept any updates.</p>
           },
           {
             title: '8. Contact Us',
@@ -103,16 +114,9 @@ const PrivacyPolicy: React.FC = () => (
             )
           }
         ].map((section, idx) => (
-          <article
-            key={idx}
-            className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4"
-          >
-            <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">
-              {section.title}
-            </h2>
-            <div className="prose prose-indigo max-w-none text-gray-700">
-              {section.content}
-            </div>
+          <article key={idx} className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">{section.title}</h2>
+            <div className="prose prose-indigo max-w-none text-gray-700">{section.content}</div>
           </article>
         ))}
       </div>

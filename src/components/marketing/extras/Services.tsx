@@ -6,16 +6,14 @@ export default function Services() {
       <div className="mx-auto">
         {/* Our Services Section */}
         <div className="mb-12">
-          <h2 className="text-[#4a36ec] text-2xl sm:text-3xl md:text-4xl font-semibold mb-6 text-center md:text-left">
-            OUR SERVICES
-          </h2>
+          <h2 className="text-[#4a36ec] text-2xl sm:text-3xl md:text-4xl font-semibold mb-6 text-center md:text-left">OUR SERVICES</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Text Content */}
             <div className="text-gray-600 space-y-4 text-base sm:text-lg md:text-xl text-center md:text-justify">
               <p>
                 SpePas is an online marketplace designed to bridge the gap between buyers and sellers of auto parts. Whether you’re a car
-                owner or mechanic looking for a specific part, a seller seeking a broader customer base, or an industry partner
-                aiming to enhance accessibility, our platform offers a simple and efficient solution.
+                owner or mechanic looking for a specific part, a seller seeking a broader customer base, or an industry partner aiming to
+                enhance accessibility, our platform offers a simple and efficient solution.
               </p>
               <p>
                 We collaborate with key industry partners to ensure a reliable and well-connected ecosystem that benefits all stakeholders.

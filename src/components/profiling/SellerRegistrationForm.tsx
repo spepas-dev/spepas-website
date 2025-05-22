@@ -1,6 +1,7 @@
 // src/components/profiling/SellerRegistrationForm.tsx
-import React, { useState, FormEvent } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Breadcrumb from '@/components/common/Breadcrumb';
 import { createSellerProfileSelf } from '@/lib/profiling';
 import { sellerRegistrationSchema } from '@/lib/profilingZodValidation';
@@ -21,7 +22,7 @@ const SellerRegistrationForm: React.FC = () => {
       const payload = {
         storeName,
         longitude: parseFloat(longitude),
-        latitude: parseFloat(latitude),
+        latitude: parseFloat(latitude)
       };
       sellerRegistrationSchema.parse(payload);
       await createSellerProfileSelf(payload);
@@ -35,7 +36,7 @@ const SellerRegistrationForm: React.FC = () => {
 
   return (
     <>
-    <section className="pt-10"></section>
+      <section className="pt-10"></section>
       <Breadcrumb title="Seller Registration" pages={['Profiling', 'Seller Registration']} />
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] mx-auto rounded-xl bg-white shadow p-6">
@@ -46,7 +47,7 @@ const SellerRegistrationForm: React.FC = () => {
             <input
               type="text"
               value={storeName}
-              onChange={e => setStoreName(e.target.value)}
+              onChange={(e) => setStoreName(e.target.value)}
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
@@ -56,7 +57,7 @@ const SellerRegistrationForm: React.FC = () => {
                 <input
                   type="number"
                   value={longitude}
-                  onChange={e => setLongitude(e.target.value)}
+                  onChange={(e) => setLongitude(e.target.value)}
                   className="w-full rounded-lg border bg-gray-100 p-3"
                   required
                 />
@@ -66,17 +67,13 @@ const SellerRegistrationForm: React.FC = () => {
                 <input
                   type="number"
                   value={latitude}
-                  onChange={e => setLatitude(e.target.value)}
+                  onChange={(e) => setLatitude(e.target.value)}
                   className="w-full rounded-lg border bg-gray-100 p-3"
                   required
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-dark text-white py-3 rounded-lg"
-            >
+            <button type="submit" disabled={loading} className="w-full bg-dark text-white py-3 rounded-lg">
               {loading ? 'Submitting…' : 'Submit'}
             </button>
           </form>

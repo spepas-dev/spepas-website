@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 interface BreadcrumbProps {
   title: string;
@@ -13,9 +13,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, pages }) => {
     <div className="bg-white">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 py-5 xl:py-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h1 className="font-semibold text-dark text-xl sm:text-2xl xl:text-custom-2 truncate">
-            {title}
-          </h1>
+          <h1 className="font-semibold text-dark text-xl sm:text-2xl xl:text-custom-2 truncate">{title}</h1>
 
           {/* make the list scrollable, no wrapping */}
           <ul className="flex items-center gap-2 overflow-x-auto whitespace-nowrap">
@@ -34,8 +32,8 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ title, pages }) => {
                       flex-shrink-0
                       text-custom-sm
                       capitalize
-                      ${hideOnMobile ? "hidden sm:inline-block" : ""}
-                      ${isLast ? "text-blue font-medium" : "hover:text-blue"}
+                      ${hideOnMobile ? 'hidden sm:inline-block' : ''}
+                      ${isLast ? 'text-blue font-medium' : 'hover:text-blue'}
                     `}
                   >
                     {isLast ? (
