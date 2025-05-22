@@ -11,7 +11,7 @@ import { queryClient } from '@/lib';
 import App from './App.tsx';
 
 init({
-  serviceName: 'Spepas Web Admin',
+  serviceName: 'Spepas Web App',
   serverUrl: import.meta.env.VITE_ELASTIC_APM_SERVER,
   serviceVersion: '0.0.1',
   active: true
