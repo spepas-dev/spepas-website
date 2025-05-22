@@ -335,7 +335,7 @@ const Header = () => {
                         onClick={() => setGopaMenuOpen((prev) => !prev)}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
-                        <img src="/public/gopa.jpg" alt="Gopa" className="w-4 h-4 mr-2" />
+                        <img src="/gopa.jpg" alt="Gopa" className="w-4 h-4 mr-2" />
                         GOPA Menu
                         <svg className="ml-1 w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                           <path d="M6 9l6 6 6-6" />
@@ -351,7 +351,7 @@ const Header = () => {
                             }}
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            <img src="/gopa.jpg" className="w-4 h-4 mr-2" />
                             Assigned
                           </button>
                           <button
@@ -371,7 +371,7 @@ const Header = () => {
                             }}
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            <img src="/gopa.jpg" className="w-4 h-4 mr-2" />
                             Unassigned Active
                           </button>
                           <button
@@ -381,7 +381,7 @@ const Header = () => {
                             }}
                             className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           >
-                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            <img src="/gopa.jpg" className="w-4 h-4 mr-2" />
                             Unassigned History
                           </button>
                         </div>
