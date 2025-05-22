@@ -1,5 +1,4 @@
-//src/components/buyer/CartItem.tsx
-
+// src/components/buyer/CartItem.tsx
 import React from 'react';
 
 interface CartItemProps {
@@ -12,23 +11,41 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
   const img = bidding.images?.[0]?.image_url;
 
   return (
-    <li className="flex items-center mb-4">
+    <li className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 p-4 bg-white rounded-lg shadow">
       {img && (
         <img
           src={img}
-          alt=""
-          className="w-16 h-16 object-cover mr-4 rounded"
+          alt={bidding.sparePart?.name}
+          className="
+            w-full h-48
+            sm:w-16 sm:h-16
+            object-cover
+            rounded-md
+          "
         />
       )}
-      <div className="flex-grow">
-        <p className="font-semibold">
+
+      <div className="flex-grow space-y-1 text-center sm:text-left">
+        <p className="text-lg sm:text-base font-semibold text-gray-800">
           {bidding.sparePart?.name || bidding.request_ID}
         </p>
-        <p>GH₵ {bidding.totalPrice}</p>
+        <p className="text-sm sm:text-base text-gray-600">
+          GH₵ {bidding.totalPrice}
+        </p>
       </div>
+
       <button
         onClick={() => onRemove(item.cart_ID)}
-        className="text-red-500 hover:text-red-700"
+        className="
+          w-full
+          sm:w-auto
+          bg-red-50 hover:bg-red-100
+          text-red-600 hover:text-red-800
+          font-medium
+          py-2 px-4
+          rounded-md
+          transition
+        "
       >
         Remove
       </button>

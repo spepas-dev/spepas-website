@@ -1,25 +1,40 @@
+// src/pages/auth/Signin.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import { useAuth } from "@/features/auth";
+import { toast } from "react-hot-toast";
 
 const Signin: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+
+    // show persistent loading toast
+    const toastId = toast.loading("Signing in…", {
+      position: "bottom-center",
+    });
+
     try {
       await login({ email, password });
+      // replace loading toast with success
+      toast.success("Signed in!", {
+        id: toastId,
+        position: "bottom-center",
+      });
       navigate("/");
-    } catch (err) {
-      setError("Invalid credentials. Please try again.");
+    } catch {
+      // replace loading toast with error
+      toast.error("Invalid credentials. Please try again.", {
+        id: toastId,
+        position: "bottom-center",
+      });
     } finally {
       setLoading(false);
     }
@@ -37,7 +52,6 @@ const Signin: React.FC = () => {
             <p>Enter your credentials below</p>
           </div>
           <form onSubmit={handleSubmit}>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
             <div className="mb-5">
               <label htmlFor="email" className="block mb-2.5">
                 Email Address <span className="text-red">*</span>
@@ -80,14 +94,20 @@ const Signin: React.FC = () => {
 
             <p className="text-center mt-6">
               Don&apos;t have an account?{" "}
-              <Link to="/auth/signup" className="text-dark hover:text-blue pl-2">
+              <Link
+                to="/auth/signup"
+                className="text-dark hover:text-blue pl-2"
+              >
                 Sign Up Now!
               </Link>
             </p>
-            
-            <p className="text-center mt-6">
+
+            <p className="text-center mt-4">
               Forgot your password?{" "}
-              <Link to="/auth/forgot-password" className="text-dark hover:text-blue">
+              <Link
+                to="/auth/forgot-password"
+                className="text-dark hover:text-blue"
+              >
                 Reset it here
               </Link>
             </p>

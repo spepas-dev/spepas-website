@@ -1,13 +1,18 @@
+/* 1. Load Poppins from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* 2. Existing imports */
 @import 'leaflet/dist/leaflet.css';
 @import 'tailwindcss';
 @import "tw-animate-css";
 
+/* 3. Custom variant for dark mode */
 @custom-variant dark (&:is(.dark *));
 
+/* 4. Theme definitions */
 @theme {
   /* Fonts */
-  /* --font-family-euclid: "Euclid Circular A"; */
-  --font-family-sans-serif: "poppins", sans-serif;
+  --font-family-sans-serif: "Poppins", sans-serif;
 
   /* Container */
   --container-padding: 1rem;
@@ -54,9 +59,6 @@
   --color-blue-light-4: #C3CEF6;
   --color-blue-light-5: #E1E8FF;
 
-  /* Other Color Scales... */
-  /* Add your red, green, yellow, teal, orange, purple scales here */
-
   /* Breakpoints */
   --breakpoint-xsm: 375px;
   --breakpoint-lsm: 425px;
@@ -67,12 +69,10 @@
   --text-2xs--line-height: 1.0625rem;
   --text-heading-1: 3.75rem;
   --text-heading-1--line-height: 4.5rem;
-  /* Add all your custom font sizes here */
 
   /* Spacing */
   --spacing-4_5: 1.125rem;
   --spacing-5_5: 1.375rem;
-  /* Add all your custom spacing values */
 
   /* Z-Index */
   --z-999999: 999999;
@@ -94,18 +94,22 @@
   --shadow-input: inset 0 0 0 2px #3C50E0;
 }
 
-/* Base Styles */
+/* 5. Base Styles */
 @layer base {
   html {
     @apply scroll-smooth;
+    /* Apply Poppins as the default */
+    font-family: var(--font-family-sans-serif);
   }
 
   body {
     @apply font-normal text-base text-dark-3 relative z-1;
+    /* Ensure body uses Poppins too */
+    font-family: var(--font-family-sans-serif);
   }
 }
 
-/* Components */
+/* 6. Components */
 @utility dropdown {
   display: flex;
   flex-direction: column;
@@ -139,7 +143,7 @@
   }
 }
 
-/* Utilities */
+/* 7. Utilities */
 @utility scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -149,7 +153,6 @@
   }
 }
 
-/* Container utility */
 @utility container {
   width: 100%;
   margin-left: auto;
@@ -168,7 +171,6 @@
   }
 }
 
-/* Custom Select Styles */
 @utility select-selected {
   background-color: var(--color-gray-1);
   border-radius: 5px 0 0 5px;
@@ -195,7 +197,6 @@
   }
 }
 
-/* Add your other custom utilities and styles */
 @utility hero-carousel {
   .swiper-pagination-bullet {
     height: 0.25rem;
@@ -216,7 +217,6 @@
   }
 }
 
-/* Input Search Clear Button Removal */
 @utility search-clear-button-hide {
   &::-ms-clear,
   &::-ms-reveal {
@@ -233,4 +233,4 @@
   }
 }
 
-/* Continue converting other styles to utilities... */
+/* …any other utilities or component styles you need */

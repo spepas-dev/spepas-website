@@ -1,14 +1,16 @@
+// src/pages/auth/Signup.tsx
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Breadcrumb from "@/components/common/Breadcrumb"; // Update path if necessary
+import Breadcrumb from "@/components/common/Breadcrumb";
 import { signupAPI } from "@/lib/auth";
- 
-// Helper to ensure messages are strings.
+import { toast } from "react-hot-toast";
+
+// Helper to ensure messages are strings
 const getMessage = (msg: unknown): string => {
   if (typeof msg === "object" && msg !== null) {
     try {
       return JSON.stringify(msg);
-    } catch (error) {
+    } catch {
       return String(msg);
     }
   }
@@ -32,35 +34,41 @@ const Signup: React.FC = () => {
     phoneNumber: "",
     user_type: "",
   });
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ): void => {
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    // if (formData.password !== formData.retypePassword) {
-    //   setError("Passwords do not match.");
-    //   return;
-    // }
-
     setLoading(true);
+
+    // show a persistent “loading” toast
+    const toastId = toast.loading("Creating account…", {
+      position: "bottom-center",
+    });
 
     try {
       const result = await signupAPI(formData);
-      // Assume the API returns an OTP ID as result.data.
       const otpID = result.data;
       localStorage.setItem("otpID", otpID);
+
+      // swap loading toast for success
+      toast.success("Account created! Check your phone for OTP.", {
+        id: toastId,
+        position: "bottom-center",
+      });
+
       navigate("/auth/activate");
-    } catch (err) {
-      console.error("Error during signup:", err);
-      setError("An unexpected error occurred.");
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      toast.error(`Signup failed: ${getMessage(err)}`, {
+        id: toastId,
+        position: "bottom-center",
+      });
     } finally {
       setLoading(false);
     }
@@ -76,116 +84,108 @@ const Signup: React.FC = () => {
               <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">
                 Create an Account
               </h2>
-              <p>Enter your detail below</p>
+              <p>Enter your details below</p>
             </div>
-            <div className="mt-5.5">
-              <form onSubmit={handleSubmit}>
-                {error && (
-                  <p className="text-red-500 mb-4">{getMessage(error)}</p>
-                )}
-                <div className="mb-5">
-                  <label htmlFor="name" className="block mb-2.5">
-                    Full Name <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    placeholder="Enter your full name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
-                  />
-                </div>
-                <div className="mb-5">
-                  <label htmlFor="email" className="block mb-2.5">
-                    Email Address <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    placeholder="Enter your email address"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
-                  />
-                </div>
-                <div className="mb-5">
-                  <label htmlFor="password" className="block mb-2.5">
-                    Password <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    autoComplete="on"
-                    className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
-                  />
-                </div>
-                {/* <div className="mb-5.5">
-                  <label htmlFor="retypePassword" className="block mb-2.5">
-                    Re-type Password <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="password"
-                    name="retypePassword"
-                    id="retypePassword"
-                    placeholder="Re-type your password"
-                    value={formData.retypePassword}
-                    onChange={handleChange}
-                    autoComplete="on"
-                    className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
-                  />
-                </div> */}
-                <div className="mb-5">
-                  <label htmlFor="phoneNumber" className="block mb-2.5">
-                    Phone Number <span className="text-red">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="phoneNumber"
-                    id="phoneNumber"
-                    placeholder="Enter your phone number"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
-                  />
-                </div>
-                <div className="mb-5">
-                  <label htmlFor="user_type" className="block mb-2.5">
-                    User Type <span className="text-red">*</span>
-                  </label>
-                  <select
-                    name="user_type"
-                    id="user_type"
-                    value={formData.user_type}
-                    onChange={handleChange}
-                    className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
-                  >
-                    <option value="">Select user type</option>
-                    <option value="BUYER">Buyer</option>
-                    <option value="SELLER">Seller</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg mt-7.5"
+
+            <form onSubmit={handleSubmit} className="mt-5.5">
+              <div className="mb-5">
+                <label htmlFor="name" className="block mb-2.5">
+                  Full Name <span className="text-red">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
+                />
+              </div>
+
+              <div className="mb-5">
+                <label htmlFor="email" className="block mb-2.5">
+                  Email Address <span className="text-red">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  placeholder="Enter your email address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
+                />
+              </div>
+
+              <div className="mb-5">
+                <label htmlFor="password" className="block mb-2.5">
+                  Password <span className="text-red">*</span>
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  autoComplete="on"
+                  className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
+                />
+              </div>
+
+              <div className="mb-5">
+                <label htmlFor="phoneNumber" className="block mb-2.5">
+                  Phone Number <span className="text-red">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  id="phoneNumber"
+                  placeholder="Enter your phone number"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+                  className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
+                />
+              </div>
+
+              <div className="mb-5">
+                <label htmlFor="user_type" className="block mb-2.5">
+                  User Type <span className="text-red">*</span>
+                </label>
+                <select
+                  name="user_type"
+                  id="user_type"
+                  value={formData.user_type}
+                  onChange={handleChange}
+                  required
+                  className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 >
-                  {loading ? "Creating Account..." : "Create Account"}
-                </button>
-                <p className="text-center mt-6">
-                  Already have an account?{" "}
-                  <Link to="/auth/signin" className="text-dark hover:text-blue">
-                    Sign in Now
-                  </Link>
-                </p>
-              </form>
-            </div>
+                  <option value="">Select user type</option>
+                  <option value="BUYER">Buyer</option>
+                  <option value="SELLER">Seller</option>
+                </select>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg mt-7.5"
+              >
+                {loading ? "Creating Account..." : "Create Account"}
+              </button>
+
+              <p className="text-center mt-6">
+                Already have an account?{" "}
+                <Link to="/auth/signin" className="text-dark hover:text-blue">
+                  Sign in Now
+                </Link>
+              </p>
+            </form>
           </div>
         </div>
       </section>

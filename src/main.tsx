@@ -1,3 +1,4 @@
+//src/main.tsx
 import "./index.css";
 
 import { init } from '@elastic/apm-rum';
@@ -23,6 +24,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+      <Toaster />
         <App />
       </AuthProvider>
     </QueryClientProvider>

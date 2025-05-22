@@ -32,12 +32,24 @@ const AddPaymentAccountForm: React.FC = () => {
 
   return (
     <>
-    <section className="pt-10"></section>
+      <section className="pt-10" />
       <Breadcrumb title="Add Payment Account" pages={['Profiling', 'Add Payment Account']} />
+
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] mx-auto rounded-xl bg-white shadow p-6 sm:p-7.5 xl:p-11">
-          <h2 className="font-semibold text-xl sm:text-2xl mb-6 text-center">Add Payment Account</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="font-semibold text-xl sm:text-2xl mb-0">Add Payment Account</h2>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              Skip for now
+            </button>
+          </div>
+
           {error && <p className="text-red-500 mb-4">{error}</p>}
+
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
               <label htmlFor="mode" className="block mb-2.5">Account Type</label>

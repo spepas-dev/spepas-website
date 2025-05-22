@@ -29,8 +29,13 @@ const AssignedHistoryPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-20">
+      <section className="pt-10"></section>
       <h1 className="text-2xl font-bold mb-4">Your Assignment History</h1>
-      <RequestList requests={requests} />
+      {requests.length > 0 ? (
+        <RequestList requests={requests} />
+      ) : (
+        <p className="text-gray-600 mt-6">No assignment history found.</p>
+      )}
     </div>
   );
 };
