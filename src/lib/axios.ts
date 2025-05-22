@@ -79,7 +79,8 @@ const baseURL = isDev
 export const apiClient = axios.create({
   baseURL,
   timeout: 10000,
-  headers: { 'Content-Type': 'application/json' }
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true
 });
 
 // ensure no Authorization header ever sneaks in
