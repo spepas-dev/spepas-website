@@ -37,7 +37,7 @@ const Hero: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15">
+      <div className="max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15 border-rounded-[20px] mt-6 sm:mt-8 lg:mt-12 xl:mt-16.5 shadow-md overflow-hidden">
         {/* Featured Products */}
         <div className="pt-8 pl-4 sm:pl-8 xl:pl-8 pr-2">
           <h2 className="text-dark text-xl font-semibold mb-4">Featured Products</h2>

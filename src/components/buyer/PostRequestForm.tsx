@@ -1,11 +1,10 @@
 // src/components/orderBids/PostRequestForm.tsx
-import React, { useEffect, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-
-import { getCarManufacturers } from '@/lib/inventoryApis';
-import { requestNonInventorySparePartAPI } from '@/lib/orderBidsApis';
-import { toastConfig } from '@/lib/toast';
+import React, { useState, useEffect } from 'react'
+import { requestNonInventorySparePartAPI } from '@/lib/orderBidsApis'
+import { getCarManufacturers } from '@/lib/inventoryApis'
+// import { toastConfig } from '@/lib/toast'
+import { toast } from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 interface CarModel {
   CarModel_ID: string;
@@ -102,21 +101,62 @@ const PostRequestForm: React.FC = () => {
   console.log('brands:', brands);
 
   return (
-    <form
+    <>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+      <h2 className="text-2xl font-semibold text-blue-800">
+        Post a Request
+      </h2>
+
+      <button
+        type="button"
+        onClick={() => navigate('/buyer/requests')}
+        className="
+          flex items-center
+          mt-3 sm:mt-0        /* keep some top margin on mobile so it doesn’t feel cramped */
+          px-4 py-2 
+          text-sm text-blue-700 
+          border border-gray-300 
+          rounded-lg 
+          hover:bg-gray-100 
+          transition
+        "
+      >
+        <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    className="w-4 h-4 mr-1"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-2-2h-4a2 2 0 00-2 2v1h10V5a2 2 0 00-2-2zM9 11h6M9 15h6"
+    />
+  </svg>
+        My Requests
+      </button>
+    </div>
+
+    {/* Descriptive text below the heading/button row */}
+    <p className="mb-6 text-gray-600">
+      Please fill out the form below to post a request. Your request will be reviewed shortly.
+    </p>
+      <form
       onSubmit={handleSubmit}
       className="
-        bg-white
-        p-6 sm:p-8
-        rounded-2xl shadow-lg
-        max-w-3xl w-full sm:w-[100%]
-        mx-auto
-        space-y-6 mt-10
+        w-full
+          bg-white
+          p-6 sm:p-8
+          rounded-2xl shadow-lg
+          space-y-6 mt-6
       "
     >
       {/* Row 1: Manufacturer & Brand */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Manufacturer</label>
+          <label className="block text-sm font-medium mb-1 text-blue">Manufacturer</label>
           <select
             value={selectedManufacturer}
             onChange={(e) => {
@@ -139,7 +179,7 @@ const PostRequestForm: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Brand</label>
+          <label className="block text-sm font-medium mb-1 text-blue">Brand</label>
           <select
             value={selectedBrand}
             onChange={(e) => {
@@ -165,7 +205,7 @@ const PostRequestForm: React.FC = () => {
       {/* Row 2: Model & Part Name */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Model</label>
+          <label className="block text-sm font-medium mb-1 text-blue">Model</label>
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel(e.target.value)}
@@ -185,7 +225,7 @@ const PostRequestForm: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Part name</label>
+          <label className="block text-sm font-medium mb-1 text-blue">Part name</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -198,7 +238,7 @@ const PostRequestForm: React.FC = () => {
       {/* Row 3: Quantity & Photos Required */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
         <div>
-          <label className="block text-sm font-medium mb-1">Quantity</label>
+          <label className="block text-sm font-medium mb-1 text-blue">Quantity</label>
           <input
             type="number"
             value={qty}
@@ -225,7 +265,7 @@ const PostRequestForm: React.FC = () => {
 
       {/* Description (full width) */}
       <div>
-        <label className="block text-sm font-medium mb-1">Description</label>
+        <label className="block text-sm font-medium mb-1 text-blue">Description</label>
         <textarea
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
@@ -249,18 +289,10 @@ const PostRequestForm: React.FC = () => {
         Post Request
       </button>
 
-      {/* ——— Test Success Toast ——— */}
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={() => toastConfig.success('This is a test success!')}
-          className="mb-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition"
-        >
-          Test Success Toast
-        </button>
-      </div>
     </form>
-  );
-};
+    </>
+
+  )
+}
 
 export default PostRequestForm;

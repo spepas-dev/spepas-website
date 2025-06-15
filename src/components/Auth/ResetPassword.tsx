@@ -1,10 +1,9 @@
 // src/components/Auth/ResetPassword.tsx
-import React, { ChangeEvent, FormEvent, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-
-import Breadcrumb from '@/components/common/Breadcrumb';
-import { resetPasswordAPI } from '@/lib/auth';
+import React, { useState, ChangeEvent, FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Breadcrumb from "@/components/common/Breadcrumb";
+import { resetPasswordAPI } from "@/lib/auth";
+import { toast } from "react-hot-toast";
 
 const ResetPassword: React.FC = () => {
   const navigate = useNavigate();
@@ -45,9 +44,19 @@ const ResetPassword: React.FC = () => {
 
   return (
     <>
-      <Breadcrumb title="Reset Password" pages={['Reset Password']} />
+      {/* <Breadcrumb title="Reset Password" pages={["Reset Password"]} /> */}
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-md p-6 sm:p-7.5 xl:p-11">
+        <div className="text-center mb-8">
+            <Link className="inline-block" to="/">
+              <img
+                src="/images/logo/logo.png"
+                alt="Logo"
+                width={119}
+                height={36}
+              />
+            </Link>
+          </div>
           <div className="text-center mb-11">
             <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">Reset Your Password</h2>
             <p>Enter the OTP and a new password below.</p>

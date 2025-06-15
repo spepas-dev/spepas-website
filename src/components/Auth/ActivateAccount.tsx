@@ -44,9 +44,19 @@ const ActivateAccount: React.FC = () => {
 
   return (
     <>
-      <Breadcrumb title="Activate Account" pages={['Activate Account']} />
+      {/* <Breadcrumb title="Activate Account" pages={["Activate Account"]} /> */}
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-md p-6 sm:p-7.5 xl:p-11">
+          <div className="text-center mb-8">
+                      <Link className="inline-block" to="/">
+                        <img
+                          src="/images/logo/logo.png"
+                          alt="Logo"
+                          width={119}
+                          height={36}
+                        />
+                      </Link>
+                    </div>
           <div className="text-center mb-11">
             <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">Activate Your Account</h2>
             <p>Please enter the OTP sent to your phone or email.</p>

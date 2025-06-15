@@ -10,7 +10,7 @@ import RiderRegistrationPage from '@/pages/profiling/RiderRegistrationPage';
 import SellerRegistrationPage from '@/pages/profiling/SellerRegistrationPage';
 
 export const profilingRoutes: RouteObject[] = [
-  { index: true, element: <AddIdentificationPage /> },
+  { index: false, element: <AddIdentificationPage /> },
   { path: 'add-identification', element: <AddIdentificationPage /> },
   { path: 'registration-selection', element: <RegistrationSelectionPage /> },
   { path: 'gopa-registration', element: <GopaRegistrationPage /> },

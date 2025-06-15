@@ -7,80 +7,86 @@ export const menuData: Menu[] = [
     newTab: false,
     path: '/'
   },
-  // {
-  //   id: 2,
-  //   title: "Shop",
-  //   newTab: false,
-  //   path: "/shop-with-sidebar",
-  // },
   {
-    id: 3,
+    id: 2,
     title: 'Contact',
     newTab: false,
     path: '/contact'
   },
   {
-    id: 6,
-    title: 'pages',
+    id: 3,
+    title: 'About Us',
     newTab: false,
-    path: '/',
-    submenu: [
-      // {
-      //   id: 61,
-      //   title: "Shop",
-      //   newTab: false,
-      //   path: "/shop-with-sidebar",
-      // },
-      // {
-      //   id: 69,
-      //   title: "My Account",
-      //   newTab: false,
-      //   path: "/my-account",
-      // },
-      // {
-      //   id: 70,
-      //   title: "Contact",
-      //   newTab: false,
-      //   path: "/contact",
-      // },
-      {
-        id: 71,
-        title: 'Privacy Policy',
-        newTab: false,
-        path: '/privacy-policy'
-      },
-      {
-        id: 72,
-        title: 'Refund Policy',
-        newTab: false,
-        path: '/refund-policy'
-      },
-      {
-        id: 73,
-        title: 'Terms of Use',
-        newTab: false,
-        path: '/terms'
-      },
-      {
-        id: 70,
-        title: 'FAQs',
-        newTab: false,
-        path: '/faqs'
-      }
-      // {
-      //   id: 63,
-      //   title: "Mail Success",
-      //   newTab: false,
-      //   path: "/mail-success",
-      // },
-      // {
-      //   id: 64,
-      //   title: "Bid Requests",
-      //   newTab: false,
-      //   path: "/bid-requests",
-      // },
-    ]
-  }
+    path: '/about-us'
+  },
+  {
+    id: 4,
+    title: 'FAQs',
+    newTab: false,
+    path: '/faqs'
+  },
+  // {
+  //   id: 6,
+  //   title: 'pages',
+  //   newTab: false,
+  //   path: '/',
+  //   submenu: [
+  //     // {
+  //     //   id: 61,
+  //     //   title: "Shop",
+  //     //   newTab: false,
+  //     //   path: "/shop-with-sidebar",
+  //     // },
+  //     // {
+  //     //   id: 69,
+  //     //   title: "My Account",
+  //     //   newTab: false,
+  //     //   path: "/my-account",
+  //     // },
+  //     // {
+  //     //   id: 70,
+  //     //   title: "Contact",
+  //     //   newTab: false,
+  //     //   path: "/contact",
+  //     // },
+  //     {
+  //       id: 71,
+  //       title: 'Privacy Policy',
+  //       newTab: false,
+  //       path: '/privacy-policy'
+  //     },
+  //     {
+  //       id: 72,
+  //       title: 'Refund Policy',
+  //       newTab: false,
+  //       path: '/refund-policy'
+  //     },
+  //     {
+  //       id: 73,
+  //       title: 'Terms of Use',
+  //       newTab: false,
+  //       path: '/terms'
+  //     },
+  //     {
+  //       id: 70,
+  //       title: 'FAQs',
+  //       newTab: false,
+  //       path: '/faqs'
+  //     }
+  //     // {
+  //     //   id: 63,
+  //     //   title: "Mail Success",
+  //     //   newTab: false,
+  //     //   path: "/mail-success",
+  //     // },
+  //     // {
+  //     //   id: 64,
+  //     //   title: "Bid Requests",
+  //     //   newTab: false,
+  //     //   path: "/bid-requests",
+  //     // },
+  //   ]
+  // }
   // {
   //   id: 5,
   //   title: "Request Bid",

@@ -5,22 +5,19 @@ export default function Services() {
     <section className="max-w-[1170px] w-full mx-auto px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 xl:px-0 bg-gray-50 shadow-xl rounded-xl mt-12">
       <div className="mx-auto">
         {/* Our Services Section */}
-        <div className="mb-12">
-          <h2 className="text-[#4a36ec] text-2xl sm:text-3xl md:text-4xl font-semibold mb-6 text-center md:text-left">OUR SERVICES</h2>
+        <div className="mb-12 px-10">
+          <h2 className="text-[#4a36ec] text-2xl sm:text-3xl md:text-4xl font-semibold mb-6 text-center md:text-left">
+            OUR SERVICES
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Text Content */}
             <div className="text-gray-600 space-y-4 text-base sm:text-lg md:text-xl text-center md:text-justify">
-              <p>
-                SpePas is an online marketplace designed to bridge the gap between buyers and sellers of auto parts. Whether you’re a car
-                owner or mechanic looking for a specific part, a seller seeking a broader customer base, or an industry partner aiming to
-                enhance accessibility, our platform offers a simple and efficient solution.
-              </p>
-              <p>
-                We collaborate with key industry partners to ensure a reliable and well-connected ecosystem that benefits all stakeholders.
-                By working together, we enhance the accessibility, quality, and availability of auto parts, making it easier for buyers to
-                find what they need and for sellers to reach the right customers. With a wide range of parts available at your fingertips,
-                SpePas brings choice, convenience, and confidence to the auto parts market.
-              </p>
+            <p>
+              SpePas is a streamlined online marketplace that connects anyone—car owners, mechanics, or sellers—to the auto parts they need. Our easy-to-use platform makes it simple to find or offer parts under one roof.
+            </p>
+            <p>
+              By partnering with key industry players, we guarantee a reliable, well–connected network that improves part quality, availability, and access. With a broad selection at your fingertips, SpePas delivers choice, convenience, and confidence every time.
+            </p>
             </div>
 
             {/* Image Content */}
