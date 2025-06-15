@@ -4,8 +4,8 @@ import './index.css';
 import { init } from '@elastic/apm-rum';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';
-import { Toaster } from 'react-hot-toast';
 import { createRoot } from 'react-dom/client';
+import { Toaster } from 'react-hot-toast';
 
 import { AuthProvider } from '@/features/auth';
 // local imports

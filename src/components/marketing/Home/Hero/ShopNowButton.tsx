@@ -1,6 +1,7 @@
 // src/components/ShopNowButton.tsx
-import React from 'react'
-import './ShopNowButton.scss' // ← this brings in all the SCSS above
+import './ShopNowButton.scss'; // ← this brings in all the SCSS above
+
+import React from 'react';
 
 const ShopNowButton: React.FC = () => {
   return (
@@ -30,7 +31,7 @@ const ShopNowButton: React.FC = () => {
         </div>
       </label>
     </div>
-  )
-}
+  );
+};
 
-export default ShopNowButton
+export default ShopNowButton;

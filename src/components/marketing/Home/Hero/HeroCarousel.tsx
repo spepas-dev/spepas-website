@@ -1,10 +1,9 @@
 // src/components/HeroCarousel.tsx
-import React from 'react'
+import React from 'react';
 // import 'swiper/css'
 // import 'swiper/css/pagination'
-
-import { Autoplay, Pagination } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
 
 const HeroCarousel: React.FC = () => {
   return (
@@ -124,12 +123,9 @@ const HeroCarousel: React.FC = () => {
                 </h1>
               </div>
 
-              <p
-                className="text-base text-gray-600 opacity-0"
-                style={{ animation: 'fadeIn 1s ease-in-out 0.5s forwards' }}
-              >
-                SpePas is the marketplace for unique and reliable auto parts. From trusted workshops to bespoke restorations,
-                we bring transparency, trust, and a human touch to every transaction.
+              <p className="text-base text-gray-600 opacity-0" style={{ animation: 'fadeIn 1s ease-in-out 0.5s forwards' }}>
+                SpePas is the marketplace for unique and reliable auto parts. From trusted workshops to bespoke restorations, we bring
+                transparency, trust, and a human touch to every transaction.
               </p>
 
               <div className="flex justify-center mt-10">
@@ -148,15 +144,13 @@ const HeroCarousel: React.FC = () => {
                   "
                   style={{
                     opacity: 0,
-                    animation:
-                      'fadeIn 1s ease-in-out 1s forwards, bounceSlow 2s ease-in-out 2s infinite',
+                    animation: 'fadeIn 1s ease-in-out 1s forwards, bounceSlow 2s ease-in-out 2s infinite'
                   }}
                 >
                   Shop Now
                 </a>
               </div>
             </div>
-
 
             {/* HERO IMAGE */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
@@ -172,7 +166,7 @@ const HeroCarousel: React.FC = () => {
                   opacity-0
                 "
                 style={{
-                  animation: 'fadeIn 1s ease-in-out 1s forwards',
+                  animation: 'fadeIn 1s ease-in-out 1s forwards'
                 }}
               />
             </div>
@@ -182,7 +176,7 @@ const HeroCarousel: React.FC = () => {
         {/* Add more <SwiperSlide> blocks for additional slides if needed */}
       </Swiper>
     </>
-  )
-}
+  );
+};
 
-export default HeroCarousel
+export default HeroCarousel;

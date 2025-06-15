@@ -1,27 +1,27 @@
 // src/components/buyer/RequestList.tsx
-import React, { useEffect, useState, useCallback } from 'react'
-import {
-  getBuyerActiveRequestsAll,
-  getBuyerRequestHistoryAll,
-} from '@/lib/orderBidsApis'
-import RequestCard from './RequestCard'
-import RequestWithOffersCard from './RequestWithOffersCard'
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { getBuyerActiveRequestsAll, getBuyerRequestHistoryAll } from '@/lib/orderBidsApis';
+
+import RequestCard from './RequestCard';
+import RequestWithOffersCard from './RequestWithOffersCard';
 
 interface RequestListProps {
   mode: 'active' | 'history';
 }
 
-const ITEMS_PER_PAGE = 8
+const ITEMS_PER_PAGE = 8;
 
 const RequestList: React.FC<RequestListProps> = ({ mode }) => {
-  const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [showFilters, setShowFilters] = useState(false) // ← toggle filters panel
-  const [currentPage, setCurrentPage] = useState(1)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showFilters, setShowFilters] = useState(false); // ← toggle filters panel
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -31,12 +31,12 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
 
     fn()
       .then((res) => {
-        setData(res.data)
-        setCurrentPage(1)
+        setData(res.data);
+        setCurrentPage(1);
       })
       .catch((err) => {
-        console.error(err)
-        setError(true)
+        console.error(err);
+        setError(true);
       })
       .finally(() => {
         setLoading(false);
@@ -49,44 +49,45 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
 
   // Reset page when filters/search/mode change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, startDate, endDate, mode])
+    setCurrentPage(1);
+  }, [searchTerm, startDate, endDate, mode]);
 
-  const CardComponent =
-    mode === 'active' ? RequestWithOffersCard : RequestCard
+  const CardComponent = mode === 'active' ? RequestWithOffersCard : RequestCard;
 
   const filteredData = data.filter((req) => {
     // Search filter
     if (searchTerm.trim()) {
-      const blob = JSON.stringify(req).toLowerCase()
-      if (!blob.includes(searchTerm.toLowerCase().trim())) return false
+      const blob = JSON.stringify(req).toLowerCase();
+      if (!blob.includes(searchTerm.toLowerCase().trim())) {
+        return false;
+      }
     }
     // Date filter
-    const created = new Date(req.createdAt)
+    const created = new Date(req.createdAt);
     if (startDate) {
-      const from = new Date(startDate + 'T00:00:00')
-      if (created < from) return false
+      const from = new Date(`${startDate}T00:00:00`);
+      if (created < from) {
+        return false;
+      }
     }
     if (endDate) {
-      const to = new Date(endDate + 'T23:59:59')
-      if (created > to) return false
+      const to = new Date(`${endDate}T23:59:59`);
+      if (created > to) {
+        return false;
+      }
     }
-    return true
-  })
+    return true;
+  });
 
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const paginatedData = filteredData.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <img
-          src="/spepasLogo.gif"
-          alt="SpePas Loading"
-          className="w-12 h-12"
-        />
+        <img src="/spepasLogo.gif" alt="SpePas Loading" className="w-12 h-12" />
       </div>
     );
   }
@@ -94,13 +95,8 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
   if (error) {
     return (
       <div className="text-center py-20 space-y-4">
-        <p className="text-red-600">
-          Something went wrong loading requests.
-        </p>
-        <button
-          onClick={fetchData}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded"
-        >
+        <p className="text-red-600">Something went wrong loading requests.</p>
+        <button onClick={fetchData} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
           Retry
         </button>
       </div>
@@ -148,13 +144,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
             transition
           "
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -171,9 +161,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
         <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 max-w-lg mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                From
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">From</label>
               <input
                 type="date"
                 value={startDate}
@@ -190,9 +178,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                To
-              </label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">To</label>
               <input
                 type="date"
                 value={endDate}
@@ -214,9 +200,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
 
       {/* If no matches after filtering */}
       {filteredData.length === 0 ? (
-        <p className="text-center text-gray-500 py-10">
-          No requests match your criteria.
-        </p>
+        <p className="text-center text-gray-500 py-10">No requests match your criteria.</p>
       ) : (
         <>
           <div
@@ -241,9 +225,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
               disabled={currentPage === 1}
               className={`
                 px-3 py-1 rounded-md
-                ${currentPage === 1
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-500 text-white hover:bg-indigo-600'}
+                ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-indigo-500 text-white hover:bg-indigo-600'}
               `}
             >
               Prev
@@ -255,9 +237,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
                 onClick={() => setCurrentPage(num)}
                 className={`
                   px-3 py-1 rounded-md
-                  ${num === currentPage
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}
+                  ${num === currentPage ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'}
                 `}
               >
                 {num}
@@ -265,15 +245,15 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
             ))}
 
             <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
               className={`
                 px-3 py-1 rounded-md
-                ${currentPage === totalPages
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-500 text-white hover:bg-indigo-600'}
+                ${
+                  currentPage === totalPages
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-indigo-500 text-white hover:bg-indigo-600'
+                }
               `}
             >
               Next

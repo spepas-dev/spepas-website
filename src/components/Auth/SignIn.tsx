@@ -3,7 +3,7 @@ import React, { ChangeEvent, FormEvent, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
-import Breadcrumb from '@/components/common/Breadcrumb';
+// import Breadcrumb from '@/components/common/Breadcrumb';
 import { useAuth } from '@/features/auth';
 
 const Signin: React.FC = () => {
@@ -45,14 +45,9 @@ const Signin: React.FC = () => {
     <>
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-md p-6 sm:p-7.5 xl:p-11">
-        <div className="text-center mb-8">
+          <div className="text-center mb-8">
             <Link className="inline-block" to="/">
-              <img
-                src="/images/logo/logo.png"
-                alt="Logo"
-                width={119}
-                height={36}
-              />
+              <img src="/images/logo/logo.png" alt="Logo" width={119} height={36} />
             </Link>
           </div>
           <div className="text-center mb-11">

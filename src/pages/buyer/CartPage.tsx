@@ -9,9 +9,7 @@ export default function CartPage() {
       {/* Spacer for fixed headers, etc. */}
       <section className="pt-10"></section>
 
-      <h1 className="text-xl sm:text-3xl lg:text-3xl font-bold mb-6 text-center sm:text-left text-blue-800">
-        My Cart
-      </h1>
+      <h1 className="text-xl sm:text-3xl lg:text-3xl font-bold mb-6 text-center sm:text-left text-blue-800">My Cart</h1>
 
       <CartList />
     </div>

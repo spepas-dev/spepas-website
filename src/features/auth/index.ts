@@ -74,7 +74,7 @@ export interface GopaProfile {
   Specialties: string[];
   User_ID: string;
   status: number;
-  date_added: string;  // ISO
+  date_added: string; // ISO
 }
 
 export interface MepaProfile {
@@ -115,7 +115,7 @@ export interface Vehicle {
   color: string;
   registrationNumber: string;
   date_added: string;
-  location: any;
+  location: unknown;
   status: number;
 }
 
@@ -352,24 +352,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
     };
 
     // List of events that constitute “activity”
-    const activityEvents: (keyof WindowEventMap)[] = [
-      "mousemove",
-      "mousedown",
-      "keypress",
-      "touchstart",
-      "scroll",
-    ];
+    // eslint-disable-next-line no-undef
+    const activityEvents: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'];
 
-    activityEvents.forEach((evt) =>
-      window.addEventListener(evt, resetTimer)
-    );
+    activityEvents.forEach((evt) => window.addEventListener(evt, resetTimer));
     resetTimer(); // start the initial timeout
 
     return () => {
       clearTimeout(timer);
-      activityEvents.forEach((evt) =>
-        window.removeEventListener(evt, resetTimer)
-      );
+      activityEvents.forEach((evt) => window.removeEventListener(evt, resetTimer));
     };
   }, [logout]);
 
