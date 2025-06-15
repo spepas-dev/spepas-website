@@ -1,13 +1,14 @@
 // src/pages/auth/Signup.tsx
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import Breadcrumb from "@/components/common/Breadcrumb";
-import { signupAPI } from "@/lib/auth";
-import { toast } from "react-hot-toast";
+import React, { ChangeEvent, FormEvent, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
+
+import Breadcrumb from '@/components/common/Breadcrumb';
+import { signupAPI } from '@/lib/auth';
 
 // Helper to ensure messages are strings
 const getMessage = (msg: unknown): string => {
-  if (typeof msg === "object" && msg !== null) {
+  if (typeof msg === 'object' && msg !== null) {
     try {
       return JSON.stringify(msg);
     } catch {
@@ -28,17 +29,15 @@ interface FormData {
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    password: "",
-    phoneNumber: "",
-    user_type: "",
+    name: '',
+    email: '',
+    password: '',
+    phoneNumber: '',
+    user_type: ''
   });
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -47,27 +46,27 @@ const Signup: React.FC = () => {
     setLoading(true);
 
     // show a persistent “loading” toast
-    const toastId = toast.loading("Creating account…", {
-      position: "bottom-center",
+    const toastId = toast.loading('Creating account…', {
+      position: 'bottom-center'
     });
 
     try {
       const result = await signupAPI(formData);
       const otpID = result.data;
-      localStorage.setItem("otpID", otpID);
+      localStorage.setItem('otpID', otpID);
 
       // swap loading toast for success
-      toast.success("Account created! Check your phone for OTP.", {
+      toast.success('Account created! Check your phone for OTP.', {
         id: toastId,
-        position: "bottom-center",
+        position: 'bottom-center'
       });
 
-      navigate("/auth/activate");
-    } catch (err: any) {
-      console.error("Signup error:", err);
+      navigate('/auth/activate');
+    } catch (err: unknown) {
+      console.error('Signup error:', err);
       toast.error(`Signup failed: ${getMessage(err)}`, {
         id: toastId,
-        position: "bottom-center",
+        position: 'bottom-center'
       });
     } finally {
       setLoading(false);
@@ -91,9 +90,7 @@ const Signup: React.FC = () => {
                     </div>
           <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-md p-4 sm:p-7.5 xl:p-11">
             <div className="text-center mb-11">
-              <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">
-                Create an Account
-              </h2>
+              <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">Create an Account</h2>
               <p>Enter your details below</p>
             </div>
 
@@ -186,11 +183,11 @@ const Signup: React.FC = () => {
                 disabled={loading}
                 className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg mt-7.5"
               >
-                {loading ? "Creating Account..." : "Create Account"}
+                {loading ? 'Creating Account...' : 'Create Account'}
               </button>
 
               <p className="text-center mt-6">
-                Already have an account?{" "}
+                Already have an account?{' '}
                 <Link to="/auth/signin" className="text-dark hover:text-blue">
                   Sign in Now
                 </Link>

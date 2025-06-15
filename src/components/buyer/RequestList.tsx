@@ -8,7 +8,7 @@ import RequestCard from './RequestCard'
 import RequestWithOffersCard from './RequestWithOffersCard'
 
 interface RequestListProps {
-  mode: 'active' | 'history'
+  mode: 'active' | 'history';
 }
 
 const ITEMS_PER_PAGE = 8
@@ -24,13 +24,10 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
   const [currentPage, setCurrentPage] = useState(1)
 
   const fetchData = useCallback(() => {
-    setLoading(true)
-    setError(false)
+    setLoading(true);
+    setError(false);
 
-    const fn =
-      mode === 'active'
-        ? getBuyerActiveRequestsAll
-        : getBuyerRequestHistoryAll
+    const fn = mode === 'active' ? getBuyerActiveRequestsAll : getBuyerRequestHistoryAll;
 
     fn()
       .then((res) => {
@@ -42,13 +39,13 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
         setError(true)
       })
       .finally(() => {
-        setLoading(false)
-      })
-  }, [mode])
+        setLoading(false);
+      });
+  }, [mode]);
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData();
+  }, [fetchData]);
 
   // Reset page when filters/search/mode change
   useEffect(() => {
@@ -91,7 +88,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
           className="w-12 h-12"
         />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -107,15 +104,11 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
           Retry
         </button>
       </div>
-    )
+    );
   }
 
   if (!data.length) {
-    return (
-      <p className="text-center text-gray-500 py-10">
-        No {mode === 'active' ? 'active' : 'historical'} requests.
-      </p>
-    )
+    return <p className="text-center text-gray-500 py-10">No {mode === 'active' ? 'active' : 'historical'} requests.</p>;
   }
 
   return (
@@ -289,7 +282,7 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default RequestList
+export default RequestList;

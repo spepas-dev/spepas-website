@@ -1,10 +1,11 @@
 // src/components/gopaInvoices/GopaAcceptedInvoices.tsx
 import React, { useEffect, useState } from 'react';
-import { getGopaAcceptedInvoices } from '@/lib/gopaInvoiceApis';
 import { useNavigate } from 'react-router-dom';
 
+import { getGopaAcceptedInvoices } from '@/lib/gopaInvoiceApis';
+
 const GopaAcceptedInvoices: React.FC = () => {
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -39,7 +40,7 @@ const GopaAcceptedInvoices: React.FC = () => {
       <section className="pt-20"></section>
       <h2 className="text-xl font-semibold mb-4">Accepted Invoices</h2>
       <ul>
-        {invoices.map(inv => (
+        {invoices.map((inv) => (
           <li key={inv.invoice_id} className="mb-2">
             <button
               onClick={() => navigate(`/gopa-invoices/accepted-invoices/${inv.invoice_id}`)}

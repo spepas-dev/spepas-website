@@ -1,15 +1,18 @@
 // src/components/layout/marketing/Header/Dropdown.tsx
 import React, { useState } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+
 // import { Menu } from '@/components/layout/marketing/Header/Menu';
 import { DropdownProps } from './DropdownProps';
 
 const Dropdown: React.FC<DropdownProps> = ({ menuItem, stickyMenu }) => {
-  // If somehow someone calls this without a submenu, bail out early
-  if (!menuItem.submenu) return null;
-
   const [dropdownToggler, setDropdownToggler] = useState(false);
   const pathUrl = useLocation().pathname;
+
+  // If somehow someone calls this without a submenu, bail out early
+  if (!menuItem.submenu) {
+    return null;
+  }
 
   return (
     <li
@@ -31,13 +34,7 @@ const Dropdown: React.FC<DropdownProps> = ({ menuItem, stickyMenu }) => {
       >
         {menuItem.title}
         {/* Chevron icon */}
-        <svg
-          className="fill-current cursor-pointer"
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-        >
+        <svg className="fill-current cursor-pointer" width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -54,7 +51,7 @@ const Dropdown: React.FC<DropdownProps> = ({ menuItem, stickyMenu }) => {
           ${stickyMenu ? 'xl:group-hover:translate-y-0' : 'xl:group-hover:translate-y-0'}
         `}
       >
-        {menuItem.submenu.map(sub => (
+        {menuItem.submenu.map((sub) => (
           <li key={sub.id}>
             <Link
               to={sub.path!}

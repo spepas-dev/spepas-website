@@ -7,37 +7,35 @@ import { toast } from "react-hot-toast";
 
 const ChangePassword: React.FC = () => {
   const navigate = useNavigate();
-  const [oldPassword, setOldPassword] = useState<string>("");
-  const [newPassword, setNewPassword] = useState<string>("");
-  const [error, setError] = useState<string>("");
+  const [oldPassword, setOldPassword] = useState<string>('');
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     // show loading toast
-    const toastId = toast.loading("Changing password…", {
-      position: "bottom-center",
+    const toastId = toast.loading('Changing password…', {
+      position: 'bottom-center'
     });
 
     try {
       await changePasswordAPI({ oldPassword, newPassword });
-      toast.success("Password changed successfully!", {
+      toast.success('Password changed successfully!', {
         id: toastId,
-        position: "bottom-center",
+        position: 'bottom-center'
       });
-      navigate("/my-account");
-    } catch (err) {
-      toast.error(
-        "Failed to change password. Please check your details and try again.",
-        {
-          id: toastId,
-          position: "bottom-center",
-        }
-      );
-      setError("Failed to change password. Please check your details and try again.");
+      navigate('/my-account');
+    } catch (err: unknown) {
+      console.log(err);
+      toast.error('Failed to change password. Please check your details and try again.', {
+        id: toastId,
+        position: 'bottom-center'
+      });
+      setError('Failed to change password. Please check your details and try again.');
     } finally {
       setLoading(false);
     }
@@ -59,9 +57,7 @@ const ChangePassword: React.FC = () => {
             </Link>
           </div>
           <div className="text-center mb-11">
-            <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">
-              Change Password
-            </h2>
+            <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">Change Password</h2>
             <p>Enter your old and new passwords below.</p>
           </div>
           <form onSubmit={handleSubmit}>
@@ -75,9 +71,7 @@ const ChangePassword: React.FC = () => {
                 id="oldPassword"
                 placeholder="Enter your current password"
                 value={oldPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setOldPassword(e.target.value)
-                }
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setOldPassword(e.target.value)}
                 autoComplete="on"
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required
@@ -92,9 +86,7 @@ const ChangePassword: React.FC = () => {
                 id="newPassword"
                 placeholder="Enter your new password"
                 value={newPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setNewPassword(e.target.value)
-                }
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
                 autoComplete="on"
                 className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
                 required
@@ -105,7 +97,7 @@ const ChangePassword: React.FC = () => {
               disabled={loading}
               className="w-full flex justify-center font-medium text-white bg-dark py-3 px-6 rounded-lg mt-7.5"
             >
-              {loading ? "Changing Password..." : "Change Password"}
+              {loading ? 'Changing Password...' : 'Change Password'}
             </button>
           </form>
         </div>

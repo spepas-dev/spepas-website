@@ -1,6 +1,7 @@
 // src/pages/CartPage.tsx
-import React from 'react'
-import CartList from '@/components/buyer/CartList'
+import React from 'react';
+
+import CartList from '@/components/buyer/CartList';
 
 export default function CartPage() {
   return (
@@ -14,5 +15,5 @@ export default function CartPage() {
 
       <CartList />
     </div>
-  )
+  );
 }

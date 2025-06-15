@@ -1,5 +1,5 @@
 // src/lib/authZodValidation.ts
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * ============================
@@ -9,23 +9,23 @@ import { z } from "zod";
 
 // 1. Signup Request Schema
 export const signupRequestSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
-  name: z.string().min(1, "Name is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  user_type: z.literal("BUYER"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters long'),
+  name: z.string().min(1, 'Name is required'),
+  phoneNumber: z.string().min(1, 'Phone number is required'),
+  user_type: z.literal('BUYER')
 });
 
 // 2. Signin Request Schema
 export const signinRequestSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters long')
 });
 
 // 3. Activate Account Request Schema
 export const activateAccountRequestSchema = z.object({
-  otp: z.string().regex(/^\d{6}$/, "OTP must be 6 digits"),
-  otpID: z.string().uuid("Invalid OTP ID"),
+  otp: z.string().regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  otpID: z.string().uuid('Invalid OTP ID')
 });
 
 // 4. Signout Request Schema
@@ -34,20 +34,20 @@ export const signoutRequestSchema = z.object({});
 
 // 5. Forgot Password Request Schema
 export const forgotPasswordRequestSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email('Invalid email address')
 });
 
 // 6. Reset Password Request Schema
 export const resetPasswordRequestSchema = z.object({
-  otp: z.string().regex(/^\d{6}$/, "OTP must be 6 digits"),
-  otpID: z.string().uuid("Invalid OTP ID"),
-  newPassword: z.string().min(8, "Password must be at least 8 characters long"),
+  otp: z.string().regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  otpID: z.string().uuid('Invalid OTP ID'),
+  newPassword: z.string().min(8, 'Password must be at least 8 characters long')
 });
 
 // 7. Change Password Request Schema
 export const changePasswordRequestSchema = z.object({
-  oldPassword: z.string().min(8, "Old password must be at least 8 characters long"),
-  newPassword: z.string().min(8, "New password must be at least 8 characters long"),
+  oldPassword: z.string().min(8, 'Old password must be at least 8 characters long'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters long')
 });
 
 // 8. Refresh Token Request Schema (GET request; no payload required)
@@ -64,7 +64,7 @@ export const refreshTokenRequestSchema = z.object({});
 // export const signupResponseSchema = z.object({
 //   status: z.number(),
 //   message: z.string(),
-//   data: z.string(), 
+//   data: z.string(),
 // });
 
 // Example: Signin Response Schema

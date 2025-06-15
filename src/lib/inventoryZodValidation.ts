@@ -9,7 +9,7 @@ const imageSchema = z.object({
   status: z.number(),
   // loosened: accept any string or undefined
   image_url: z.string().optional(),
-  image_ob: z.any(),
+  image_ob: z.any()
 });
 
 const sparePartSchema = z.object({
@@ -25,7 +25,7 @@ const sparePartSchema = z.object({
   seller_ID: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
-  images: z.array(imageSchema),
+  images: z.array(imageSchema)
 });
 
 const carModelSchema = z.object({
@@ -52,10 +52,10 @@ const carModelSchema = z.object({
         name: z.string(),
         country: z.string(),
         status: z.number(),
-        createdAt: z.string(),
-      }),
+        createdAt: z.string()
+      })
     })
-    .optional(),
+    .optional()
 });
 
 const carBrandSchema = z.object({
@@ -74,9 +74,9 @@ const carBrandSchema = z.object({
       name: z.string(),
       country: z.string(),
       status: z.number(),
-      createdAt: z.string(),
+      createdAt: z.string()
     })
-    .optional(),
+    .optional()
 });
 
 const manufacturerSchema = z.object({
@@ -86,29 +86,29 @@ const manufacturerSchema = z.object({
   country: z.string(),
   status: z.number(),
   createdAt: z.string(),
-  brands: z.array(carBrandSchema),
+  brands: z.array(carBrandSchema)
 });
 
 export const carManufacturersResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
-  data: z.array(manufacturerSchema),
+  data: z.array(manufacturerSchema)
 });
 
 export const carBrandsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
-  data: z.array(carBrandSchema),
+  data: z.array(carBrandSchema)
 });
 
 export const carModelsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
-  data: z.array(carModelSchema),
+  data: z.array(carModelSchema)
 });
 
 export const sparePartsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
-  data: z.array(sparePartSchema),
+  data: z.array(sparePartSchema)
 });

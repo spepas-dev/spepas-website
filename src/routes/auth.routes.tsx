@@ -1,13 +1,13 @@
 // src/routes/auth.routes.tsx
 import { RouteObject } from 'react-router-dom';
 
+import ActivateAccountPage from '@/pages/auth/activate';
+import ChangePasswordPage from '@/pages/auth/change-password';
+import ForgotPasswordPage from '@/pages/auth/forgot-password';
+import ResetPasswordPage from '@/pages/auth/reset-password';
 // Import your authentication page components:
 import SignInPage from '@/pages/auth/signin';
 import SignUpPage from '@/pages/auth/signup';
-import ActivateAccountPage from '@/pages/auth/activate';
-import ForgotPasswordPage from '@/pages/auth/forgot-password';
-import ResetPasswordPage from '@/pages/auth/reset-password';
-import ChangePasswordPage from '@/pages/auth/change-password';
 
 
 export const authRoutes: RouteObject[] = [

@@ -1,5 +1,6 @@
 // src/components/Hero.tsx
 import React, { useRef } from 'react';
+
 import HeroCarousel from './HeroCarousel';
 import HeroFeature from './HeroFeature';
 
@@ -39,42 +40,24 @@ const Hero: React.FC = () => {
       <div className="max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15 border-rounded-[20px] mt-6 sm:mt-8 lg:mt-12 xl:mt-16.5 shadow-md overflow-hidden">
         {/* Featured Products */}
         <div className="pt-8 pl-4 sm:pl-8 xl:pl-8 pr-2">
-          <h2 className="text-dark text-xl font-semibold mb-4">
-            Featured Products
-          </h2>
+          <h2 className="text-dark text-xl font-semibold mb-4">Featured Products</h2>
 
           <div className="relative">
-            <div
-              ref={scrollRef}
-              className="overflow-x-auto scrollbar-hide"
-              style={{ scrollbarWidth: 'none' }}
-            >
+            <div ref={scrollRef} className="overflow-x-auto scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
               <div className="flex gap-5">
-                {[1,2,3,4,5,6,7,8].map((n) => (
-                  <div
-                    key={n}
-                    className="min-w-[250px] rounded-[10px] bg-white p-4 sm:p-7.5 flex-shrink-0"
-                  >
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <div key={n} className="min-w-[250px] rounded-[10px] bg-white p-4 sm:p-7.5 flex-shrink-0">
                     <div className="flex items-center gap-14">
                       <div>
                         <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-5">
                           <a href="#">{`Item ${n}`}</a>
                         </h2>
-                        <p className="font-medium text-gray-500 text-sm mb-1.5">
-                          offer
-                        </p>
+                        <p className="font-medium text-gray-500 text-sm mb-1.5">offer</p>
                         <span className="flex items-center gap-3">
-                          <span className="font-medium text-xl text-red-500">
-                            GH₵ {n * 100}
-                          </span>
+                          <span className="font-medium text-xl text-red-500">GH₵ {n * 100}</span>
                         </span>
                       </div>
-                      <img
-                        src={`/images/products/part ${n}.jpg`}
-                        alt={`Item ${n}`}
-                        width={123}
-                        height={161}
-                      />
+                      <img src={`/images/products/part ${n}.jpg`} alt={`Item ${n}`} width={123} height={161} />
                     </div>
                   </div>
                 ))}
@@ -85,13 +68,7 @@ const Hero: React.FC = () => {
               onClick={handleScrollLeft}
               className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 p-2 rounded-full shadow-md hover:bg-gray-100"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-dark"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -99,13 +76,7 @@ const Hero: React.FC = () => {
               onClick={handleScrollRight}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 p-2 rounded-full shadow-md hover:bg-gray-100"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-dark"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>

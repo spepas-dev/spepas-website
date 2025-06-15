@@ -1,7 +1,7 @@
 // src/components/marketing/MyAccount/GroupsRolesTab.tsx
 import React from 'react';
 
-const GroupsRolesTab: React.FC<{ groups: any[]; roles: any[] }> = ({ groups, roles }) => (
+const GroupsRolesTab: React.FC<{ groups: unknown[]; roles: unknown[] }> = ({ groups, roles }) => (
   <div className="space-y-4">
     <div>
       <h4 className="font-medium">Groups</h4>
