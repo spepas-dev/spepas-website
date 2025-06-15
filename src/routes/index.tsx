@@ -24,7 +24,7 @@ export const routes = [
     children: altHomeRoutes,
   },
   {
-    path: '/',
+    path: '/notlandingpages/',
     element: <MarketingLayout />,
     errorElement: <ErrorPage />,
     children: [
@@ -38,7 +38,7 @@ export const routes = [
 
   },
   {
-    path: '/auth/',
+    path: '/notlandingpages/auth/',
     element: <AuthLayout />, // Auth pages now use AuthLayout
     errorElement: <ErrorPage />,
     children: authRoutes,
