@@ -1,0 +1,239 @@
+/* src/components/ShopNowButton.scss */
+
+@import url(https://fonts.googleapis.com/css?family=Fira+Sans:400,300,700,500,400italic,500italic,700italic,300italic);
+
+.button-wrapper {
+  position: relative;
+  display: inline-block;
+  /* ensure the container is large enough for all the spots */
+  width: 200px;
+  height: 50px;
+  margin-top: 2.5rem; /* same as mt-10 in Tailwind */
+}
+
+/* Hide the checkbox */
+.button-wrapper input[type='checkbox'] {
+  display: none;
+}
+
+/* When checkbox is checked, target the inner button */
+.button-wrapper input:checked + label .button_inner {
+  background: transparent;
+  transform: rotate(90deg);
+  width: 50px; /* final width after animation */
+  border-radius: 100px;
+  box-shadow: 0px 0px 0px 440px rgba(0, 0, 0, 0);
+  animation: finalbox 0.4s 4.42s cubic-bezier(0.39, 2.01, 0.27, 0.75) forwards;
+}
+.button-wrapper input:checked + label .button_inner span.t {
+  opacity: 0;
+  top: 20px;
+}
+.button-wrapper input:checked + label .button_inner i.l {
+  left: 14px;
+  opacity: 1;
+  top: 11px;
+  animation: down 1s 0.25s infinite, final 0.2s 4s forwards;
+}
+.button-wrapper input:checked + label .button_inner .tick {
+  position: absolute;
+  left: 2px;
+  transform: scale(0) rotate(-90deg);
+  color: #00c1fc;
+  top: 11px;
+  margin: auto;
+  font-size: 22px;
+  animation: tick 0.3s 4.7s forwards;
+}
+
+/* THE SPOTS: for all 52 spots */
+.button-wrapper input:checked + label .button_inner .button_spots {
+  opacity: 1 !important;
+}
+@for $i from 1 through 52 {
+  .button-wrapper input:checked + label .button_inner .button_spots:nth-of-type(#{$i}) {
+    top: (16px - random(10)) !important;
+    left: -34px !important;
+    opacity: 0;
+    padding: random(20) / 4 + 2 + px !important;
+    animation: spew 1s 0.3s forwards,
+      rotate 4s + random(4) / 10 0.25s + random(12) / 10 linear infinite,
+      final 0.2s 4s forwards,
+      spot-#{$i} 0.7s 0.4 / random(10) + random(10) / 10 + 10s linear infinite !important;
+  }
+}
+
+/* Before hover, show only base styles */
+.button-wrapper label {
+  display: block;
+}
+.button-wrapper .button_inner {
+  position: absolute;
+  width: 200px;
+  height: 50px;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: auto;
+  border-radius: 2px;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.04);
+  font-weight: 100;
+  font-size: 12px;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  color: white;
+  text-align: center;
+  background: transparent;
+  transition: all 0.3s, box-shadow 0.2s, transform 0.2s 0.2s;
+}
+.button-wrapper .button_inner .t {
+  position: relative;
+  top: 6px;
+  opacity: 1;
+  left: -10px;
+  transition: left 0.4s 0.1s;
+}
+.button-wrapper .button_inner i.l {
+  position: relative;
+  left: -19px;
+  top: 20px;
+  color: #00c1fc;
+  font-size: 25px;
+  opacity: 0;
+  transition: left 0.3s 0s, top 0.3s 0s, opacity 0.3s 0s;
+}
+.button-wrapper .button_inner:hover {
+  color: #2c3940;
+  background: white;
+  box-shadow: 0px 17px 18px -14px rgba(0, 0, 0, 0.08);
+}
+.button-wrapper .button_inner:hover .t {
+  left: 16px;
+  transition: left 0.4s;
+}
+.button-wrapper .button_inner:hover i.l {
+  top: 12px;
+  opacity: 1;
+  transition: left 0.3s 0s, top 0.3s 0.1s, opacity 0.3s 0.1s;
+}
+/* On hover, trigger spot animations */
+.button-wrapper .button_inner:hover .button_spots {
+  // We will rely on the spot-#{$i} keyframes generated above
+}
+
+/* Circle spots base style */
+.button-wrapper .button_spots {
+  position: absolute;
+  border-radius: 100px;
+  background: green;
+  opacity: 0;
+  animation: opacity 1s;
+}
+@for $i from 1 through 52 {
+  .button-wrapper .button_spots:nth-of-type(#{$i}) {
+    transform-origin: 90px - random(10) 20px - random(10);
+    background: hsla(350 + random(399), 57% - random(10), 65%, 1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.12);
+    transition: all 1s + random(10) / 10;
+  }
+}
+
+/* Declare keyframes exactly as you provided */
+@for $i from 1 through 20 {
+  @keyframes spot-#{$i} {
+    from {
+      opacity: 0;
+    }
+    to {
+      transform: translateY(30px) translatex(-20px + $i * 2);
+      opacity: 0.6;
+    }
+  }
+}
+@for $i from 20 through 40 {
+  @keyframes spot-#{$i} {
+    from {
+      opacity: 0;
+    }
+    to {
+      transform: translateY(-30px) translatex(-50px + $i * 2);
+      opacity: 0.6;
+    }
+  }
+}
+@for $i from 40 through 45 {
+  @keyframes spot-#{$i} {
+    from {
+      opacity: 0;
+    }
+    to {
+      transform: translateY(-86px + $i * 2) translatex(40px);
+      opacity: 0.6;
+    }
+  }
+}
+@for $i from 46 through 54 {
+  @keyframes spot-#{$i} {
+    from {
+      opacity: 0;
+    }
+    to {
+      transform: translateY(-99px + $i * 2) translatex(-40px);
+      opacity: 0.6;
+    }
+  }
+}
+@keyframes opacity {
+  from {
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes rotate {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    transform: rotate(360deg);
+    opacity: 0.8;
+  }
+}
+@keyframes down {
+  from {
+    left: 10px;
+  }
+  to {
+    left: 57px;
+  }
+}
+@keyframes spew {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.8;
+  }
+}
+@keyframes final {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes finalbox {
+  from {
+  }
+  to {
+    width: 50px;
+  }
+}
+@keyframes tick {
+  from {
+  }
+  to {
+    transform: scale(1) rotate(-90deg);
+  }
+}

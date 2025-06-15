@@ -9,12 +9,14 @@ import RefundPolicyPage from '@/pages/marketing/refund-policy/page';
 import TermsOfUsePage from '@/pages/marketing/terms/page';
 import ShopWithoutSidebarPage from '@/pages/marketing/shop-without-sidebar/page';
 import ShopDetailsPage from '@/pages/marketing/shop-details/page';
+import AboutUsPage from '@/pages/marketing/about-us/page';
+// import AltHomePage from '@/pages/marketing/home/alt-home/page'; // Importing the alternative home page
 
 import MyAccountPage from '@/pages/marketing/my-account/page';
 import ProtectedRoute from '@/components/common/ProtectedRoute';
 
 export const websiteRoutes: RouteObject[] = [
-  { index: true, element: <HomePage /> },
+  { path: 'home', element: <HomePage /> },
   { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
   { path: 'refund-policy',   element: <RefundPolicyPage /> },
   { path: 'terms',           element: <TermsOfUsePage /> },
@@ -22,11 +24,13 @@ export const websiteRoutes: RouteObject[] = [
   { path: 'contact',         element: <ContactPage /> },
   { path: 'shop',            element: <ShopWithoutSidebarPage /> },
   { path: 'shop/:id',        element: <ShopDetailsPage /> },
+  { path: 'about-us',        element: <AboutUsPage /> },
 
-  // ← This chunk is now protected:
+
+  
   {
     path: 'my-account',
-    element: <ProtectedRoute />,       // checks auth, otherwise Navigate
+    element: <ProtectedRoute />,       
     children: [
       { index: true, element: <MyAccountPage /> }
     ]

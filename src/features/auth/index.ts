@@ -74,87 +74,87 @@ export type ChangePasswordPayload = {
 
 // Define a user type based on your API response.
 
-
 // ----- nested profile interfaces -----
 export interface GopaProfile {
-    id: number;
-    Gopa_ID: string;
-    Specialties: string[];
-    User_ID: string;
-    status: number;
-    date_added: string;  // ISO
-  }
-  
-  export interface MepaProfile {
-    id: number;
-    Mepa_ID: string;
-    User_ID: string;
-    address: string;
-    shop_name: string;
-    location: { type: string; coordinates: number[] };
-    status: number;
-    date_added: string;
-  }
-  
-  export interface SellerDetails {
-    id: number;
-    Seller_ID: string;
-    storeName: string;
-    business_reg_url: string | null;
-    business_reg_obj: object | null;
-    Location: { type: string; coordinates: number[] };
-    Gopa_ID: string | null;
-    date_added: string;
-    status: number;
-  }
-  
-  export interface Vehicle {
-    id: number;
-    Vehicle_ID: string;
-    User_ID: string;
-    added_by: string;
-    Deliver_ID: string;
-    type: string;
-    model: string;
-    front_image_url: string | null;
-    front_image_obj: object | null;
-    back_image_url: string | null;
-    back_image_obj: object | null;
-    color: string;
-    registrationNumber: string;
-    date_added: string;
-    location: any;
-    status: number;
-  }
-  
-  export interface DeliverProfile {
-    id: number;
-    Deliver_ID: string;
-    User_ID: string;
-    added_by: string;
-    licenseNumber: string;
-    front_license_url: string | null;
-    back_license_url: string | null;
-    front_license_obj: object | null;
-    back_license_obj: object | null;
-    location: { type: string; coordinates: number[] };
-    status: number;
-    date_added: string;
-    vehicles: Vehicle[];
-  }
-  
-  export interface PaymentAccount {
-    id: number;
-    Account_ID: string;
-    User_ID: string;
-    added_by: string;
-    mode: string;
-    accountNumber: string;
-    provider: string;
-    name: string;
-    date_added: string;
-    status: number;
-  }
+  id: number;
+  Gopa_ID: string;
+  Specialties: string[];
+  User_ID: string;
+  status: number;
+  date_added: string;  // ISO
+}
+
+export interface MepaProfile {
+  id: number;
+  Mepa_ID: string;
+  User_ID: string;
+  address: string;
+  shop_name: string;
+  location: { type: string; coordinates: number[] };
+  status: number;
+  date_added: string;
+}
+
+export interface SellerDetails {
+  id: number;
+  Seller_ID: string;
+  storeName: string;
+  business_reg_url: string | null;
+  business_reg_obj: object | null;
+  Location: { type: string; coordinates: number[] };
+  Gopa_ID: string | null;
+  date_added: string;
+  status: number;
+}
+
+export interface Vehicle {
+  id: number;
+  Vehicle_ID: string;
+  User_ID: string;
+  added_by: string;
+  Deliver_ID: string;
+  type: string;
+  model: string;
+  front_image_url: string | null;
+  front_image_obj: object | null;
+  back_image_url: string | null;
+  back_image_obj: object | null;
+  color: string;
+  registrationNumber: string;
+  date_added: string;
+  location: any;
+  status: number;
+}
+
+export interface DeliverProfile {
+  id: number;
+  Deliver_ID: string;
+  User_ID: string;
+  added_by: string;
+  licenseNumber: string;
+  front_license_url: string | null;
+  back_license_url: string | null;
+  front_license_obj: object | null;
+  back_license_obj: object | null;
+  location: { type: string; coordinates: number[] };
+  status: number;
+  date_added: string;
+  vehicles: Vehicle[];
+}
+
+export interface PaymentAccount {
+  id: number;
+  Account_ID: string;
+  User_ID: string;
+  added_by: string;
+  mode: string;
+  accountNumber: string;
+  provider: string;
+  name: string;
+  date_added: string;
+  status: number;
+}
+
 export type UserType = {
   name: string;
   email: string;
@@ -353,6 +353,42 @@ export const AuthProvider = ({
       throw error;
     }
   };
+
+  /**
+   * Auto-logout after 2 hours of inactivity.
+   */
+  useEffect(() => {
+    const INACTIVITY_MS = 1000 * 60 * 60 * 2; // 2 hours
+    let timer: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        logout();
+      }, INACTIVITY_MS);
+    };
+
+    // List of events that constitute “activity”
+    const activityEvents: (keyof WindowEventMap)[] = [
+      "mousemove",
+      "mousedown",
+      "keypress",
+      "touchstart",
+      "scroll",
+    ];
+
+    activityEvents.forEach((evt) =>
+      window.addEventListener(evt, resetTimer)
+    );
+    resetTimer(); // start the initial timeout
+
+    return () => {
+      clearTimeout(timer);
+      activityEvents.forEach((evt) =>
+        window.removeEventListener(evt, resetTimer)
+      );
+    };
+  }, [logout]);
 
   // Prepare the context value.
   const value: AuthContextType = {

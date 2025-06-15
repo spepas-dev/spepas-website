@@ -36,10 +36,10 @@ const ActiveBidsPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-25">
       {/* Tab Navigation */}
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold">Bids</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-blue-800">Bids</h1>
         <div className="flex gap-4 border-b border-gray-200">
           <button
             onClick={() => setTab('new')}

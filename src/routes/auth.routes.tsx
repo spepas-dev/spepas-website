@@ -9,6 +9,7 @@ import ForgotPasswordPage from '@/pages/auth/forgot-password';
 import ResetPasswordPage from '@/pages/auth/reset-password';
 import ChangePasswordPage from '@/pages/auth/change-password';
 
+
 export const authRoutes: RouteObject[] = [
   { index: true, element: <SignInPage /> },
   { path: 'signin', element: <SignInPage /> },
@@ -17,4 +18,5 @@ export const authRoutes: RouteObject[] = [
   { path: 'forgot-password', element: <ForgotPasswordPage /> },
   { path: 'reset-password', element: <ResetPasswordPage /> },
   { path: 'change-password', element: <ChangePasswordPage /> },
+
 ];

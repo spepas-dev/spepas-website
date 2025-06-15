@@ -42,7 +42,7 @@ const Footer = () => {
                       fill="#3C50E0"
                     />
                   </svg>
-                  (+233) 123-456-7899
+                  #####
                 </a>
               </li>
 
@@ -165,7 +165,7 @@ const Footer = () => {
             <ul className="flex flex-col lg:items-end gap-3">
               <li>
                 <a
-                  className="inline-flex items-center gap-3 py-[9px] pl-4 pr-7.5 text-white rounded-md bg-dark ease-out duration-200 hover:bg-opacity-95"
+                  className="flex w-56 items-center justify-center gap-3 py-[9px] px-4 text-white rounded-md bg-dark transition duration-200 hover:bg-opacity-95"
                   href="#"
                 >
                   <svg className="fill-current" width="34" height="35" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -184,7 +184,7 @@ const Footer = () => {
 
               <li>
                 <a
-                  className="inline-flex items-center gap-3 py-[9px] pl-4 pr-8.5 text-white rounded-md bg-blue ease-out duration-200 hover:bg-opacity-95"
+                  className="flex w-56 items-center justify-center gap-3 py-[9px] px-4 text-white rounded-md bg-blue transition duration-200 hover:bg-opacity-95"
                   href="#"
                 >
                   <svg className="fill-current" width="34" height="35" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">

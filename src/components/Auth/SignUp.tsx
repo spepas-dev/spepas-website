@@ -76,9 +76,19 @@ const Signup: React.FC = () => {
 
   return (
     <>
-      <Breadcrumb title="Signup" pages={["Signup"]} />
+      {/* <Breadcrumb title="Signup" pages={["Signup"]} /> */}
       <section className="overflow-hidden bg-white">
         <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+          <div className="text-center mb-8">
+                      <Link className="inline-block" to="/">
+                        <img
+                          src="/images/logo/logo.png"
+                          alt="Logo"
+                          width={119}
+                          height={36}
+                        />
+                      </Link>
+                    </div>
           <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-md p-4 sm:p-7.5 xl:p-11">
             <div className="text-center mb-11">
               <h2 className="font-semibold text-xl sm:text-2xl xl:text-3xl text-dark mb-1.5">

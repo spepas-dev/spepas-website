@@ -13,6 +13,7 @@ import { useAuth } from '@/features/auth';
 const Header = () => {
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [gopaMenuOpen, setGopaMenuOpen] = useState(false);
+  const [requestsMenuOpen, setRequestsMenuOpen] = useState(false);
 
   const [stickyMenu, setStickyMenu] = useState(false);
   const navigate = useNavigate();
@@ -243,16 +244,7 @@ const Header = () => {
                         
 
 
-                      {/* Seller’s Bids */}
-                      {sellerId && (
-                        <button
-                          onClick={() => navigate(`/seller/${sellerId}/bids`)}
-                          className="flex items-center text-dark text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
-                        >
-                          <img src="/bid.svg" alt="Bids" className="w-4 h-4 mr-1" />
-                          Bids
-                        </button>
-                      )}
+                      
 
                       {gopaId && (
                           <>
@@ -287,6 +279,17 @@ const Header = () => {
                           </>
                         )}
 
+                      {/* Seller’s Bids */}
+                      {sellerId && (
+                        <button
+                          onClick={() => navigate(`/seller/${sellerId}/bids`)}
+                          className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
+                        >
+                          <img src="/bid.svg" alt="Bids" className="w-4 h-4 mr-1" />
+                          Bids
+                        </button>
+                      )}  
+
                       <button
                         onClick={() => navigate('/buyer/cart')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
@@ -299,16 +302,37 @@ const Header = () => {
                         onClick={() => navigate('/buyer/post-request')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
-                        <path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        Post
+                        <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
+                          </svg>
+                        Create Request
                       </button>
 
                       <button
                         onClick={() => navigate('/buyer/requests')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
-                        <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        Requests
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          className="w-4 h-4 mr-1"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-2-2h-4a2 2 0 00-2 2v1h10V5a2 2 0 00-2-2zM9 11h6M9 15h6"
+                          />
+                        </svg>
+                        My Requests
                       </button>
                     </div>
 
@@ -318,124 +342,177 @@ const Header = () => {
               {/* //   <!-- Hamburger Toggle BTN --> */}
 
               <div className="flex items-center gap-5">
-                  <div className="hidden xl:flex items-center gap-5">
-                      {isAuthenticated && (
-                          <div className="flex items-center space-x-2">
-                            {/* Seller’s Bids */}
-                            {sellerId && (
-                              <button
-                                onClick={() => navigate(`/seller/${sellerId}/bids`)}
-                                className="flex items-center bg-gradient-to-r from-blue to-blue-500 text-white text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
-                              >
-                                <img src="/bid.svg" alt="Bids" className="w-4 h-4 mr-1" />
-                                Bids
-                              </button>
-                            )}
+              <div className="hidden xl:flex items-center gap-5">
+              {isAuthenticated && (
+                <div className="flex items-center space-x-2">
+                  {/* Seller’s Bids */}
+                  {sellerId && (
+                    <button
+                      onClick={() => navigate(`/seller/${sellerId}/bids`)}
+                      className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
+                    >
+                      <img src="/bid.svg" alt="Bids" className="w-4 h-4 mr-1" />
+                      Bids
+                    </button>
+                  )}
 
-                            {/* Cart */}
-                            <button
-                              onClick={() => navigate('/buyer/cart')}
-                              className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
-                            >
-                              <img src="/cart.svg" alt="Bids" className="w-4 h-4 mr-1" />
-                              Cart
-                            </button>
+                  {/* Cart */}
+                  <button
+                    onClick={() => navigate('/buyer/cart')}
+                    className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
+                  >
+                    <img src="/cart.svg" alt="Cart" className="w-4 h-4 mr-1" />
+                    Cart
+                  </button>
 
-                            {/* Post A Request */}
-                            <button
-                              onClick={() => navigate('/buyer/post-request')}
-                              className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
-                            >
-                              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                {/* e.g. a “+” icon */}
-                                <path d="M12 5v14m-7-7h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                              </svg>
-                              Post
-                            </button>
+                  {/* Requests Menu (Desktop) */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setRequestsMenuOpen((prev) => !prev)}
+                      className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        className="w-4 h-4 mr-1"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-2-2h-4a2 2 0 00-2 2v1h10V5a2 2 0 00-2-2zM9 11h6M9 15h6"
+                        />
+                      </svg>
+                      Requests
+                      <svg
+                        className="ml-1 w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
 
-                            {/* My Requests */}
-                            <button
-                              onClick={() => navigate('/buyer/requests')}
-                              className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
-                            >
-                              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                                {/* e.g. a list icon */}
-                                <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                              </svg>
-                              Requests
-                            </button>
-                          </div>
-                        )}
-
-                        {/* gopa header desktop view */}
-                        {/* gopa header desktop view as a dropdown in desktop */}
-                        {gopaId && (
-                              <div className="relative hidden xl:block">
-                                <button
-                                  onClick={() => setGopaMenuOpen((prev) => !prev)}
-                                  className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
-                                >
-                                  <img src="/public/gopa.jpg" alt="Gopa" className="w-4 h-4 mr-2" />
-                                  GOPA Menu
-                                  <svg
-                                    className="ml-1 w-3 h-3"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path d="M6 9l6 6 6-6" />
-                                  </svg>
-                                </button>
-
-                                {gopaMenuOpen && (
-                                  <div className="absolute mt-2 w-56 bg-white shadow-lg rounded-md border border-gray-200 z-50">
-                                    <button
-                                      onClick={() => {
-                                        navigate(`/gopa/${gopaId}/assigned/active`);
-                                        setGopaMenuOpen(false);
-                                      }}
-                                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                      <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
-                                      Assigned
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        navigate(`/gopa/${gopaId}/assigned/history`);
-                                        setGopaMenuOpen(false);
-                                      }}
-                                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                      <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
-                                      Assigned History
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        navigate(`/gopa/${gopaId}/unassigned/active`);
-                                        setGopaMenuOpen(false);
-                                      }}
-                                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                      <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
-                                      Unassigned Active
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        navigate(`/gopa/${gopaId}/unassigned/history`);
-                                        setGopaMenuOpen(false);
-                                      }}
-                                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                    >
-                                      <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
-                                      Unassigned History
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                    {requestsMenuOpen && (
+                      <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-md border border-gray-200 z-50">
+                        <button
+                          onClick={() => {
+                            navigate('/buyer/post-request');
+                            setRequestsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <svg
+                            className="w-4 h-4 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
+                          </svg>
+                          Create Request
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate('/buyer/requests');
+                            setRequestsMenuOpen(false);
+                          }}
+                          className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            className="w-4 h-4 mr-1"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-2-2h-4a2 2 0 00-2 2v1h10V5a2 2 0 00-2-2zM9 11h6M9 15h6"
+                            />
+                          </svg>
+                          My Requests
+                        </button>
+                      </div>
+                    )}
                   </div>
 
+                  {/* GOPA Menu (Desktop) */}
+                  {gopaId && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setGopaMenuOpen((prev) => !prev)}
+                        className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
+                      >
+                        <img src="/public/gopa.jpg" alt="Gopa" className="w-4 h-4 mr-2" />
+                        GOPA Menu
+                        <svg
+                          className="ml-1 w-3 h-3"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+
+                      {gopaMenuOpen && (
+                        <div className="absolute mt-2 w-56 bg-white shadow-lg rounded-md border border-gray-200 z-50">
+                          <button
+                            onClick={() => {
+                              navigate(`/gopa/${gopaId}/assigned/active`);
+                              setGopaMenuOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            Assigned
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate(`/gopa/${gopaId}/assigned/history`);
+                              setGopaMenuOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            Assigned History
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate(`/gopa/${gopaId}/unassigned/active`);
+                              setGopaMenuOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            Unassigned Active
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate(`/gopa/${gopaId}/unassigned/history`);
+                              setGopaMenuOpen(false);
+                            }}
+                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            <img src="/public/gopa.jpg" className="w-4 h-4 mr-2" />
+                            Unassigned History
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
                {isAuthenticated ? (
                 <div className="hidden sm:flex items-center gap-5">
                   <button
