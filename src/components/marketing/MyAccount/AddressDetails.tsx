@@ -1,6 +1,7 @@
 // src/components/marketing/MyAccount/AddressDetails.tsx
 import React, { useEffect, useState } from 'react';
-import { getMyAddresses, addAddress } from '@/lib/addressApis';
+
+import { addAddress, getMyAddresses } from '@/lib/addressApis';
 
 interface Address {
   address_id: string;
@@ -18,7 +19,7 @@ const AddressDetails: React.FC = () => {
     title: '',
     addressDetails: '',
     longitude: '',
-    latitude: '',
+    latitude: ''
   });
   const [saving, setSaving] = useState(false);
 
@@ -36,10 +37,8 @@ const AddressDetails: React.FC = () => {
     fetchAddresses();
   }, []);
 
-  const handleChange = (field: keyof typeof form) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +49,7 @@ const AddressDetails: React.FC = () => {
         title: form.title,
         addressDetails: form.addressDetails,
         longitude: parseFloat(form.longitude),
-        latitude: parseFloat(form.latitude),
+        latitude: parseFloat(form.latitude)
       });
       setForm({ title: '', addressDetails: '', longitude: '', latitude: '' });
       fetchAddresses();
@@ -70,9 +69,11 @@ const AddressDetails: React.FC = () => {
         <p className="text-gray-500 mb-6">No addresses found.</p>
       ) : (
         <ul className="mb-6 space-y-4">
-          {addresses.map(addr => (
+          {addresses.map((addr) => (
             <li key={addr.address_id} className="p-4 border rounded-lg">
-              <p><strong>{addr.title}</strong></p>
+              <p>
+                <strong>{addr.title}</strong>
+              </p>
               <p>{addr.addressDetails}</p>
               <p className="text-sm text-gray-500">
                 Coordinates: {addr.location.coordinates[1]}, {addr.location.coordinates[0]}
@@ -86,13 +87,7 @@ const AddressDetails: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <div>
           <label className="block mb-1 font-medium">Title</label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={handleChange('title')}
-            required
-            className="w-full border rounded px-3 py-2"
-          />
+          <input type="text" value={form.title} onChange={handleChange('title')} required className="w-full border rounded px-3 py-2" />
         </div>
         <div>
           <label className="block mb-1 font-medium">Address Details</label>
@@ -127,11 +122,7 @@ const AddressDetails: React.FC = () => {
             />
           </div>
         </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
-        >
+        <button type="submit" disabled={saving} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
           {saving ? 'Saving…' : 'Add Address'}
         </button>
       </form>

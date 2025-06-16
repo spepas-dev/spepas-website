@@ -24,7 +24,7 @@ export const menuData: Menu[] = [
     title: 'FAQs',
     newTab: false,
     path: '/faqs'
-  },
+  }
   // {
   //   id: 6,
   //   title: 'pages',

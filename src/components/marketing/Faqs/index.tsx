@@ -1,8 +1,13 @@
 // src/pages/Faq.tsx
 import React from 'react';
-import Breadcrumb from '../Common/Breadcrumb';
-import FAQItem from '@/components/marketing/Faqs/FAQItem'; // or wherever you keep FAQItem
 import { Link } from 'react-router-dom';
+
+import FAQItem from '@/components/marketing/Faqs/FAQItem'; // or wherever you keep FAQItem
+
+import Breadcrumb from '../Common/Breadcrumb';
+
+// eslint-disable-next-line quotes
+const message = "What's SpePas' return policy?";
 
 const faqSections = [
   {
@@ -12,7 +17,8 @@ const faqSections = [
         question: 'What is SpePas?',
         answer: (
           <p>
-            SpePas is an online marketplace where buyers and sellers connect to trade auto parts securely and conveniently across West Africa.
+            SpePas is an online marketplace where buyers and sellers connect to trade auto parts securely and conveniently across West
+            Africa.
           </p>
         )
       },
@@ -76,7 +82,7 @@ const faqSections = [
     heading: '3. Returns & Exchanges',
     items: [
       {
-        question: "What's SpePas' return policy?",
+        question: message,
         answer: (
           <ul className="list-disc list-inside space-y-1">
             <li>Initiate within 24–48 hrs of delivery.</li>
@@ -191,9 +197,21 @@ const faqSections = [
         answer: (
           <>
             <ul className="list-disc list-inside mb-4">
-              <li><Link to="/return-policy" className="text-indigo-600 hover:underline">Return Policy</Link></li>
-              <li><Link to="/terms-of-use" className="text-indigo-600 hover:underline">Terms of Use</Link></li>
-              <li><Link to="/privacy-policy" className="text-indigo-600 hover:underline">Privacy Policy</Link></li>
+              <li>
+                <Link to="/return-policy" className="text-indigo-600 hover:underline">
+                  Return Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms-of-use" className="text-indigo-600 hover:underline">
+                  Terms of Use
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="text-indigo-600 hover:underline">
+                  Privacy Policy
+                </Link>
+              </li>
             </ul>
             <p>By using SpePas you agree to all our policies.</p>
           </>
@@ -211,39 +229,22 @@ const Faq: React.FC = () => (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <header className="text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-gray-700 sm:text-lg">
-            Find quick answers to common questions about buying, selling, and using SpePas.
-          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">Frequently Asked Questions</h1>
+          <p className="text-gray-700 sm:text-lg">Find quick answers to common questions about buying, selling, and using SpePas.</p>
         </header>
 
         {/* Illustration */}
         <div className="rounded-lg overflow-hidden">
-          <img
-            src="/images/images/faq.png"
-            alt="FAQ"
-            className="w-full h-auto object-cover"
-          />
+          <img src="/images/images/faq.png" alt="FAQ" className="w-full h-auto object-cover" />
         </div>
 
         {/* FAQ Sections */}
         {faqSections.map((sec, idx) => (
-          <article
-            key={idx}
-            className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4"
-          >
-            <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">
-              {sec.heading}
-            </h2>
+          <article key={idx} className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4">
+            <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">{sec.heading}</h2>
             <div className="space-y-4">
               {sec.items.map((item, i) => (
-                <FAQItem
-                  key={i}
-                  question={item.question}
-                  answer={item.answer}
-                />
+                <FAQItem key={i} question={item.question} answer={item.answer} />
               ))}
             </div>
           </article>

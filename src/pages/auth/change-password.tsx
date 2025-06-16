@@ -1,5 +1,6 @@
-import React from "react";
-import ChangePassword from "@/components/Auth/ChangePassword";
+import React from 'react';
+
+import ChangePassword from '@/components/Auth/ChangePassword';
 
 const ChangePasswordPage: React.FC = () => {
   return (

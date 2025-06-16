@@ -1,26 +1,20 @@
 // src/lib/auth.ts
-import apiClient from './axios';
 import {
-  signupRequestSchema,
-  signinRequestSchema,
   activateAccountRequestSchema,
-  signoutRequestSchema,
-  forgotPasswordRequestSchema,
-  resetPasswordRequestSchema,
   changePasswordRequestSchema,
+  forgotPasswordRequestSchema,
   refreshTokenRequestSchema,
+  resetPasswordRequestSchema,
+  signinRequestSchema,
+  signoutRequestSchema,
+  signupRequestSchema
 } from './authZodValidation';
+import apiClient from './axios';
 
 /**
  * 1. User Registration (Signup)
  */
-export const signupAPI = async (payload: {
-  email: string;
-  password: string;
-  name: string;
-  phoneNumber: string;
-  user_type: string;
-}) => {
+export const signupAPI = async (payload: { email: string; password: string; name: string; phoneNumber: string; user_type: string }) => {
   // Validate payload using Zod
   signupRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/signup', payload);
@@ -31,24 +25,17 @@ export const signupAPI = async (payload: {
 /**
  * 2. User Sign-In
  */
-export const signinAPI = async (payload: {
-  email: string;
-  password: string;
-}) => {
+export const signinAPI = async (payload: { email: string; password: string }) => {
   signinRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/signin', payload);
   console.log('Response from Signin API:', response.data);
   return response.data;
 };
 
-
 /**
  * 3. Activate Account
  */
-export const activateAccountAPI = async (payload: {
-  otp: string;
-  otpID: string;
-}) => {
+export const activateAccountAPI = async (payload: { otp: string; otpID: string }) => {
   activateAccountRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/activate-account', payload);
   console.log('Response from Activate Account API:', response.data);
@@ -73,18 +60,14 @@ export const signoutAPI = async () => {
 export const forgotPasswordAPI = async (payload: { email: string }) => {
   forgotPasswordRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/forgot-password', payload);
-    console.log('Response from Forgot Password API:', response.data);
+  console.log('Response from Forgot Password API:', response.data);
   return response.data;
 };
 
 /**
  * 6. Reset Password
  */
-export const resetPasswordAPI = async (payload: {
-  otp: string;
-  otpID: string;
-  newPassword: string;
-}) => {
+export const resetPasswordAPI = async (payload: { otp: string; otpID: string; newPassword: string }) => {
   resetPasswordRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/reset-password', payload);
   console.log('Response from Reset Password API:', response.data);
@@ -94,13 +77,10 @@ export const resetPasswordAPI = async (payload: {
 /**
  * 7. Change Password
  */
-export const changePasswordAPI = async (payload: {
-  oldPassword: string;
-  newPassword: string;
-}) => {
+export const changePasswordAPI = async (payload: { oldPassword: string; newPassword: string }) => {
   changePasswordRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/change-password', payload);
-    console.log('Response from Change Password API:', response.data);
+  console.log('Response from Change Password API:', response.data);
   return response.data;
 };
 

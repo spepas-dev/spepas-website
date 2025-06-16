@@ -1,6 +1,7 @@
 // src/components/profiling/AddIdentification.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Breadcrumb from '@/components/common/Breadcrumb';
 import { addIdentificationSelf } from '@/lib/profiling';
 
@@ -10,12 +11,12 @@ const AddIdentification: React.FC = () => {
     idType: '',
     idN_number: '',
     issue_date: '',
-    expiry_date: '',
+    expiry_date: ''
   });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +32,7 @@ const AddIdentification: React.FC = () => {
 
   return (
     <>
-    <section className="pt-10"></section>
+      <section className="pt-10"></section>
       <Breadcrumb title="Add Identification" pages={['Profiling', 'Add Identification']} />
 
       <form onSubmit={handleSubmit} className="bg-white rounded shadow p-4 max-w-4xl w-[80%] mx-auto p-4 pt-20">
@@ -98,11 +99,7 @@ const AddIdentification: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex-1 bg-dark text-white py-3 rounded-lg font-medium"
-          >
+          <button type="submit" disabled={loading} className="flex-1 bg-dark text-white py-3 rounded-lg font-medium">
             {loading ? 'Saving…' : 'Continue'}
           </button>
           {/* <button

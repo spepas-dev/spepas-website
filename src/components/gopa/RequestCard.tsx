@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface Props {
-  request: any;
+  request: unknown;
 }
 
 const RequestCard: React.FC<Props> = ({ request }) => (
@@ -12,10 +12,7 @@ const RequestCard: React.FC<Props> = ({ request }) => (
       <h2 className="font-semibold">{request.sparePartDetail?.name || request.SparePart_ID}</h2>
       <p className="text-sm text-gray-600">Qty: {request.quantity}</p>
     </div>
-    <Link
-      to={`/gopa/${request.Gopa_ID}/requests/${request.request_id}/sellers`}
-      className="text-indigo-500 hover:underline"
-    >
+    <Link to={`/gopa/${request.Gopa_ID}/requests/${request.request_id}/sellers`} className="text-indigo-500 hover:underline">
       View Sellers
     </Link>
   </div>

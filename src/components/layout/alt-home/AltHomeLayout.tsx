@@ -1,15 +1,15 @@
 // src/components/layout/alt-home/AltHomeLayout.tsx
-import React from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { Outlet, useLocation } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
+import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
+import { Outlet, useLocation } from 'react-router-dom';
 
 /**
  * A full-screen, edge-to-edge layout for the AltHome page.
  * Includes page-transition animations but no header/footer or max-width container.
  */
 const AltHomeLayout: React.FC = () => {
-  const location = useLocation()
+  const location = useLocation();
 
   return (
     <HelmetProvider>
@@ -28,7 +28,7 @@ const AltHomeLayout: React.FC = () => {
         </AnimatePresence>
       </div>
     </HelmetProvider>
-  )
-}
+  );
+};
 
-export default AltHomeLayout
+export default AltHomeLayout;
