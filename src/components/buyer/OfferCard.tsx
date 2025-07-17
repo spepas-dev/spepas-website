@@ -1,31 +1,36 @@
 // src/components/buyer/OfferCard.tsx
-import React from 'react';
-import { toast } from 'react-hot-toast';
+import React from 'react'
+import { toast } from 'react-hot-toast'
 
 interface OfferCardProps {
-  offer: unknown;
-  inCart: boolean;
-  onAdd: (biddingId: string) => void;
-  onRemove: (biddingId: string) => void;
+  offer: any
+  inCart: boolean
+  onAdd: (biddingId: string) => void
+  onRemove: (biddingId: string) => void
 }
 
-const OfferCard: React.FC<OfferCardProps> = ({ offer, inCart, onAdd, onRemove }) => {
-  const seller = offer.seller ?? {};
-  const imgUrl = seller.business_reg_url ?? '';
-  const sellerName = seller.storeName ?? 'Unknown Seller';
-  const price = offer.totalPrice ?? offer.price ?? 0;
+const OfferCard: React.FC<OfferCardProps> = ({
+  offer,
+  inCart,
+  onAdd,
+  onRemove,
+}) => {
+  const seller = offer.seller ?? {}
+  const imgUrl = seller.business_reg_url ?? ''
+  const sellerName = seller.storeName ?? 'Unknown Seller'
+  const price = offer.totalPrice ?? offer.price ?? 0
 
   const handleAdd = () => {
-    const id = toast.loading('Adding to cart…', { position: 'bottom-center' });
-    onAdd(offer.bidding_ID);
-    toast.success('Added to cart!', { id, position: 'bottom-center' });
-  };
+    const id = toast.loading('Adding to cart…', { position: 'bottom-center' })
+    onAdd(offer.bidding_ID)
+    toast.success('Added to cart!', { id, position: 'bottom-center' })
+  }
 
   const handleRemove = () => {
-    const id = toast.loading('Removing from cart…', { position: 'bottom-center' });
-    onRemove(offer.bidding_ID);
-    toast.success('Removed from cart!', { id, position: 'bottom-center' });
-  };
+    const id = toast.loading('Removing from cart…', { position: 'bottom-center' })
+    onRemove(offer.bidding_ID)
+    toast.success('Removed from cart!', { id, position: 'bottom-center' })
+  }
 
   return (
     <div
@@ -65,21 +70,34 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, inCart, onAdd, onRemove })
           />
         ) : (
           /* Simple SVG placeholder when no image URL */
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-8 h-8 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
               d="M3 7a2 2 0 012-2h3l2-2h4l2 2h3a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
             />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12l2 2 4-4" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12l2 2 4-4"
+            />
           </svg>
         )}
       </div>
 
       {/* Seller info */}
       <div className="flex-grow text-center sm:text-left space-y-1">
-        <p className="text-base sm:text-sm font-semibold text-gray-800">{sellerName}</p>
+        <p className="text-base sm:text-sm font-semibold text-gray-800">
+          {sellerName}
+        </p>
         <p className="text-sm sm:text-xs text-gray-600">GH₵ {price}</p>
       </div>
 
@@ -123,7 +141,7 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, inCart, onAdd, onRemove })
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default OfferCard;
+export default OfferCard

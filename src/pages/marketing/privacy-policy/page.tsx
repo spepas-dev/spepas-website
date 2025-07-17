@@ -1,5 +1,9 @@
-import PrivacyPolicy from '@/components/marketing/PrivacyPolicy'; // Adjust the path as needed
+// src/pages/PrivacyPolicyPage.tsx
+import React from 'react';
+import PrivacyPolicy from '../../../components/marketing/PrivacyPolicy';
 
-export default function PrivacyPolicyPage() {
+const PrivacyPolicyPage: React.FC = () => {
   return <PrivacyPolicy />;
-}
+};
+
+export default PrivacyPolicyPage;

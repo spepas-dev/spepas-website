@@ -1,11 +1,10 @@
 // src/routes/gopaInvoices.routes.tsx
 import { RouteObject } from 'react-router-dom';
-
 import AcceptInvoicePage from '@/pages/gopaInvoices/AcceptInvoicePage';
+import InvoiceListToAcceptPage from '@/pages/gopaInvoices/InvoiceListToAcceptPage';
+import GopaAcceptedInvoicesPage from '@/pages/gopaInvoices/GopaAcceptedInvoicesPage';
 import GopaAcceptedInvoiceDetailsPage from '@/pages/gopaInvoices/GopaAcceptedInvoiceDetailsPage';
 import GopaAcceptedInvoiceItemDetailsPage from '@/pages/gopaInvoices/GopaAcceptedInvoiceItemDetailsPage';
-import GopaAcceptedInvoicesPage from '@/pages/gopaInvoices/GopaAcceptedInvoicesPage';
-import InvoiceListToAcceptPage from '@/pages/gopaInvoices/InvoiceListToAcceptPage';
 
 export const gopaInvoiceRoutes: RouteObject[] = [
   { path: 'gopa-invoices/accept', element: <AcceptInvoicePage /> },
@@ -13,10 +12,10 @@ export const gopaInvoiceRoutes: RouteObject[] = [
   { path: 'gopa-invoices/accepted', element: <GopaAcceptedInvoicesPage /> },
   {
     path: 'gopa-invoices/accepted/:invoice_id',
-    element: <GopaAcceptedInvoiceDetailsPage />
+    element: <GopaAcceptedInvoiceDetailsPage />,
   },
   {
     path: 'gopa-invoices/accepted/:invoice_id/items/:item_id',
-    element: <GopaAcceptedInvoiceItemDetailsPage />
-  }
+    element: <GopaAcceptedInvoiceItemDetailsPage />,
+  },
 ];

@@ -1,9 +1,9 @@
-// src/components/buyer/RequestCard.tsx
+// src/components/buyer/RequestCard.tsx 
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface RequestCardProps {
-  req: unknown;
+  req: any;
 }
 
 const RequestCard: React.FC<RequestCardProps> = ({ req }) => {
@@ -33,8 +33,12 @@ const RequestCard: React.FC<RequestCardProps> = ({ req }) => {
       )}
 
       <div className="flex-grow p-4 space-y-2">
-        <h2 className="text-lg sm:text-base font-semibold text-gray-800">{req.sparePart.name}</h2>
-        <p className="text-sm sm:text-xs text-gray-600 line-clamp-3">{req.sparePart.description}</p>
+        <h2 className="text-lg sm:text-base font-semibold text-gray-800">
+          {req.sparePart.name}
+        </h2>
+        <p className="text-sm sm:text-xs text-gray-600 line-clamp-3">
+          {req.sparePart.description}
+        </p>
       </div>
 
       <div className="p-4">

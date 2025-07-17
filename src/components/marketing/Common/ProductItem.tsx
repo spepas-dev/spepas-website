@@ -7,7 +7,7 @@
 // import { AppDispatch } from "@/redux/store";
 import { Link } from 'react-router-dom';
 
-import { Product } from '@/types/product';
+import { Product } from '../Shop/shopData';
 
 const ProductItem = ({ item }: { item: Product }) => {
   // const { openModal } = useModalContext();
@@ -119,7 +119,6 @@ const ProductItem = ({ item }: { item: Product }) => {
       </h3>
 
       <span className="flex items-center gap-2 font-medium text-lg">
-        <span className="text-dark">${item.discountedPrice}</span>
         <span className="text-dark-4 line-through">${item.price}</span>
       </span>
     </div>

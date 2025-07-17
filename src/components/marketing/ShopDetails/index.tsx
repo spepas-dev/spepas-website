@@ -1,9 +1,8 @@
 // src/components/marketing/ShopDetails/index.tsx
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-
+import { useParams, useNavigate } from 'react-router-dom';
+import shopData, { Product } from '@/components/marketing/Shop/shopData';
 import Breadcrumb from '@/components/common/Breadcrumb';
-import shopData from '@/components/marketing/Shop/shopData';
 
 const ShopDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +14,10 @@ const ShopDetails: React.FC = () => {
     return (
       <div className="w-full max-w-lg mx-auto py-20 text-center px-4">
         <p className="text-xl text-red-500 mb-4">Product not found.</p>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" onClick={() => navigate(-1)}>
+        <button
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          onClick={() => navigate(-1)}
+        >
           Go Back
         </button>
       </div>
@@ -24,7 +26,10 @@ const ShopDetails: React.FC = () => {
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Breadcrumb title={item.title} pages={['shop', `/shop/${item.id}`, item.title]} />
+      <Breadcrumb
+        title={item.title}
+        pages={['shop', `/shop/${item.id}`, item.title]}
+      />
 
       <div className="flex flex-col md:flex-row gap-8 mt-8">
         {/* Image */}
@@ -41,7 +46,9 @@ const ShopDetails: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold">{item.title}</h1>
 
           {/* Price */}
-          <div className="text-xl sm:text-2xl font-bold text-blue-600">GH₵{item.price.toFixed(2)}</div>
+          <div className="text-xl sm:text-2xl font-bold text-blue-600">
+            GH₵{item.price.toFixed(2)}
+          </div>
 
           {/* Rating */}
           <div className="flex items-center gap-1">
@@ -50,7 +57,9 @@ const ShopDetails: React.FC = () => {
                 key={i}
                 src="/images/icons/icon-star.svg"
                 alt="star"
-                className={`w-4 h-4 sm:w-5 sm:h-5 ${i < Math.round(item.reviews / 3) ? 'opacity-100' : 'opacity-30'}`}
+                className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                  i < Math.round(item.reviews / 3) ? 'opacity-100' : 'opacity-30'
+                }`}
               />
             ))}
             <span className="ml-2 text-sm sm:text-base text-gray-600">

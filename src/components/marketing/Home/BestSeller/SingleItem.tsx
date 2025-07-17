@@ -5,7 +5,7 @@
 // import { addItemToCart } from "@/redux/features/cart-slice";
 import { Link } from 'react-router-dom';
 
-import { Product } from '@/types/product';
+import { Product } from '../../Shop/shopData';
 // import { addItemToWishlist } from "@/redux/features/wishlist-slice";
 
 const SingleItem = ({ item }: { item: Product }) => {

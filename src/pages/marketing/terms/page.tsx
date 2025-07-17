@@ -1,5 +1,9 @@
-import TermsOfUse from '@/components/marketing/TermsOfUse'; // Adjust the path as needed
+// src/pages/TermsPage.tsx
+import React from 'react';
+import TermsOfUse from '../../../components/marketing/TermsOfUse';
 
-export default function Terms() {
+const TermsPage: React.FC = () => {
   return <TermsOfUse />;
-}
+};
+
+export default TermsPage;

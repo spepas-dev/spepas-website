@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface CartItemProps {
-  item: unknown;
+  item: any;
   onRemove: (cartId: string) => void;
 }
 
@@ -26,8 +26,12 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
       )}
 
       <div className="flex-grow space-y-1 text-center sm:text-left">
-        <p className="text-lg sm:text-base font-semibold text-gray-800">{bidding.sparePart?.name || bidding.request_ID}</p>
-        <p className="text-sm sm:text-base text-gray-600">GH₵ {bidding.totalPrice}</p>
+        <p className="text-lg sm:text-base font-semibold text-gray-800">
+          {bidding.sparePart?.name || bidding.request_ID}
+        </p>
+        <p className="text-sm sm:text-base text-gray-600">
+          GH₵ {bidding.totalPrice}
+        </p>
       </div>
 
       <button

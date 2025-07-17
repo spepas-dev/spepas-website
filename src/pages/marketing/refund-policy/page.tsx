@@ -1,6 +1,9 @@
-// page.tsx
-import RefundPolicy from '@/components/marketing/RefundPolicy'; // Update the path if necessary
+// src/pages/RefundPolicyPage.tsx
+import React from 'react';
+import RefundPolicy from '../../../components/marketing/RefundPolicy';
 
-export default function RefundPolicyPage() {
+const RefundPolicyPage: React.FC = () => {
   return <RefundPolicy />;
-}
+};
+
+export default RefundPolicyPage;

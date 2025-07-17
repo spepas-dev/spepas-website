@@ -1,9 +1,17 @@
 // src/lib/addressApis.ts
-import { addAddressSchema, getAddressDetailsByIdParamsSchema } from './addressZodValidation';
 import apiClient from './axios';
+import {
+  addAddressSchema,
+  getAddressDetailsByIdParamsSchema
+} from './addressZodValidation';
 
 // POST: Add New Address
-export const addAddress = async (payload: { title: string; addressDetails: string; longitude: number; latitude: number }) => {
+export const addAddress = async (payload: {
+  title: string;
+  addressDetails: string;
+  longitude: number;
+  latitude: number;
+}) => {
   addAddressSchema.parse(payload);
   const { data } = await apiClient.post('/address/add-address', payload);
   return data;

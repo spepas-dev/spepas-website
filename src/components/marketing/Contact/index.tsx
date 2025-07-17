@@ -13,31 +13,31 @@ const Contact = () => {
   });
   const [status, setStatus] = useState(null);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // const handleChange = (e) => {
+  //   setFormData({ ...formData, [e.target.name]: e.target.value });
+  // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('Sending...');
-    try {
-      const res = await fetch('/api/proxy/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setStatus('Message sent successfully!');
-      } else {
-        setStatus(`Error: ${data.error}`);
-      }
-    } catch (error) {
-      setStatus(`Error: ${error.message}`);
-    }
-  };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setStatus('Sending...');
+  //   try {
+  //     const res = await fetch('/api/proxy/contact', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify(formData)
+  //     });
+  //     const data = await res.json();
+  //     if (res.ok) {
+  //       setStatus('Message sent successfully!');
+  //     } else {
+  //       setStatus(`Error: ${data.error}`);
+  //     }
+  //   } catch (error) {
+  //     setStatus(`Error: ${error.message}`);
+  //   }
+  // };
 
   return (
     <>
@@ -112,7 +112,7 @@ const Contact = () => {
             <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
               {/* Contact Form */}
               <div className="xl:max-w-[770px] w-full bg-white rounded-xl shadow-1 p-4 sm:p-7.5 xl:p-10">
-                <form onSubmit={handleSubmit}>
+                <form>
                   <div className="flex flex-col lg:flex-row gap-5 sm:gap-8 mb-5">
                     <div className="w-full">
                       <label htmlFor="firstName" className="block mb-2.5">
@@ -123,7 +123,7 @@ const Contact = () => {
                         name="firstName"
                         id="firstName"
                         placeholder="Jhon"
-                        onChange={handleChange}
+                        // onChange={handleChange}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
                     </div>
@@ -136,7 +136,7 @@ const Contact = () => {
                         name="lastName"
                         id="lastName"
                         placeholder="Deo"
-                        onChange={handleChange}
+                        // onChange={handleChange}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
                     </div>
@@ -151,7 +151,7 @@ const Contact = () => {
                         name="subject"
                         id="subject"
                         placeholder="Type your subject"
-                        onChange={handleChange}
+                        // onChange={handleChange}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
                     </div>
@@ -164,7 +164,7 @@ const Contact = () => {
                         name="phone"
                         id="phone"
                         placeholder="Enter your phone"
-                        onChange={handleChange}
+                        // onChange={handleChange}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
                     </div>
@@ -178,7 +178,7 @@ const Contact = () => {
                       id="message"
                       rows={5}
                       placeholder="Type your message"
-                      onChange={handleChange}
+                      // onChange={handleChange}
                       className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full p-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                     ></textarea>
                   </div>

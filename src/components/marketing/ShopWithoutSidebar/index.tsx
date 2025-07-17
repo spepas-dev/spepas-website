@@ -1,6 +1,5 @@
 // src/components/marketing/ShopWithoutSidebar.tsx
 import React, { useState } from 'react';
-
 import Breadcrumb from '../Common/Breadcrumb';
 import shopData from '../Shop/shopData';
 import SingleGridItem from '../Shop/SingleGridItem';
@@ -11,8 +10,8 @@ const ShopWithoutSidebar: React.FC = () => {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const options = [
     { label: 'Latest Products', value: '0' },
-    { label: 'Best Selling', value: '1' },
-    { label: 'Old Products', value: '2' }
+    { label: 'Best Selling',   value: '1' },
+    { label: 'Old Products',    value: '2' },
   ];
 
   return (
@@ -37,7 +36,9 @@ const ShopWithoutSidebar: React.FC = () => {
                 className={`
                   flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full
                   transition-colors duration-200
-                  ${view === 'grid' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                  ${view === 'grid'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
                 `}
               >
                 {/* simple grid icon */}
@@ -53,7 +54,9 @@ const ShopWithoutSidebar: React.FC = () => {
                 className={`
                   flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full
                   transition-colors duration-200
-                  ${view === 'list' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                  ${view === 'list'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
                 `}
               >
                 {/* simple list icon */}
@@ -66,9 +69,15 @@ const ShopWithoutSidebar: React.FC = () => {
           </div>
 
           {/* Product grid / list */}
-          <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6' : 'flex flex-col gap-6'}>
-            {shopData.map((item) =>
-              view === 'grid' ? <SingleGridItem item={item} key={item.id} /> : <SingleListItem item={item} key={item.id} />
+          <div className={
+            view === 'grid'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'
+              : 'flex flex-col gap-6'
+          }>
+            {shopData.map(item =>
+              view === 'grid'
+                ? <SingleGridItem item={item} key={item.id} />
+                : <SingleListItem item={item} key={item.id}/>
             )}
           </div>
         </div>

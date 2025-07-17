@@ -1,12 +1,13 @@
 // src/pages/gopaInvoices/InvoiceListToAcceptPage.tsx
 import React from 'react';
+import InvoiceListToAccept from '../../components/gopaInvoices/InvoiceListToAccept';
 
-import InvoiceListToAccept from '@/components/gopaInvoices/InvoiceListToAccept';
-
-export default function InvoiceListToAcceptPage() {
+const InvoiceListToAcceptPage: React.FC = () => {
   return (
     <main>
       <InvoiceListToAccept />
     </main>
   );
-}
+};
+
+export default InvoiceListToAcceptPage;

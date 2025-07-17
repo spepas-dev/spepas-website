@@ -1,26 +1,30 @@
 // src/lib/orderBidsApis.ts
 import apiClient from './axios';
 import {
-  addBidToCartSchema,
-  assignRequestToSellerSchema,
   emptySchema,
-  gopaSellerForRequestParamsSchema,
   inventorySparePartRequestSchema,
   nonInventorySparePartRequestSchema,
+  assignRequestToSellerSchema,
+  submitBidSchema,
+  addBidToCartSchema,
   removeBidFromCartSchema,
+  uploadSparePartImagesSchema,
   // param schemas for GETs
   requestDetailParamsSchema,
+  gopaSellerForRequestParamsSchema,
+  userIdParamsSchema,
   requestIdParamsSchema,
   sellerIdParamsSchema,
-  submitBidSchema,
-  uploadSparePartImagesSchema,
-  userIdParamsSchema
 } from './orderBidsZodValidation';
 
 /**
  * 1. Request Spare Part (Inventory)
  */
-export const requestInventorySparePartAPI = async (payload: { SparePart_ID: string; require_image: number; quantity: number }) => {
+export const requestInventorySparePartAPI = async (payload: {
+  SparePart_ID: string;
+  require_image: number;
+  quantity: number;
+}) => {
   inventorySparePartRequestSchema.parse(payload);
   const response = await apiClient.post('/request/inventory-spare-part-request', payload);
   console.log('Response from inventory-spare-part-request:', response.data);
@@ -48,7 +52,10 @@ export const requestNonInventorySparePartAPI = async (payload: {
 /**
  * 3. Assign Request To Seller GOPA Screen
  */
-export const assignRequestToSellerAPI = async (payload: { request_id: string; sellerIDs: string[] }) => {
+export const assignRequestToSellerAPI = async (payload: {
+  request_id: string;
+  sellerIDs: string[];
+}) => {
   assignRequestToSellerSchema.parse(payload);
   const response = await apiClient.post('/request/assign-request-to-seller', payload);
   console.log('Response from assign-request-to-seller:', response.data);
@@ -94,13 +101,16 @@ export const removeBidFromCartAPI = async (payload: { cart_ID: string }) => {
 /**
  * 7. Upload Spare Part Images seller submit-bid
  */
-export const uploadSparePartImagesAPI = async (payload: { bidding_ID: string; files: File[] }) => {
+export const uploadSparePartImagesAPI = async (payload: {
+  bidding_ID: string;
+  files: File[];
+}) => {
   uploadSparePartImagesSchema.parse(payload);
   const formData = new FormData();
   formData.append('bidding_ID', payload.bidding_ID);
   payload.files.forEach((f) => formData.append('file', f));
   const response = await apiClient.post('/bid/upload-sparepart-images', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
   console.log('Response from upload-sparepart-images:', response.data);
   return response.data;
@@ -161,9 +171,14 @@ export const getRequestDetailAPI = async (params: { request_id: string }) => {
 /**
  * 6. GOPA Sellers For Request GOPA Screen
  */
-export const getGOPASellerForRequestAPI = async (params: { gopa_id: string; request_id: string }) => {
+export const getGOPASellerForRequestAPI = async (params: {
+  gopa_id: string;
+  request_id: string;
+}) => {
   gopaSellerForRequestParamsSchema.parse(params);
-  const response = await apiClient.get(`/request/GOPA-seller-for-request/${params.gopa_id}/${params.request_id}`);
+  const response = await apiClient.get(
+    `/request/GOPA-seller-for-request/${params.gopa_id}/${params.request_id}`
+  );
   console.log('Response from GOPA-seller-for-request:', response.data);
   return response.data;
 };
@@ -223,7 +238,9 @@ export const getRequestBidsAllAPI = async (params: { request_id: string }) => {
  */
 export const getSellerBidsForActiveRequestsAPI = async (params: { seller_id: string }) => {
   sellerIdParamsSchema.parse(params);
-  const response = await apiClient.get(`/bid/seller-bids-for-active-requests-all/${params.seller_id}`);
+  const response = await apiClient.get(
+    `/bid/seller-bids-for-active-requests-all/${params.seller_id}`
+  );
   console.log('Response from seller-bids-for-active-requests-all:', response.data);
   return response.data;
 };
@@ -233,7 +250,9 @@ export const getSellerBidsForActiveRequestsAPI = async (params: { seller_id: str
  */
 export const getSellerBidsForRequestsHistoryAPI = async (params: { seller_id: string }) => {
   sellerIdParamsSchema.parse(params);
-  const response = await apiClient.get(`/bid/seller-bids-for-requests-history-all/${params.seller_id}`);
+  const response = await apiClient.get(
+    `/bid/seller-bids-for-requests-history-all/${params.seller_id}`
+  );
   console.log('Response from seller-bids-for-requests-history-all:', response.data);
   return response.data;
 };

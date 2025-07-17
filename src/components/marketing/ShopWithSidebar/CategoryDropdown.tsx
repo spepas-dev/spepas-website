@@ -1,12 +1,23 @@
-'use client';
+// src/components/CategoryDropdown.tsx
+import React, { useState } from 'react';
 
-import { useState } from 'react';
+export interface Category {
+  name: string;
+  products: number | string;
+}
 
-const CategoryItem = ({ category }) => {
+interface CategoryItemProps {
+  category: Category;
+}
+
+const CategoryItem: React.FC<CategoryItemProps> = ({ category }) => {
   const [selected, setSelected] = useState(false);
+
   return (
     <button
-      className={`${selected && 'text-blue'} group flex items-center justify-between ease-out duration-200 hover:text-blue `}
+      className={`${
+        selected ? 'text-blue' : ''
+      } group flex items-center justify-between ease-out duration-200 hover:text-blue`}
       onClick={() => setSelected(!selected)}
     >
       <div className="flex items-center gap-2">
@@ -47,21 +58,37 @@ const CategoryItem = ({ category }) => {
   );
 };
 
-const CategoryDropdown = ({ categories }) => {
-  const [toggleDropdown, setToggleDropdown] = useState(true);
+interface CategoryDropdownProps {
+  categories: Category[];
+}
+
+const CategoryDropdown: React.FC<CategoryDropdownProps> = ({ categories }) => {
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
       <div
         onClick={(e) => {
           e.preventDefault();
-          setToggleDropdown(!toggleDropdown);
+          setIsOpen(!isOpen);
         }}
-        className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 ${toggleDropdown && 'shadow-filter'}`}
+        className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 ${
+          isOpen ? 'shadow-filter' : ''
+        }`}
       >
         <p className="text-dark">Category</p>
-        <button aria-label="button for category dropdown" className={`text-dark ease-out duration-200 ${toggleDropdown && 'rotate-180'}`}>
-          <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <button
+          aria-label="Toggle category dropdown"
+          className={`text-dark ease-out duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        >
+          <svg
+            className="fill-current"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -72,11 +99,9 @@ const CategoryDropdown = ({ categories }) => {
         </button>
       </div>
 
-      {/* dropdown && 'shadow-filter */}
-      {/* <!-- dropdown menu --> */}
-      <div className={`flex-col gap-3 py-6 pl-6 pr-5.5 ${toggleDropdown ? 'flex' : 'hidden'}`}>
-        {categories.map((category, key) => (
-          <CategoryItem key={key} category={category} />
+      <div className={`flex-col gap-3 py-6 pl-6 pr-5.5 ${isOpen ? 'flex' : 'hidden'}`}>
+        {categories.map((cat, idx) => (
+          <CategoryItem key={idx} category={cat} />
         ))}
       </div>
     </div>

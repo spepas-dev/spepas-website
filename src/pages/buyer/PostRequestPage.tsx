@@ -1,12 +1,14 @@
 // src/pages/buyer/PostRequestPage.tsx
-// import React from 'react';
-import PostRequestForm from '@/components/buyer/PostRequestForm';
+import React from 'react';
+import PostRequestForm from '../../components/buyer/PostRequestForm';
 
-export default function PostRequestPage() {
+const PostRequestPage: React.FC = () => {
   return (
-    <div className="container mx-auto p-4 max-w-4xl w-[100%] mx-auto p-4 pt-20">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
       <section className="pt-10"></section>
       <PostRequestForm />
     </div>
   );
-}
+};
+
+export default PostRequestPage;

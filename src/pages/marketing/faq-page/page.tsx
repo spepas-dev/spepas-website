@@ -1,5 +1,9 @@
-import Faq from '@/components/marketing/Faqs'; // Adjust the path as needed
+// src/pages/FaqPage.tsx
+import React from 'react';
+import Faq from '../../../components/marketing/Faqs';
 
-export default function FaqPage() {
+const FaqPage: React.FC = () => {
   return <Faq />;
-}
+};
+
+export default FaqPage;

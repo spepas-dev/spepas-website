@@ -1,7 +1,6 @@
 // src/pages/auth/activate.tsx
-import React from 'react';
-
-import ActivateAccount from '@/components/Auth/ActivateAccount';
+import React from "react";
+import ActivateAccount from "@/components/Auth/ActivateAccount";
 
 const ActivateAccountPage: React.FC = () => {
   return (

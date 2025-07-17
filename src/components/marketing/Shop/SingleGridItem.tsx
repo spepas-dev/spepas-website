@@ -1,7 +1,6 @@
 // src/components/marketing/Shop/SingleGridItem.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
-
 import { Product } from './shopData';
 
 interface SingleGridItemProps {
@@ -23,19 +22,26 @@ const SingleGridItem: React.FC<SingleGridItemProps> = ({ item }) => {
         <button
           className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-end justify-center pb-2
                      text-white text-xs font-medium transition-opacity duration-200"
-        ></button>
+        >
+          
+        </button>
       </div>
 
       {/* Content */}
       <div className="p-3 flex flex-col items-center text-center space-y-1">
         {/* Title */}
-        <Link to={`/shop/${item.id}`} className="text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-150">
+        <Link 
+          to={`/shop/${item.id}`}
+          className="text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-150"
+        >
           {item.title}
         </Link>
 
         {/* Price */}
         <div className="flex items-baseline gap-1">
-          <span className="text-blue-600 text-lg font-bold">GH₵{item.price.toFixed(2)}</span>
+          <span className="text-blue-600 text-lg font-bold">
+            GH₵{item.price.toFixed(2)}
+          </span>
         </div>
 
         {/* Rating */}

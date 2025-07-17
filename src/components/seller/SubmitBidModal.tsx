@@ -1,10 +1,9 @@
 // src/components/seller/SubmitBidModal.tsx
 import React, { useState } from 'react';
-
 import { submitBidAPI, uploadSparePartImagesAPI } from '@/lib/orderBidsApis';
 
 interface SubmitBidModalProps {
-  request: unknown;
+  request: any;
   onClose: () => void;
 }
 
@@ -25,7 +24,7 @@ const SubmitBidModal: React.FC<SubmitBidModalProps> = ({ request, onClose }) => 
         price: totalPrice,
         unitPrice,
         totalPrice,
-        discount: 0
+        discount: 0,
       });
       if (files.length) {
         await uploadSparePartImagesAPI({ bidding_ID: request.requestId, files });
@@ -53,7 +52,7 @@ const SubmitBidModal: React.FC<SubmitBidModalProps> = ({ request, onClose }) => 
               <input
                 type="number"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={e => setPrice(e.target.value)}
                 placeholder="GH₵/unit"
                 className="w-full px-4 py-2 border rounded-lg outline-none"
                 required
@@ -63,7 +62,7 @@ const SubmitBidModal: React.FC<SubmitBidModalProps> = ({ request, onClose }) => 
               <label className="block text-gray-600 mb-1">Delivery time</label>
               <select
                 value={deliveryTime}
-                onChange={(e) => setDeliveryTime(e.target.value)}
+                onChange={e => setDeliveryTime(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg outline-none"
               >
                 <option>2 days</option>
@@ -74,9 +73,18 @@ const SubmitBidModal: React.FC<SubmitBidModalProps> = ({ request, onClose }) => 
           </div>
           <div>
             <label className="block text-gray-600 mb-1">Add photos (required)</label>
-            <input type="file" multiple accept="image/*" onChange={(e) => e.target.files && setFiles(Array.from(e.target.files))} />
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={e => e.target.files && setFiles(Array.from(e.target.files))}
+            />
           </div>
-          <button type="submit" disabled={submitting} className="w-full bg-indigo-500 text-white py-2 rounded-lg">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full bg-indigo-500 text-white py-2 rounded-lg"
+          >
             {submitting ? 'Submitting…' : 'Submit bid'}
           </button>
         </form>

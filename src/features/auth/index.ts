@@ -1,18 +1,25 @@
 // src/features/auth/index.ts
-import * as React from 'react';
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useState } from 'react';
+import * as React from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  ReactElement,
+} from "react";
 
 // Import all your API helper functions from lib/auth.ts
 import {
-  activateAccountAPI,
-  changePasswordAPI,
-  forgotPasswordAPI,
-  refreshTokenAPI,
-  resetPasswordAPI,
+  signupAPI,
   signinAPI,
+  activateAccountAPI,
   signoutAPI,
-  signupAPI
-} from '../../lib/auth';
+  forgotPasswordAPI,
+  resetPasswordAPI,
+  changePasswordAPI,
+  refreshTokenAPI,
+} from "../../lib/auth";
 
 /**
  * --------------------------------------------------
@@ -26,7 +33,7 @@ export type SignupPayload = {
   password: string;
   name: string;
   phoneNumber: string;
-  user_type: 'BUYER';
+  user_type: "BUYER";
 };
 
 // For Signin (User Login)
@@ -74,7 +81,7 @@ export interface GopaProfile {
   Specialties: string[];
   User_ID: string;
   status: number;
-  date_added: string; // ISO
+  date_added: string;  // ISO
 }
 
 export interface MepaProfile {
@@ -115,7 +122,7 @@ export interface Vehicle {
   color: string;
   registrationNumber: string;
   date_added: string;
-  location: unknown;
+  location: any;
   status: number;
 }
 
@@ -147,6 +154,7 @@ export interface PaymentAccount {
   date_added: string;
   status: number;
 }
+
 export type UserType = {
   name: string;
   email: string;
@@ -163,8 +171,8 @@ export type UserType = {
   sellerDetails: SellerDetails | null;
   deliver: DeliverProfile | null;
   paymentAccounts: PaymentAccount[];
-  user_groups: unknown[];
-  user_roles: unknown[];
+  user_groups: any[];
+  user_roles: any[];
 };
 
 // The auth state contains the current user and tokens.
@@ -178,11 +186,11 @@ export type AuthData = {
 export type AuthContextType = {
   authData: AuthData;
   isAuthenticated: boolean;
-  signup: (payload: SignupPayload) => Promise<unknown>;
+  signup: (payload: SignupPayload) => Promise<any>;
   login: (payload: SigninPayload) => Promise<void>;
   activateAccount: (payload: ActivateAccountPayload) => Promise<void>;
   logout: () => Promise<void>;
-  forgotPassword: (payload: ForgotPasswordPayload) => Promise<unknown>;
+  forgotPassword: (payload: ForgotPasswordPayload) => Promise<any>;
   resetPassword: (payload: ResetPasswordPayload) => Promise<void>;
   changePassword: (payload: ChangePasswordPayload) => Promise<void>;
   refreshAuth: () => Promise<void>;
@@ -192,7 +200,7 @@ export type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // A constant key for storing auth state in localStorage.
-const STORAGE_KEY = 'authData';
+const STORAGE_KEY = "authData";
 
 /**
  * --------------------------------------------------
@@ -202,21 +210,26 @@ const STORAGE_KEY = 'authData';
  * allowing external modules (e.g., Axios interceptor) to update the auth state.
  */
 let globalSetAuthData: ((newAuthData: AuthData) => void) | undefined;
-export const getGlobalSetAuthData = (): ((newAuthData: AuthData) => void) | undefined => globalSetAuthData;
+export const getGlobalSetAuthData = (): ((newAuthData: AuthData) => void) | undefined =>
+  globalSetAuthData;
 
 /**
  * --------------------------------------------------
  * AuthProvider Component
  * --------------------------------------------------
  */
-export const AuthProvider = ({ children }: { children: ReactNode }): ReactElement => {
+export const AuthProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}): ReactElement => {
   // Initialize auth state from localStorage, if available.
   const [authData, setAuthData] = useState<AuthData>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : { user: null };
   });
 
-  // Persist unknown changes to auth state back to localStorage.
+  // Persist any changes to auth state back to localStorage.
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
   }, [authData]);
@@ -230,11 +243,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
    * Signup: Registers a new user.
    * Does not update auth state (usually verification follows) but returns API data.
    */
-  const signup = async (payload: SignupPayload): Promise<unknown> => {
+  const signup = async (payload: SignupPayload): Promise<any> => {
     try {
       return await signupAPI(payload);
     } catch (error) {
-      console.error('Signup failed:', error);
+      console.error("Signup failed:", error);
       throw error;
     }
   };
@@ -247,7 +260,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
       const response = await signinAPI(payload);
       setAuthData(response.data);
     } catch (error) {
-      console.error('Signin failed:', error);
+      console.error("Signin failed:", error);
       throw error;
     }
   };
@@ -260,7 +273,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
       const response = await activateAccountAPI(payload);
       setAuthData(response.data);
     } catch (error) {
-      console.error('Activate account failed:', error);
+      console.error("Activate account failed:", error);
       throw error;
     }
   };
@@ -274,7 +287,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
       setAuthData({ user: null });
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
       throw error;
     }
   };
@@ -282,11 +295,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
   /**
    * Forgot Password: Initiates forgot password process.
    */
-  const forgotPassword = async (payload: ForgotPasswordPayload): Promise<unknown> => {
+  const forgotPassword = async (
+    payload: ForgotPasswordPayload
+  ): Promise<any> => {
     try {
       return await forgotPasswordAPI(payload);
     } catch (error) {
-      console.error('Forgot password failed:', error);
+      console.error("Forgot password failed:", error);
       throw error;
     }
   };
@@ -299,7 +314,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
       const response = await resetPasswordAPI(payload);
       setAuthData(response.data);
     } catch (error) {
-      console.error('Reset password failed:', error);
+      console.error("Reset password failed:", error);
       throw error;
     }
   };
@@ -308,11 +323,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
    * Change Password: Changes the user password.
    * Typically no state update is needed unless your API returns new tokens.
    */
-  const changePassword = async (payload: ChangePasswordPayload): Promise<void> => {
+  const changePassword = async (
+    payload: ChangePasswordPayload
+  ): Promise<void> => {
     try {
       await changePasswordAPI(payload);
     } catch (error) {
-      console.error('Change password failed:', error);
+      console.error("Change password failed:", error);
       throw error;
     }
   };
@@ -326,10 +343,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
       setAuthData((prev) => ({
         ...prev,
         token: data.newAccessToken,
-        refresh_token: data.newRefreshToken
+        refresh_token: data.newRefreshToken,
       }));
     } catch (error) {
-      console.error('Refresh token failed:', error);
+      console.error("Refresh token failed:", error);
       // Optionally clear auth state if token refresh fails.
       setAuthData({ user: null });
       localStorage.removeItem(STORAGE_KEY);
@@ -352,15 +369,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
     };
 
     // List of events that constitute “activity”
-    // eslint-disable-next-line no-undef
-    const activityEvents: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'];
+    const activityEvents: (keyof WindowEventMap)[] = [
+      "mousemove",
+      "mousedown",
+      "keypress",
+      "touchstart",
+      "scroll",
+    ];
 
-    activityEvents.forEach((evt) => window.addEventListener(evt, resetTimer));
+    activityEvents.forEach((evt) =>
+      window.addEventListener(evt, resetTimer)
+    );
     resetTimer(); // start the initial timeout
 
     return () => {
       clearTimeout(timer);
-      activityEvents.forEach((evt) => window.removeEventListener(evt, resetTimer));
+      activityEvents.forEach((evt) =>
+        window.removeEventListener(evt, resetTimer)
+      );
     };
   }, [logout]);
 
@@ -375,7 +401,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
     forgotPassword,
     resetPassword,
     changePassword,
-    refreshAuth
+    refreshAuth,
   };
 
   // Since this file remains a .ts file (no JSX), we use React.createElement.
@@ -388,7 +414,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }): ReactElemen
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

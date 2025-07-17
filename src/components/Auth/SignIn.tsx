@@ -29,7 +29,7 @@ const Signin: React.FC = () => {
         id: toastId,
         position: 'bottom-center'
       });
-      navigate('/');
+      navigate('/home');
     } catch {
       // replace loading toast with error
       toast.error('Invalid credentials. Please try again.', {

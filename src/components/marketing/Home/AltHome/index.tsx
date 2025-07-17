@@ -55,6 +55,7 @@ const AltHome: React.FC = () => {
           alt="Gears background"
           className="w-full h-full object-cover opacity-50"
         />
+
         {/* 2) Overlayed content */}
         <div
           className="
@@ -133,7 +134,7 @@ const AltHome: React.FC = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default AltHome;
+export default AltHome

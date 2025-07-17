@@ -15,6 +15,6 @@ export const toastConfig = {
   info: (message: string) =>
     toast(message, {
       duration: 3000,
-      position: 'bottom-center'
+      position: 'bottom-center',
     })
 };
