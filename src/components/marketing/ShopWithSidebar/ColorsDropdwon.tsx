@@ -1,21 +1,33 @@
-'use client';
+// src/components/ColorsDropdown.tsx
 import React, { useState } from 'react';
 
-const ColorsDropdwon = () => {
-  const [toggleDropdown, setToggleDropdown] = useState(true);
-  const [activeColor, setActiveColor] = useState('blue');
+const ColorsDropdown: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(true);
+  const [activeColor, setActiveColor] = useState<string>('blue');
 
-  const colors = ['red', 'blue', 'orange', 'pink', 'purple'];
+  const colors: string[] = ['red', 'blue', 'orange', 'pink', 'purple'];
 
   return (
     <div className="bg-white shadow-1 rounded-lg">
       <div
-        onClick={() => setToggleDropdown(!toggleDropdown)}
-        className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 ${toggleDropdown && 'shadow-filter'}`}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`cursor-pointer flex items-center justify-between py-3 pl-6 pr-5.5 ${
+          isOpen ? 'shadow-filter' : ''
+        }`}
       >
         <p className="text-dark">Colors</p>
-        <button aria-label="button for colors dropdown" className={`text-dark ease-out duration-200 ${toggleDropdown && 'rotate-180'}`}>
-          <svg className="fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <button
+          aria-label="Toggle colors dropdown"
+          className={`text-dark ease-out duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        >
+          <svg
+            className="fill-current"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               fillRule="evenodd"
               clipRule="evenodd"
@@ -26,17 +38,28 @@ const ColorsDropdwon = () => {
         </button>
       </div>
 
-      {/* <!-- dropdown menu --> */}
-      <div className={`flex-wrap gap-2.5 p-6 ${toggleDropdown ? 'flex' : 'hidden'}`}>
-        {colors.map((color, key) => (
-          <label key={key} htmlFor={color} className="cursor-pointer select-none flex items-center">
+      <div className={`flex-wrap gap-2.5 p-6 ${isOpen ? 'flex' : 'hidden'}`}>
+        {colors.map((color) => (
+          <label key={color} htmlFor={color} className="cursor-pointer select-none flex items-center">
             <div className="relative">
-              <input type="radio" name="color" id={color} className="sr-only" onChange={() => setActiveColor(color)} />
+              <input
+                type="radio"
+                name="color"
+                id={color}
+                className="sr-only"
+                checked={activeColor === color}
+                onChange={() => setActiveColor(color)}
+              />
               <div
-                className={`flex items-center justify-center w-5.5 h-5.5 rounded-full ${activeColor === color && 'border'}`}
-                style={{ borderColor: `${color}` }}
+                className={`flex items-center justify-center w-5.5 h-5.5 rounded-full ${
+                  activeColor === color ? 'border' : ''
+                }`}
+                style={{ borderColor: color }}
               >
-                <span className="block w-3 h-3 rounded-full" style={{ backgroundColor: `${color}` }}></span>
+                <span
+                  className="block w-3 h-3 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
               </div>
             </div>
           </label>
@@ -46,4 +69,4 @@ const ColorsDropdwon = () => {
   );
 };
 
-export default ColorsDropdwon;
+export default ColorsDropdown;

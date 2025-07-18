@@ -1,8 +1,7 @@
 //marketing layout
 import { AnimatePresence, motion } from 'framer-motion';
-import { HelmetProvider } from 'react-helmet-async';
 import { Outlet, useLocation } from 'react-router-dom';
-
+import { HelmetProvider } from 'react-helmet-async';
 import Footer from './Footer';
 import Header from './Header';
 
@@ -29,6 +28,6 @@ export const MarketingLayout = () => {
         </AnimatePresence>
         <Footer />
       </div>
-    </HelmetProvider>
+     </HelmetProvider>
   );
 };

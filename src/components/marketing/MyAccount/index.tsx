@@ -1,34 +1,42 @@
 // src/components/marketing/MyAccount/index.tsx
-import { Disclosure, Transition } from '@headlessui/react';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import React, { Fragment, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { Fragment, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Disclosure, Transition } from '@headlessui/react'
+import { ChevronDownIcon } from '@heroicons/react/24/solid'
+import { useAuth } from '@/features/auth'
 
-import { useAuth } from '@/features/auth';
+import GeneralDetails from './GeneralDetails'
+import GopaProfileTab from './GopaProfileTab'
+import MepaProfileTab from './MepaProfileTab'
+import SellerDetailsTab from './SellerDetailsTab'
+import DeliverProfileTab from './DeliverProfileTab'
+import PaymentAccountsTab from './PaymentAccountsTab'
+import GroupsRolesTab from './GroupsRolesTab'
+import AddressDetails from './AddressDetails'
+import WalletDetails from './WalletDetails'
 
-import AddressDetails from './AddressDetails';
-import DeliverProfileTab from './DeliverProfileTab';
-import GeneralDetails from './GeneralDetails';
-import GopaProfileTab from './GopaProfileTab';
-import GroupsRolesTab from './GroupsRolesTab';
-import MepaProfileTab from './MepaProfileTab';
-import PaymentAccountsTab from './PaymentAccountsTab';
-import SellerDetailsTab from './SellerDetailsTab';
-import WalletDetails from './WalletDetails';
-
-type TabKey = 'general' | 'gopa' | 'mepa' | 'seller' | 'deliver' | 'groups' | 'payments' | 'address' | 'wallet';
+type TabKey =
+  | 'general'
+  | 'gopa'
+  | 'mepa'
+  | 'seller'
+  | 'deliver'
+  | 'groups'
+  | 'payments'
+  | 'address'
+  | 'wallet'
 
 const MyAccount: React.FC = () => {
-  const { authData, logout } = useAuth();
-  const user = authData!.user!;
-  const navigate = useNavigate();
+  const { authData, logout } = useAuth()
+  const user = authData!.user!
+  const navigate = useNavigate()
 
   // Format "Member Since".
-  const createdDate = new Date(user.createdAt);
+  const createdDate = new Date(user.createdAt)
   const createdMonthYear = createdDate.toLocaleString('default', {
     month: 'long',
-    year: 'numeric'
-  });
+    year: 'numeric',
+  })
 
   // Flattened list of all tabs
   const tabs: Array<{ key: TabKey; label: string }> = [
@@ -37,18 +45,19 @@ const MyAccount: React.FC = () => {
     user.mepa && { key: 'mepa', label: 'My MEPA Profile' },
     user.sellerDetails && { key: 'seller', label: 'My Seller Profile' },
     user.deliver && { key: 'deliver', label: 'My Delivery Profile' },
-    ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups/Roles' },
+    ((user.user_groups?.length ?? 0) > 0 ||
+      (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups/Roles' },
     (user.paymentAccounts?.length ?? 0) > 0 && {
       key: 'payments',
-      label: 'My Payment Accounts'
+      label: 'My Payment Accounts',
     },
     { key: 'address', label: 'My Addresses' },
-    { key: 'wallet', label: 'My Wallet' }
+    { key: 'wallet', label: 'My Wallet' },
   ]
     .filter(Boolean)
-    .map((item) => item as { key: TabKey; label: string });
+    .map((item) => item as { key: TabKey; label: string })
 
-  const [activeTab, setActiveTab] = useState<TabKey>('general');
+  const [activeTab, setActiveTab] = useState<TabKey>('general')
 
   return (
     <section className="py-20 bg-white min-h-screen">
@@ -69,8 +78,12 @@ const MyAccount: React.FC = () => {
             {/* Header: user name & join date */}
             <div className="flex items-center gap-4 py-6 px-7.5 border-b border-gray-200">
               <div>
-                <p className="text-lg font-bold text-gray-600 mb-1">Welcome, {user.name}</p>
-                <p className="text-xs text-gray-400">Member Since {createdMonthYear}</p>
+                <p className="text-lg font-bold text-gray-600 mb-1">
+                  Welcome, {user.name}
+                </p>
+                <p className="text-xs text-gray-400">
+                  Member Since {createdMonthYear}
+                </p>
               </div>
             </div>
 
@@ -96,8 +109,8 @@ const MyAccount: React.FC = () => {
                 {/* Desktop: Sign Out at bottom */}
                 <button
                   onClick={() => {
-                    logout();
-                    navigate('/');
+                    logout()
+                    navigate('/')
                   }}
                   className="mt-6 w-full flex justify-center items-center gap-2 py-2.5 px-4 bg-red-100 text-red-700 rounded-2xl"
                 >
@@ -164,8 +177,8 @@ const MyAccount: React.FC = () => {
                         <Disclosure.Button
                           as="button"
                           onClick={() => {
-                            logout();
-                            navigate('/');
+                            logout()
+                            navigate('/')
                           }}
                           className="mt-4 w-full flex justify-center items-center gap-2 py-2.5 px-4 bg-red-100 text-red-700 rounded-2xl"
                         >
@@ -183,13 +196,28 @@ const MyAccount: React.FC = () => {
           <main className="xl:flex-1 w-full">
             <div className="bg-gray-75 rounded-2xl shadow-[0_6px_30px_rgba(92,124,250,0.1)] py-10 px-6 sm:px-10 xl:px-12">
               {activeTab === 'general' && <GeneralDetails user={user} />}
-              {activeTab === 'gopa' && user.gopa && <GopaProfileTab profile={user.gopa} />}
-              {activeTab === 'mepa' && user.mepa && <MepaProfileTab profile={user.mepa} />}
-              {activeTab === 'seller' && user.sellerDetails && <SellerDetailsTab details={user.sellerDetails} />}
-              {activeTab === 'deliver' && user.deliver && <DeliverProfileTab deliver={user.deliver} />}
-              {activeTab === 'groups' && <GroupsRolesTab groups={user.user_groups ?? []} roles={user.user_roles ?? []} />}
+              {activeTab === 'gopa' && user.gopa && (
+                <GopaProfileTab profile={user.gopa} />
+              )}
+              {activeTab === 'mepa' && user.mepa && (
+                <MepaProfileTab profile={user.mepa} />
+              )}
+              {activeTab === 'seller' && user.sellerDetails && (
+                <SellerDetailsTab details={user.sellerDetails} />
+              )}
+              {activeTab === 'deliver' && user.deliver && (
+                <DeliverProfileTab deliver={user.deliver} />
+              )}
+              {activeTab === 'groups' && (
+                <GroupsRolesTab
+                  groups={user.user_groups ?? []}
+                  roles={user.user_roles ?? []}
+                />
+              )}
 
-              {activeTab === 'payments' && user.paymentAccounts && <PaymentAccountsTab accounts={user.paymentAccounts} />}
+              {activeTab === 'payments' && user.paymentAccounts && (
+                <PaymentAccountsTab accounts={user.paymentAccounts} />
+              )}
               {activeTab === 'address' && <AddressDetails />}
               {activeTab === 'wallet' && <WalletDetails />}
             </div>
@@ -197,7 +225,7 @@ const MyAccount: React.FC = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default MyAccount;
+export default MyAccount

@@ -1,7 +1,6 @@
 // src/components/marketing/MyAccount/GopaProfileTab.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { GopaProfile } from '@/features/auth';
 
 interface GopaProfileTabProps {
@@ -21,7 +20,8 @@ const GopaProfileTab: React.FC<GopaProfileTabProps> = ({ profile }) => {
         <strong>Specialties:</strong> {profile.Specialties.join(', ')}
       </p>
       <p>
-        <strong>Became a GOPA on:</strong> {new Date(profile.date_added).toLocaleDateString()}
+        <strong>Became a GOPA on:</strong>{' '}
+        {new Date(profile.date_added).toLocaleDateString()}
       </p>
 
       <div className="mt-6 flex gap-4">

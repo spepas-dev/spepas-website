@@ -1,7 +1,6 @@
 // src/components/gopaInvoices/AcceptInvoice.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { acceptInvoiceByGopa } from '@/lib/gopaInvoiceApis';
 
 const AcceptInvoice: React.FC = () => {
@@ -28,12 +27,16 @@ const AcceptInvoice: React.FC = () => {
         <input
           type="text"
           value={invoiceId}
-          onChange={(e) => setInvoiceId(e.target.value)}
+          onChange={e => setInvoiceId(e.target.value)}
           required
           className="w-full border rounded px-3 py-2 mt-1"
         />
       </label>
-      <button type="submit" disabled={loading} className="mt-4 bg-dark text-white py-2 px-4 rounded">
+      <button
+        type="submit"
+        disabled={loading}
+        className="mt-4 bg-dark text-white py-2 px-4 rounded"
+      >
         {loading ? 'Processing…' : 'Accept'}
       </button>
     </form>

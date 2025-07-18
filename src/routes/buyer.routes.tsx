@@ -3,34 +3,34 @@ import { RouteObject } from 'react-router-dom';
 
 import CartPage from '@/pages/buyer/CartPage';
 import CheckoutPage from '@/pages/buyer/CheckoutPage';
-import MyRequestsOffersPage from '@/pages/buyer/MyRequestsOffersPage';
-import MyRequestsPage from '@/pages/buyer/MyRequestsPage';
-import OffersPage from '@/pages/buyer/OffersPage';
 import PostRequestPage from '@/pages/buyer/PostRequestPage';
+import MyRequestsPage from '@/pages/buyer/MyRequestsPage';
+import MyRequestsOffersPage from '@/pages/buyer/MyRequestsOffersPage'
+import OffersPage from '@/pages/buyer/OffersPage';
 
 export const buyerRoutes: RouteObject[] = [
   {
     path: 'buyer/cart',
-    element: <CartPage />
+    element: <CartPage />,
   },
   {
     path: 'buyer/checkout',
-    element: <CheckoutPage />
+    element: <CheckoutPage />,
   },
   {
     path: 'buyer/post-request',
-    element: <PostRequestPage />
+    element: <PostRequestPage />,
   },
   {
     path: 'buyer/requests',
-    element: <MyRequestsPage />
+    element: <MyRequestsPage />,
   },
   {
     path: 'buyer/requests/offers-all',
-    element: <MyRequestsOffersPage />
+    element: <MyRequestsOffersPage />,
   },
   {
     path: 'buyer/requests/:requestId/offers',
-    element: <OffersPage />
-  }
+    element: <OffersPage />,
+  },
 ];

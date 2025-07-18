@@ -1,6 +1,6 @@
 // // src/lib/axios.ts
 
-// with token refresh
+// with token refresh 
 // import axios from 'axios';
 // import { refreshTokenAPI } from './auth';
 
@@ -11,6 +11,7 @@
 //     'Content-Type': 'application/json',
 //   },
 // });
+
 
 // axiosInstance.interceptors.request.use(
 //   (config) => {
@@ -31,6 +32,7 @@
 //   (error) => Promise.reject(error)
 // );
 
+
 // axiosInstance.interceptors.response.use(
 //   (response) => response,
 //   async (error) => {
@@ -39,8 +41,9 @@
 //     if (error.response?.status === 401 && !originalRequest._retry) {
 //       originalRequest._retry = true;
 //       try {
-
+ 
 //         const data = await refreshTokenAPI();
+
 
 //         const storedAuth = localStorage.getItem('authData');
 //         let authData = storedAuth ? JSON.parse(storedAuth) : {};
@@ -48,8 +51,9 @@
 //         authData.refresh_token = data.newRefreshToken;
 //         localStorage.setItem('authData', JSON.stringify(authData));
 
+  
 //         axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.newAccessToken}`;
-
+ 
 //         originalRequest.headers['Authorization'] = `Bearer ${data.newAccessToken}`;
 
 //         return axiosInstance(originalRequest);
@@ -64,26 +68,27 @@
 
 // export default axiosInstance;
 
+
 //without token refresh
 // src/lib/axios.ts
 import axios from 'axios';
 
-const isDev = import.meta.env.DEV;
+const isDev     = import.meta.env.DEV;
 const proxyBase = import.meta.env.VITE_PROXY_BASE_URL; // “api”
-const liveBase = import.meta.env.VITE_API_URL; // “https://api…/gateway/v1”
+const liveBase  = import.meta.env.VITE_API_URL;        // “https://api…/gateway/v1”
 
 const baseURL = isDev
-  ? `/${proxyBase}` // → “/api”
-  : liveBase; // → remote gateway
+  ? `/${proxyBase}`      // → “/api”
+  : liveBase;            // → remote gateway
 
 export const apiClient = axios.create({
   baseURL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true
 });
 
 // ensure no Authorization header ever sneaks in
 delete apiClient.defaults.headers.common['Authorization'];
 
 export default apiClient;
+

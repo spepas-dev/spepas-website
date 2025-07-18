@@ -205,6 +205,7 @@ const Footer = () => {
         </div>
         {/* <!-- footer menu end --> */}
       </div>
+
     </footer>
   );
 };

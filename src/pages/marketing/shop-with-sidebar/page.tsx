@@ -1,14 +1,8 @@
-import { Metadata } from 'next';
+// src/pages/ShopWithSidebarPage.tsx
 import React from 'react';
+import ShopWithSidebar from '../../../components/marketing/ShopWithSidebar';
 
-import ShopWithSidebar from '@/components/ShopWithSidebar';
-export const metadata: Metadata = {
-  title: 'Shop Page | NextCommerce Nextjs E-commerce template',
-  description: 'This is Shop Page for NextCommerce Template'
-  // other metadata
-};
-
-const ShopWithSidebarPage = () => {
+const ShopWithSidebarPage: React.FC = () => {
   return (
     <main>
       <ShopWithSidebar />

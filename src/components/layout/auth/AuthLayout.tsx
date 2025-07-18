@@ -1,7 +1,8 @@
 // src/components/layout/auth/AuthLayout.tsx
 import { AnimatePresence, motion } from 'framer-motion';
-import { HelmetProvider } from 'react-helmet-async';
 import { Outlet, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+
 
 export const AuthLayout = () => {
   const location = useLocation();

@@ -1,6 +1,7 @@
 export default function Values() {
   return (
     <section className="max-w-[1170px] w-full sm:px-8 xl:px-0 py-12 mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      
       {/* Our Vision */}
       <div className="bg-white p-6 shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Our Vision</h2>
@@ -31,6 +32,7 @@ export default function Values() {
           industry partnerships and a scalable business model driving long-term success.
         </p>
       </div>
+
     </section>
   );
 }

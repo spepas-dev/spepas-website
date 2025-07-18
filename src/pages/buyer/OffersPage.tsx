@@ -1,12 +1,14 @@
 // src/pages/buyer/OffersPage.tsx
-// import React from 'react';
-import OffersList from '@/components/buyer/OffersList';
+import React from 'react';
+import OffersList from '../../components/buyer/OffersList';
 
-export default function OffersPage() {
+const OffersPage: React.FC = () => {
   return (
-    <div className="container mx-auto p-4 max-w-4xl w-[80%] mx-auto p-4 pt-20">
+    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
       <section className="pt-10"></section>
       <OffersList />
     </div>
   );
-}
+};
+
+export default OffersPage;

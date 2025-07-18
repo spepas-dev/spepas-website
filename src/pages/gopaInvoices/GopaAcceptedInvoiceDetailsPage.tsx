@@ -1,12 +1,13 @@
 // src/pages/gopaInvoices/GopaAcceptedInvoiceDetailsPage.tsx
 import React from 'react';
+import GopaAcceptedInvoiceDetails from '../../components/gopaInvoices/GopaAcceptedInvoiceDetails';
 
-import GopaAcceptedInvoiceDetails from '@/components/gopaInvoices/GopaAcceptedInvoiceDetails';
-
-export default function GopaAcceptedInvoiceDetailsPage() {
+const GopaAcceptedInvoiceDetailsPage: React.FC = () => {
   return (
     <main>
       <GopaAcceptedInvoiceDetails />
     </main>
   );
-}
+};
+
+export default GopaAcceptedInvoiceDetailsPage;

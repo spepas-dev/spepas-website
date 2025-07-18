@@ -5,7 +5,7 @@ export const menuData: Menu[] = [
     id: 1,
     title: 'Home',
     newTab: false,
-    path: '/'
+    path: '/home'
   },
   {
     id: 2,
@@ -24,7 +24,7 @@ export const menuData: Menu[] = [
     title: 'FAQs',
     newTab: false,
     path: '/faqs'
-  }
+  },
   // {
   //   id: 6,
   //   title: 'pages',

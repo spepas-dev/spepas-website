@@ -1,5 +1,4 @@
 import React from 'react';
-
 import Breadcrumb from '../Common/Breadcrumb';
 
 const TermsOfUse: React.FC = () => {
@@ -8,8 +7,9 @@ const TermsOfUse: React.FC = () => {
       title: '1. General Overview',
       content: (
         <p>
-          SpePas provides an online marketplace where independent sellers list auto parts for buyers. We don’t manufacture, own, or inspect
-          products— we simply facilitate transactions between buyers and sellers.
+          SpePas provides an online marketplace where independent sellers list
+          auto parts for buyers. We don’t manufacture, own, or inspect products—
+          we simply facilitate transactions between buyers and sellers.
         </p>
       )
     },
@@ -84,20 +84,34 @@ const TermsOfUse: React.FC = () => {
     },
     {
       title: '6. Dispute Resolution',
-      content: <p>We encourage amicable resolution via Customer Support. If needed, SpePas will decide based on available evidence.</p>
+      content: (
+        <p>
+          We encourage amicable resolution via Customer Support. If needed,
+          SpePas will decide based on available evidence.
+        </p>
+      )
     },
     {
       title: '7. Limitation of Liability',
       content: (
         <ul className="list-disc list-inside space-y-1">
-          <li>SpePas is not liable for disputes or damages between buyers & sellers.</li>
-          <li>We do not guarantee product quality, safety, or legality.</li>
+          <li>
+            SpePas is not liable for disputes or damages between buyers & sellers.
+          </li>
+          <li>
+            We do not guarantee product quality, safety, or legality.
+          </li>
         </ul>
       )
     },
     {
       title: '8. Changes to Terms',
-      content: <p>We may update these terms periodically; using SpePas after updates means you accept them.</p>
+      content: (
+        <p>
+          We may update these terms periodically; using SpePas after updates
+          means you accept them.
+        </p>
+      )
     },
     {
       title: '9. Contact Information',
@@ -106,8 +120,7 @@ const TermsOfUse: React.FC = () => {
           Questions? Email us at{' '}
           <a href="mailto:support@spepas.com" className="text-indigo-600 hover:underline">
             support@spepas.com
-          </a>
-          .
+          </a>.
         </p>
       )
     }
@@ -121,15 +134,26 @@ const TermsOfUse: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           {/* Header */}
           <header className="text-center space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">SpePas Terms of Use</h1>
-            <p className="text-gray-700 sm:text-lg">By using SpePas you agree to these rules. Please read them carefully.</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">
+              SpePas Terms of Use
+            </h1>
+            <p className="text-gray-700 sm:text-lg">
+              By using SpePas you agree to these rules. Please read them carefully.
+            </p>
           </header>
 
           {/* Sections */}
           {sections.map((sec, idx) => (
-            <article key={idx} className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4">
-              <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">{sec.title}</h2>
-              <div className="prose prose-indigo max-w-none text-gray-700">{sec.content}</div>
+            <article
+              key={idx}
+              className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4"
+            >
+              <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">
+                {sec.title}
+              </h2>
+              <div className="prose prose-indigo max-w-none text-gray-700">
+                {sec.content}
+              </div>
             </article>
           ))}
         </div>
