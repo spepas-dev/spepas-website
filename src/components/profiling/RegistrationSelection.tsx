@@ -38,7 +38,7 @@ const RegistrationSelection: React.FC = () => {
 
       <button
   type="button"
-  onClick={() => navigate('/')}
+  onClick={() => navigate('/home')}
   className="mt-6 px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200"
 >
   Skip
