@@ -5,6 +5,10 @@ import Breadcrumb from '@/components/common/Breadcrumb';
 import { createPaymentAccountSelf } from '@/lib/profiling';
 import { paymentAccountCreationSchema } from '@/lib/profilingZodValidation';
 
+// Extend these as needed
+const ACCOUNT_TYPE_OPTIONS = ['BANK_ACCOUNT'] as const;
+const PROVIDER_OPTIONS = ['ECOBANK'] as const;
+
 const AddPaymentAccountForm: React.FC = () => {
   const navigate = useNavigate();
   const [mode, setMode] = useState('');              // e.g. 'BANK_ACCOUNT'
@@ -51,18 +55,23 @@ const AddPaymentAccountForm: React.FC = () => {
           {error && <p className="text-red-500 mb-4">{error}</p>}
 
           <form onSubmit={handleSubmit}>
+            {/* Account Type (dropdown) */}
             <div className="mb-5">
               <label htmlFor="mode" className="block mb-2.5">Account Type</label>
-              <input
+              <select
                 id="mode"
-                type="text"
                 value={mode}
                 onChange={e => setMode(e.target.value)}
-                placeholder="e.g. BANK_ACCOUNT"
                 className="w-full rounded-lg border border-gray-300 bg-gray-100 py-3 px-5"
                 required
-              />
+              >
+                <option value="" disabled>Select account type</option>
+                {ACCOUNT_TYPE_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
             </div>
+
             <div className="mb-5">
               <label htmlFor="accountNumber" className="block mb-2.5">Account Number</label>
               <input
@@ -74,18 +83,24 @@ const AddPaymentAccountForm: React.FC = () => {
                 required
               />
             </div>
+
+            {/* Provider (dropdown) */}
             <div className="mb-5">
               <label htmlFor="provider" className="block mb-2.5">Provider</label>
-              <input
+              <select
                 id="provider"
-                type="text"
                 value={provider}
                 onChange={e => setProvider(e.target.value)}
-                placeholder="e.g. ECOBANK"
                 className="w-full rounded-lg border border-gray-300 bg-gray-100 py-3 px-5"
                 required
-              />
+              >
+                <option value="" disabled>Select provider</option>
+                {PROVIDER_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
             </div>
+
             <div className="mb-5">
               <label htmlFor="name" className="block mb-2.5">Account Holder Name</label>
               <input
@@ -97,6 +112,7 @@ const AddPaymentAccountForm: React.FC = () => {
                 required
               />
             </div>
+
             <button
               type="submit"
               disabled={loading}

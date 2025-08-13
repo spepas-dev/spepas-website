@@ -10,7 +10,7 @@ import TermsOfUsePage from '@/pages/marketing/terms/page';
 import ShopWithoutSidebarPage from '@/pages/marketing/shop-without-sidebar/page';
 import ShopDetailsPage from '@/pages/marketing/shop-details/page';
 import AboutUsPage from '@/pages/marketing/about-us/page';
-// import AltHomePage from '@/pages/marketing/home/alt-home/page'; // Importing the alternative home page
+// import AltHomePage from '@/pages/marketing/home/alt-home/page';
 
 import MyAccountPage from '@/pages/marketing/my-account/page';
 import ProtectedRoute from '@/components/common/ProtectedRoute';

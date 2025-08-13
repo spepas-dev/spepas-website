@@ -262,6 +262,7 @@ export const AuthProvider = ({
     } catch (error) {
       console.error("Signin failed:", error);
       throw error;
+      
     }
   };
 

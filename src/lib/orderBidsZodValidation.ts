@@ -25,7 +25,7 @@ export const nonInventorySparePartRequestSchema = z.object({
 /** 3. Assign Request To Seller */
 export const assignRequestToSellerSchema = z.object({
   request_id: z.string().uuid('Invalid request_id'),
-  sellerIDs: z.array(z.string().uuid(), ),
+  sellerIDs: z.array(z.string().uuid()),
 });
 
 /** 4. Submit Bid */
@@ -50,7 +50,7 @@ export const removeBidFromCartSchema = z.object({
 /** 7. Upload Spare Part Images */
 export const uploadSparePartImagesSchema = z.object({
   bidding_ID: z.string().uuid('Invalid bidding_ID'),
-  files: z.array(z.instanceof(File), ),
+  files: z.array(z.instanceof(File)),
 });
 
 /* ————————————— GET params schemas ————————————— */
@@ -79,4 +79,38 @@ export const requestIdParamsSchema = z.object({
 /** any endpoint taking a single seller_id */
 export const sellerIdParamsSchema = z.object({
   seller_id: z.string().uuid('Invalid seller_id'),
+});
+
+/* ————————————— New Zod Schemas ————————————— */
+
+/** POST /checkout/with-existing-address */
+export const checkoutWithExistingAddressSchema = z.object({
+  address_id: z.string().uuid('Invalid address_id'),
+  aggeagate: z.number().int().min(0),
+  paymentDetails: z.object({
+    paymentMode: z.string().min(1),
+    walletNumber: z.string().min(1),
+    network: z.string().min(1),
+  }),
+});
+
+/** POST /checkout/with-new-address */
+export const checkoutWithNewAddressSchema = z.object({
+  address: z.object({
+    title: z.string().min(1),
+    addressDetails: z.string().min(1),
+    longitude: z.number(),
+    latitude: z.number(),
+  }),
+  aggeagate: z.number().int().min(0),
+  paymentDetails: z.object({
+    paymentMode: z.string().min(1),
+    walletNumber: z.string().min(1),
+    network: z.string().min(1),
+  }),
+});
+
+/** GET /charge/get-user-charges/{aggeagate} */
+export const getUserChargesParamsSchema = z.object({
+  aggeagate: z.string().min(1),
 });
