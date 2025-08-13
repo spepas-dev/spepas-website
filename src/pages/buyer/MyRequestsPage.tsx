@@ -15,7 +15,7 @@ const MyRequestsPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-blue-800">My Requests</h1>
         <button
           type="button"
-          onClick={() => navigate('/buyer/post-request')}
+          onClick={() => navigate('/95668339501103956045/buyer/post-request')}
           className="flex items-center mt-3 sm:mt-0 px-4 py-2 text-sm text-blue-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
         >
           <svg

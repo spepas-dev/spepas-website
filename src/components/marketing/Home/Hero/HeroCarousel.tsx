@@ -134,7 +134,7 @@ const HeroCarousel: React.FC = () => {
 
               <div className="flex justify-center mt-10">
                 <a
-                  href="/shop"
+                  href="/95668339501103956045/shop"
                   className="
                     neon-pulse
                     inline-flex items-center justify-center

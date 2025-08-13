@@ -88,7 +88,7 @@ const MyAccount: React.FC = () => {
         {/* Add Profile & Switch Profile */}
         <div className="flex justify-end mb-6 space-x-4">
           <button
-            onClick={() => navigate('/registration-selection')}
+            onClick={() => navigate('/95668339501103956045/registration-selection')}
             className="bg-gradient-to-r from-blue to-blue-500 text-white font-medium py-2 px-6 rounded-2xl shadow-md"
           >
             Add Profile

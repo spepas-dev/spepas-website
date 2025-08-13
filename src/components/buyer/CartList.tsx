@@ -70,7 +70,7 @@ const CartList: React.FC = () => {
     try {
       const charges = await getUserChargesAPI({ aggeagate: agg })
       // navigate to the buyer-specific checkout route
-      navigate('/buyer/checkout', { state: { charges, aggeagate: agg } })
+      navigate('/95668339501103956045/buyer/checkout', { state: { charges, aggeagate: agg } })
     } catch (err) {
       console.error(err)
       toast.error('Failed to fetch charges.')
@@ -105,7 +105,7 @@ const CartList: React.FC = () => {
         />
         <p className="text-gray-600 text-base sm:text-lg">Your cart is empty.</p>
         <button
-          onClick={() => navigate('/Shop')}
+          onClick={() => navigate('/95668339501103956045/Shop')}
           className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base px-6 py-2 rounded-full shadow transition"
         >
           Go to Shop

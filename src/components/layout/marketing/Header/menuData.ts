@@ -5,25 +5,25 @@ export const menuData: Menu[] = [
     id: 1,
     title: 'Home',
     newTab: false,
-    path: '/home'
+    path: '/95668339501103956045/home'
   },
   {
     id: 2,
     title: 'Contact',
     newTab: false,
-    path: '/contact'
+    path: '/95668339501103956045/contact'
   },
   {
     id: 3,
     title: 'About Us',
     newTab: false,
-    path: '/about-us'
+    path: '/95668339501103956045/about-us'
   },
   {
     id: 4,
     title: 'FAQs',
     newTab: false,
-    path: '/faqs'
+    path: '/95668339501103956045/faqs'
   },
   // {
   //   id: 6,

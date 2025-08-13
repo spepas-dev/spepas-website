@@ -23,7 +23,7 @@ const AddIdentification: React.FC = () => {
     setLoading(true);
     try {
       await addIdentificationSelf(form);
-      navigate('/registration-selection');
+      navigate('/95668339501103956045/registration-selection');
     } finally {
       setLoading(false);
     }

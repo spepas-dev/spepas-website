@@ -30,7 +30,7 @@ const ActivateAccount: React.FC = () => {
         id: toastId,
         position: 'bottom-center'
       });
-      navigate('/add-identification');
+      navigate('/95668339501103956045/add-identification');
     } catch {
       toast.error('Activation failed. Please check your OTP and try again.', {
         id: toastId,

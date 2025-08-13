@@ -26,7 +26,7 @@ const AddPaymentAccountForm: React.FC = () => {
       const payload = { mode, accountNumber, provider, name };
       paymentAccountCreationSchema.parse(payload);
       await createPaymentAccountSelf(payload);
-      navigate('/');
+      navigate('/95668339501103956045/home');
     } catch {
       setError('Failed to add payment account. Please check your inputs.');
     } finally {
@@ -45,7 +45,7 @@ const AddPaymentAccountForm: React.FC = () => {
             <h2 className="font-semibold text-xl sm:text-2xl mb-0">Add Payment Account</h2>
             <button
               type="button"
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/95668339501103956045/home')}
               className="text-gray-600 hover:text-gray-800 transition-colors"
             >
               Skip for now

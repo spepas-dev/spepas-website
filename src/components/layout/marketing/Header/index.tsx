@@ -27,8 +27,8 @@ const Header = () => {
   const { isAuthenticated, authData } = useAuth();
   const { accountType } = useAccountType();
 
-  const sellerId = authData?.user?.sellerDetails?.Seller_ID;
-  const gopaId   = authData?.user?.gopa?.Gopa_ID;
+    const sellerId = authData?.user?.sellerDetails?.Seller_ID;
+    const gopaId   = authData?.user?.gopa?.Gopa_ID;
 
   // Sticky menu
   const handleStickyMenu = () => {
@@ -51,7 +51,7 @@ const Header = () => {
       <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0">
         <div className={`flex flex-row gap-5 items-center justify-between ease-out duration-200 ${stickyMenu ? 'py-4' : 'py-4'}`}>
           <div className="xl:w-auto flex-col sm:flex-row flex justify-between gap-5 sm:gap-10">
-            <Link className="flex-shrink-0 max-[430px]:mx-auto" to="/home">
+            <Link className="flex-shrink-0 max-[430px]:mx-auto" to="/95668339501103956045/home">
               <img src="/images/logo/logo.png" alt="Logo" width={119} height={36} />
             </Link>
           </div>
@@ -143,7 +143,7 @@ const Header = () => {
                     {isAuthenticated ? (
                       <button
                         onClick={() => {
-                          navigate('/my-account');
+                          navigate('/95668339501103956045/my-account');
                           setNavigationOpen(false);
                         }}
                         className="flex items-center bg-gradient-to-r from-blue to-blue-500 text-white text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
@@ -167,7 +167,7 @@ const Header = () => {
                     ) : (
                       <div className="inline-block p-[1px] bg-gradient-to-r from-blue to-blue-500 rounded-md">
                         <Link
-                          to="/auth/signin"
+                          to="/95668339501103956045/auth/signin"
                           onClick={() => setNavigationOpen(false)}
                           className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                         >
@@ -195,28 +195,28 @@ const Header = () => {
                   {accountType === 'GOPA' && gopaId && (
                     <>
                       <button
-                        onClick={() => navigate(`/gopa/${gopaId}/assigned/active`)}
+                        onClick={() => navigate(`/95668339501103956045/gopa/${gopaId}/assigned/active`)}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
                         Assigned
                       </button>
                       <button
-                        onClick={() => navigate(`/gopa/${gopaId}/assigned/history`)}
+                        onClick={() => navigate(`/95668339501103956045/gopa/${gopaId}/assigned/history`)}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
                         Assigned History
                       </button>
                       <button
-                        onClick={() => navigate(`/gopa/${gopaId}/unassigned/active`)}
+                        onClick={() => navigate(`/95668339501103956045/gopa/${gopaId}/unassigned/active`)}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
                         Unassigned Active
                       </button>
                       <button
-                        onClick={() => navigate(`/gopa/${gopaId}/unassigned/history`)}
+                        onClick={() => navigate(`/95668339501103956045/gopa/${gopaId}/unassigned/history`)}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <img src="/public/gopa.jpg" className="w-4 h-4 mr-1" />
@@ -228,7 +228,7 @@ const Header = () => {
                   {/* Seller’s Bids (Mobile) */}
                   {accountType === 'SELLER' && sellerId && (
                     <button
-                      onClick={() => navigate(`/seller/${sellerId}/bids`)}
+                      onClick={() => navigate(`/95668339501103956045/seller/${sellerId}/bids`)}
                       className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
                     >
                       <img src="/bid.svg" alt="Bids" className="w-4 h-4 mr-1" />
@@ -240,14 +240,14 @@ const Header = () => {
                   {accountType === 'BUYER' && (
                     <>
                       <button
-                        onClick={() => navigate('/buyer/cart')}
+                        onClick={() => navigate('/95668339501103956045/buyer/cart')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <img src="/cart.svg" alt="Cart" className="w-4 h-4 mr-1" />
                         Cart
                       </button>
                       <button
-                        onClick={() => navigate('/buyer/post-request')}
+                        onClick={() => navigate('/95668339501103956045/buyer/post-request')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <svg
@@ -262,7 +262,7 @@ const Header = () => {
                         Create Request
                       </button>
                       <button
-                        onClick={() => navigate('/buyer/requests')}
+                        onClick={() => navigate('/95668339501103956045/buyer/requests')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <svg
@@ -295,7 +295,7 @@ const Header = () => {
                     {/* Seller’s Bids (Desktop) */}
                     {accountType === 'SELLER' && sellerId && (
                       <button
-                        onClick={() => navigate(`/seller/${sellerId}/bids`)}
+                        onClick={() => navigate(`/95668339501103956045/seller/${sellerId}/bids`)}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded shadow hover:opacity-90 transition"
                       >
                         <img src="/bid.svg" alt="Bids" className="w-4 h-4 mr-1" />
@@ -306,7 +306,7 @@ const Header = () => {
                     {/* Cart (Desktop) */}
                     {accountType === 'BUYER' && (
                       <button
-                        onClick={() => navigate('/buyer/cart')}
+                        onClick={() => navigate('/95668339501103956045/buyer/cart')}
                         className="flex items-center bg-gray-100 text-gray-800 text-xs font-medium py-1 px-2 rounded hover:bg-gray-200 transition"
                       >
                         <img src="/cart.svg" alt="Cart" className="w-4 h-4 mr-1" />
@@ -351,7 +351,7 @@ const Header = () => {
                           <div className="absolute mt-2 w-48 bg-white shadow-lg rounded-md border border-gray-200 z-50">
                             <button
                               onClick={() => {
-                                navigate('/buyer/post-request');
+                                navigate('/95668339501103956045/buyer/post-request');
                                 setRequestsMenuOpen(false);
                               }}
                               className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -369,7 +369,7 @@ const Header = () => {
                             </button>
                             <button
                               onClick={() => {
-                                navigate('/buyer/requests');
+                                navigate('/95668339501103956045/buyer/requests');
                                 setRequestsMenuOpen(false);
                               }}
                               className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -419,7 +419,7 @@ const Header = () => {
                           <div className="absolute mt-2 w-56 bg-white shadow-lg rounded-md border border-gray-200 z-50">
                             <button
                               onClick={() => {
-                                navigate(`/gopa/${gopaId}/assigned/active`);
+                                navigate(`/95668339501103956045/gopa/${gopaId}/assigned/active`);
                                 setGopaMenuOpen(false);
                               }}
                               className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -429,7 +429,7 @@ const Header = () => {
                             </button>
                             <button
                               onClick={() => {
-                                navigate(`/gopa/${gopaId}/assigned/history`);
+                                navigate(`/95668339501103956045/gopa/${gopaId}/assigned/history`);
                                 setGopaMenuOpen(false);
                               }}
                               className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -439,7 +439,7 @@ const Header = () => {
                             </button>
                             <button
                               onClick={() => {
-                                navigate(`/gopa/${gopaId}/unassigned/active`);
+                                navigate(`/95668339501103956045/gopa/${gopaId}/unassigned/active`);
                                 setGopaMenuOpen(false);
                               }}
                               className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -449,7 +449,7 @@ const Header = () => {
                             </button>
                             <button
                               onClick={() => {
-                                navigate(`/gopa/${gopaId}/unassigned/history`);
+                                navigate(`/95668339501103956045/gopa/${gopaId}/unassigned/history`);
                                 setGopaMenuOpen(false);
                               }}
                               className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -468,7 +468,7 @@ const Header = () => {
               {isAuthenticated ? (
                 <div className="hidden sm:flex items-center gap-5">
                   <button
-                    onClick={() => navigate('/my-account')}
+                    onClick={() => navigate('/95668339501103956045/my-account')}
                     className="flex items-center border border-blue rounded-full gap-3 px-2 py-1 bg-white hover:bg-blue-50 transition-shadow shadow-sm"
                   >
                     <svg
@@ -496,7 +496,7 @@ const Header = () => {
                 </div>
               ) : (
                 <div className="hidden sm:flex items-center gap-5">
-                  <Link to="/auth/signin" className="flex items-center gap-2.5">
+                  <Link to="/95668339501103956045/auth/signin" className="flex items-center gap-2.5">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                       <path
                         fillRule="evenodd"

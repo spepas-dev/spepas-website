@@ -1,3 +1,4 @@
+// src/components/marketing/Home/BestSeller/index.tsx
 import { Link } from 'react-router-dom';
 
 import shopData from '@/components/marketing/Shop/shopData';

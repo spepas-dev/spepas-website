@@ -68,7 +68,7 @@ const Signup: React.FC = () => {
         id: toastId,
         position: 'bottom-center',
       });
-      navigate('/auth/activate');
+      navigate('/95668339501103956045/auth/activate');
     } catch (err: unknown) {
       console.error('Signup error:', err);
       toast.error(`Signup failed: ${getMessage(err)}`, {
@@ -208,7 +208,7 @@ const Signup: React.FC = () => {
 
               <p className="text-center mt-6">
                 Already have an account?{' '}
-                <Link to="/auth/signin" className="text-dark hover:text-blue">
+                <Link to="/95668339501103956045/auth/signin" className="text-dark hover:text-blue">
                   Sign in Now
                 </Link>
               </p>

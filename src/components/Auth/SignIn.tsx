@@ -66,7 +66,7 @@ const Signin: React.FC = () => {
   const handleRoleSelect = (role: Role) => {
     setAccountType(role);
     setShowRoleSelector(false);
-    navigate('/home');
+    navigate('/95668339501103956045/home');
   };
 
   return (
@@ -121,13 +121,13 @@ const Signin: React.FC = () => {
 
             <p className="text-center mt-6 text-sm">
               Don’t have an account?{' '}
-              <Link to="/auth/signup" className="text-blue hover:underline">
+              <Link to="/95668339501103956045/auth/signup" className="text-blue hover:underline">
                 Sign Up
               </Link>
             </p>
             <p className="text-center mt-2 text-sm">
               Forgot your password?{' '}
-              <Link to="/auth/forgot-password" className="text-blue hover:underline">
+              <Link to="/95668339501103956045/auth/forgot-password" className="text-blue hover:underline">
                 Reset it here
               </Link>
             </p>

@@ -94,7 +94,7 @@ const PostRequestForm: React.FC = () => {
       setSelectedManufacturer('')
       setSelectedBrand('')
       setSelectedModel('')
-      navigate('/buyer/requests')
+      navigate('/95668339501103956045/buyer/requests')
     })
     
     .catch(() => {
@@ -115,7 +115,7 @@ console.log('brands:', brands);
 
       <button
         type="button"
-        onClick={() => navigate('/buyer/requests')}
+        onClick={() => navigate('/95668339501103956045/buyer/requests')}
         className="
           flex items-center
           mt-3 sm:mt-0        /* keep some top margin on mobile so it doesn’t feel cramped */
