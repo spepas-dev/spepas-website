@@ -45,7 +45,7 @@ const RequestWithOffersCard: React.FC<Props> = ({ req }) => {
 
       {bids.length > 0 ? (
         <Link
-          to={`/buyer/requests/${req.request_ID}/offers`}
+          to={`/95668339501103956045/buyer/requests/${req.request_ID}/offers`}
           className="inline-block bg-indigo-500 text-white px-3 py-1 rounded"
         >
           View all offers

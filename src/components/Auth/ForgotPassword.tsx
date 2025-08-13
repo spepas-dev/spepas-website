@@ -31,7 +31,7 @@ const ForgotPassword: React.FC = () => {
         position: 'bottom-center'
       });
 
-      navigate('/auth/reset-password');
+      navigate('/95668339501103956045/auth/reset-password');
     } catch (err: unknown) {
       console.log(err);
       toast.error('Failed to send reset link. Please try again.', {

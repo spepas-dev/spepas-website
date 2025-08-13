@@ -1,3 +1,4 @@
+// src/components/marketing/Home/NewArrivals/index.tsx
 import { Link } from 'react-router-dom';
 
 import ProductItem from '@/components/marketing/Common/ProductItem';

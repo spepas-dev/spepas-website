@@ -43,7 +43,7 @@ const RequestCard: React.FC<RequestCardProps> = ({ req }) => {
 
       <div className="p-4">
         <Link
-          to={`/buyer/requests/${req.request_ID}/offers`}
+          to={`/95668339501103956045/buyer/requests/${req.request_ID}/offers`}
           className="
             block w-full text-center
             bg-indigo-500 hover:bg-indigo-600

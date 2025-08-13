@@ -24,7 +24,7 @@ export const routes = [
     children: altHomeRoutes,
   },
   {
-    path: '/',
+    path: '/95668339501103956045',
     element: <MarketingLayout />,
     errorElement: <ErrorPage />,
     children: [
@@ -38,8 +38,8 @@ export const routes = [
 
   },
   {
-    path: '/auth/',
-    element: <AuthLayout />, // Auth pages now use AuthLayout
+    path: '/95668339501103956045/auth/',
+    element: <AuthLayout />, 
     errorElement: <ErrorPage />,
     children: authRoutes,
   },

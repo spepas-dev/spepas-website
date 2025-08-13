@@ -19,7 +19,7 @@ const GopaRegistrationForm: React.FC = () => {
       const payload = { Specialties: specialties.split(',').map(s => s.trim()) };
       gopaRegistrationSchema.parse(payload);
       await createGopaProfileSelf(payload);
-      navigate('/add-payment-account');
+      navigate('/95668339501103956045/add-payment-account');
     } catch {
       setError('Registration failed. Please check your input.');
     } finally {

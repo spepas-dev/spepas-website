@@ -27,7 +27,7 @@ const MepaRegistrationForm: React.FC = () => {
       };
       mepaRegistrationSchema.parse(payload);
       await createMepaProfileSelf(payload);
-      navigate('/add-payment-account');
+      navigate('/95668339501103956045/add-payment-account');
     } catch {
       setError('Registration failed. Please check your inputs.');
     } finally {

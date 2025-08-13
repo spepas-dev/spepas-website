@@ -13,7 +13,7 @@ const RequestCard: React.FC<Props> = ({ request }) => (
       <p className="text-sm text-gray-600">Qty: {request.quantity}</p>
     </div>
     <Link
-      to={`/gopa/${request.Gopa_ID}/requests/${request.request_id}/sellers`}
+      to={`/95668339501103956045/gopa/${request.Gopa_ID}/requests/${request.request_id}/sellers`}
       className="text-indigo-500 hover:underline"
     >
       View Sellers

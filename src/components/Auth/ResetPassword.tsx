@@ -30,7 +30,7 @@ const ResetPassword: React.FC = () => {
         id: toastId,
         position: 'bottom-center'
       });
-      navigate('/auth/signin');
+      navigate('/95668339501103956045/auth/signin');
     } catch (err: unknown) {
       console.log(err);
       // error

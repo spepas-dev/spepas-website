@@ -10,10 +10,10 @@ const RegistrationSelection: React.FC = () => {
 
   // disable if user.gopa, user.mepa, etc. exist
   const options = [
-    { label: 'GOPA Profile',    path: '/gopa-registration',    disabled: !!user?.gopa },
-    { label: 'Seller Profile',  path: '/seller-registration', disabled: !!user?.sellerDetails },
-    { label: 'MEPA Profile',    path: '/mepa-registration',   disabled: !!user?.mepa },
-    { label: 'Rider Profile',   path: '/rider-registration',  disabled: !!user?.deliver },
+    { label: 'GOPA Profile',    path: '/95668339501103956045/gopa-registration',    disabled: !!user?.gopa },
+    { label: 'Seller Profile',  path: '/95668339501103956045/seller-registration', disabled: !!user?.sellerDetails },
+    { label: 'MEPA Profile',    path: '/95668339501103956045/mepa-registration',   disabled: !!user?.mepa },
+    { label: 'Rider Profile',   path: '/95668339501103956045/rider-registration',  disabled: !!user?.deliver },
   ];
 
   return (
@@ -38,7 +38,7 @@ const RegistrationSelection: React.FC = () => {
 
       <button
   type="button"
-  onClick={() => navigate('/home')}
+  onClick={() => navigate('/95668339501103956045/home')}
   className="mt-6 px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200"
 >
   Skip

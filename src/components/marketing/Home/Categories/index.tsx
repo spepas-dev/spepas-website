@@ -1,3 +1,4 @@
+// src/components/marketing/Home/Categories/index.tsx
 'use client';
 // Import Swiper styles
 import 'swiper/css/navigation';
