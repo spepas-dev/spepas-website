@@ -1,7 +1,8 @@
 // src/components/buyer/CartList.tsx
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getItemsInCartAll, removeBidFromCartAPI } from '@/lib/orderBidsApis'
+import toast from 'react-hot-toast'
+import { getItemsInCartAll, removeBidFromCartAPI, getUserChargesAPI } from '@/lib/orderBidsApis'
 import CartItem from './CartItem'
 import Lottie from 'lottie-react'
 import loadingAnimation from '@/assets/lottie/loading-cart.json'
@@ -23,6 +24,59 @@ const CartList: React.FC = () => {
     removeBidFromCartAPI({ cart_ID: cartId })
       .then(() => setItems(prev => prev.filter(i => i.cart_ID !== cartId)))
       .catch(console.error)
+  }
+
+  // 1) Prompt via toast, 2) call getUserCharges, 3) navigate to /buyer/checkout
+  const handleCheckout = () => {
+    toast(
+      (t) => (
+        <div className="p-4 bg-white rounded shadow-lg">
+          <p className="mb-2 font-medium">Aggregate cart items?</p>
+          <div className="flex justify-end gap-2">
+            <button
+              className="px-3 py-1 bg-green-600 text-white rounded"
+              onClick={async () => {
+                toast.dismiss(t.id)
+                await confirmAggregate('1')
+              }}
+            >
+              Yes
+            </button>
+            <button
+              className="px-3 py-1 bg-gray-200 rounded"
+              onClick={async () => {
+                toast.dismiss(t.id)
+                await confirmAggregate('0')
+              }}
+            >
+              No
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        // ensure toast appears below header and above everything else
+        style: {
+          marginTop: '4rem', 
+          zIndex: 10000,
+        },
+      }
+    )
+  }
+
+  const confirmAggregate = async (agg: '1' | '0') => {
+    setLoading(true)
+    try {
+      const charges = await getUserChargesAPI({ aggeagate: agg })
+      // navigate to the buyer-specific checkout route
+      navigate('/buyer/checkout', { state: { charges, aggeagate: agg } })
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to fetch charges.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const total = items.reduce((sum, i) => sum + (i.bid.totalPrice || 0), 0)
@@ -73,7 +127,7 @@ const CartList: React.FC = () => {
           Total: GH₵ {total.toFixed(2)}
         </span>
         <button
-          onClick={() => navigate('/checkout')}
+          onClick={handleCheckout}
           className="mt-4 sm:mt-0 bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base px-6 py-2 rounded transition"
         >
           Checkout

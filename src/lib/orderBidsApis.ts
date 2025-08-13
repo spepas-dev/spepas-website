@@ -15,6 +15,10 @@ import {
   userIdParamsSchema,
   requestIdParamsSchema,
   sellerIdParamsSchema,
+  // new schemas
+  checkoutWithExistingAddressSchema,
+  checkoutWithNewAddressSchema,
+  getUserChargesParamsSchema,
 } from './orderBidsZodValidation';
 
 /**
@@ -63,7 +67,7 @@ export const assignRequestToSellerAPI = async (payload: {
 };
 
 /**
- * 4. Submit A Bid -bids-submitBids page
+ * 4. Submit A Bid - bids-submitBids page
  */
 export const submitBidAPI = async (payload: {
   bidding_ID: string;
@@ -255,4 +259,65 @@ export const getSellerBidsForRequestsHistoryAPI = async (params: { seller_id: st
   );
   console.log('Response from seller-bids-for-requests-history-all:', response.data);
   return response.data;
+};
+
+/**
+ * 14. Checkout with Existing Address
+ */
+export const checkoutWithExistingAddressAPI = async (payload: {
+  address_id: string;
+  aggeagate: number;
+  paymentDetails: {
+    paymentMode: string;
+    walletNumber: string;
+    network: string;
+  };
+}) => {
+  checkoutWithExistingAddressSchema.parse(payload);
+  const response = await apiClient.post('/checkout/with-existing-address', payload);
+  console.log('Response from checkout/with-existing-address:', response.data);
+  return response.data;
+};
+
+/**
+ * 15. Checkout with New Address
+ */
+export const checkoutWithNewAddressAPI = async (payload: {
+  address: {
+    title: string;
+    addressDetails: string;
+    longitude: number;
+    latitude: number;
+  };
+  aggeagate: number;
+  paymentDetails: {
+    paymentMode: string;
+    walletNumber: string;
+    network: string;
+  };
+}) => {
+  checkoutWithNewAddressSchema.parse(payload);
+  const response = await apiClient.post('/checkout/with-new-address', payload);
+  console.log('Response from checkout/with-new-address:', response.data);
+  return response.data;
+};
+
+/**
+ * 16. Get User Charges
+ */
+export const getUserChargesAPI = async (params: { aggeagate: string }) => {
+  getUserChargesParamsSchema.parse(params);
+
+  // call the endpoint
+  const response = await apiClient.get(
+    `/charge/get-user-charges/${params.aggeagate}`
+  );
+
+  // response.data is:
+  // { status: 1, message: "Successful", data: { MAIN_AMOUNT, SERVICE_CHARGE, … } }
+  const envelope = response.data;
+  console.log('Response envelope:', envelope);
+
+  // return only the .data payload
+  return envelope.data;
 };
