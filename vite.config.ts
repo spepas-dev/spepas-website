@@ -16,6 +16,9 @@ export default ({ mode }: { mode: string }) => {
   console.log('mode', mode);
   const apiUrl = process.env.VITE_API_URL;
   console.log('📡 API URL:', apiUrl);
+
+  const apiProtocolIsHttps = apiUrl?.startsWith('https'); // *adjusted*
+
   const proxyConfig: ProxyOptions = {
     target: apiUrl,
     changeOrigin: true,
@@ -41,8 +44,8 @@ export default ({ mode }: { mode: string }) => {
           console.log('Headers:', headers);
 
           // Add any custom headers if needed
-          proxyReq.setHeader('X-Forwarded-Proto', 'http');
-          proxyReq.setHeader('Origin', 'http://localhost:5173');
+          proxyReq.setHeader('X-Forwarded-Proto', apiProtocolIsHttps ? 'https' : 'http'); // *adjusted*
+          proxyReq.setHeader('Origin', 'http://localhost:3000'); // *adjusted*
         });
 
         proxy.on('proxyRes', (proxyRes, req, res) => {
@@ -51,6 +54,25 @@ export default ({ mode }: { mode: string }) => {
           console.log('\n✨ Incoming Response:');
           console.log('Status:', proxyRes.statusCode);
           console.log('Headers:', proxyRes.headers);
+
+          // --- Rewrite Set-Cookie so the browser actually stores it in dev ---
+          const setCookieHeader = proxyRes.headers['set-cookie']; // *adjusted*
+          if (Array.isArray(setCookieHeader)) { // *adjusted*
+            const rewritten = setCookieHeader.map((cookie) => { // *adjusted*
+              let c = cookie; // *adjusted*
+              // Force dev-friendly domain/path // *adjusted*
+              c = c.replace(/Domain=[^;]+/i, 'Domain=localhost'); // *adjusted*
+              c = c.replace(/Path=[^;]+/i, 'Path=/'); // *adjusted*
+              // If backend sets SameSite=None; Secure, drop Secure in plain HTTP dev // *adjusted*
+              if (!apiProtocolIsHttps) { // *adjusted*
+                c = c.replace(/; *Secure/gi, ''); // *adjusted*
+                // If SameSite=None exists, Lax is fine for same-site dev // *adjusted*
+                c = c.replace(/; *SameSite=None/gi, '; SameSite=Lax'); // *adjusted*
+              }
+              return c; // *adjusted*
+            }); // *adjusted*
+            proxyRes.headers['set-cookie'] = rewritten; // *adjusted*
+          } // *adjusted*
 
           proxyRes.on('data', (chunk) => {
             chunks.push(chunk);

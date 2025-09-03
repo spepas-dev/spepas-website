@@ -12,12 +12,11 @@ import ShopDetailsPage from '@/pages/marketing/shop-details/page';
 import AboutUsPage from '@/pages/marketing/about-us/page';
 // import AltHomePage from '@/pages/marketing/home/alt-home/page';
 
-import MyAccountPage from '@/pages/marketing/my-account/page';
-import ProtectedRoute from '@/components/common/ProtectedRoute';
+// import ProtectedRoute from '@/components/common/ProtectedRoute'; // *adjusted* (removed; now using ProtectedLayout in routes/index)
 
 export const websiteRoutes: RouteObject[] = [
-  { path: 'home', element: <HomePage /> },
-  { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
+  { path: 'home',            element: <HomePage /> },
+  { path: 'privacy-policy',  element: <PrivacyPolicyPage /> },
   { path: 'refund-policy',   element: <RefundPolicyPage /> },
   { path: 'terms',           element: <TermsOfUsePage /> },
   { path: 'faqs',            element: <FAQPage /> },
@@ -26,13 +25,6 @@ export const websiteRoutes: RouteObject[] = [
   { path: 'shop/:id',        element: <ShopDetailsPage /> },
   { path: 'about-us',        element: <AboutUsPage /> },
 
-
-  
-  {
-    path: 'my-account',
-    element: <ProtectedRoute />,       
-    children: [
-      { index: true, element: <MyAccountPage /> }
-    ]
-  }
+  // NOTE: The `my-account` route has been moved under ProtectedLayout in routes/index.tsx  // *adjusted*
+  // to avoid using the old ProtectedRoute wrapper.
 ];

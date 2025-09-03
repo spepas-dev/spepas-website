@@ -12,6 +12,7 @@ import {
   uploadRiderLicenseFrontSchema,
   uploadRiderLicenseBackSchema,
   uploadRiderVehicleFrontSchema,
+  getUserDetailsParamSchema, // *adjusted*
 } from './profilingZodValidation';
 
 /**
@@ -188,3 +189,14 @@ export const getUserIdentificationSelf = async () => {
   const { data } = await apiClient.get('/user/user-identification-self');
   return data;
 };
+
+/**
+ * 12. Get Single User Information (Admin-and-Self)                               // *adjusted*
+ *     GET /user/user-details/{user_id}                                       // *adjusted*
+ *                             
+ */
+export const getUserDetailsById = async (user_id: string) => {                // *adjusted*
+  getUserDetailsParamSchema.parse({ user_id });                                // *adjusted*
+  const { data } = await apiClient.get(`/user/user-details/${user_id}`);       // *adjusted*
+  return data;                                                                 // *adjusted*
+};        

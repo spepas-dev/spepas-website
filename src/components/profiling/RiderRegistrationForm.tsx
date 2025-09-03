@@ -43,7 +43,7 @@ const RiderRegistrationForm: React.FC = () => {
       riderVehicleRegistrationSchema.parse(vehiclePayload);
       await addRiderVehicleSelf(vehiclePayload as any);
 
-      navigate('/add-payment-account');
+      navigate('/95668339501103956045/add-payment-account');
     } catch {
       setError('Registration failed. Please check your inputs.');
     } finally {

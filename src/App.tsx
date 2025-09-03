@@ -1,4 +1,4 @@
-//src/App.tsx
+// src/App.tsx
 import { RouterProvider } from 'react-router-dom';
 
 // import { Toaster } from 'react-hot-toast'
@@ -11,6 +11,7 @@ function App() {
       {/* <Toaster /> */}
 
       <RouterProvider router={router} />
+      {/* <SessionGuard />  */} {/* *adjusted* — remove global guard so public pages stay public */}
     </>
   );
 }

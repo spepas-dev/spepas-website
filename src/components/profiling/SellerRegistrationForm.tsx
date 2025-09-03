@@ -25,7 +25,7 @@ const SellerRegistrationForm: React.FC = () => {
       };
       sellerRegistrationSchema.parse(payload);
       await createSellerProfileSelf(payload);
-      navigate('/add-payment-account');
+      navigate('/95668339501103956045/add-payment-account');
     } catch {
       setError('Registration failed. Please check your inputs.');
     } finally {

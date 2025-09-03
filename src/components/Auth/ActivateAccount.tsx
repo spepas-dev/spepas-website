@@ -26,6 +26,9 @@ const ActivateAccount: React.FC = () => {
 
     try {
       await activateAccount({ otp, otpID });
+      localStorage.removeItem('otpID');                               // *adjusted*
+      // small tick to ensure Set-Cookie is committed in dev proxy before nav  // *adjusted*
+      await new Promise((r) => setTimeout(r, 150));                    // *adjusted*
       toast.success('Account activated!', {
         id: toastId,
         position: 'bottom-center'
@@ -81,7 +84,7 @@ const ActivateAccount: React.FC = () => {
             </button>
             <p className="text-center mt-6">
               Didn’t receive an OTP?{' '}
-              <Link to="/auth/forgot-password" className="text-dark hover:text-blue">
+              <Link to="/95668339501103956045/auth/forgot-password" className="text-dark hover:text-blue"> {/* *adjusted* */}
                 Resend OTP
               </Link>
             </p>

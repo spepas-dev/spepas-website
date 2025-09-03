@@ -81,3 +81,8 @@ export const uploadRiderVehicleFrontSchema = z.object({
   Image_Type: z.string().nonempty(),
   file: z.any(),
 })
+
+// 12. Get Single User Information (Admin-only) param schema                   // *adjusted*
+export const getUserDetailsParamSchema = z.object({                            // *adjusted*
+  user_id: z.string().uuid(),                                                 // *adjusted*
+});  
