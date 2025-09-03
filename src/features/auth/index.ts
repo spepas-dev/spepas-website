@@ -21,6 +21,10 @@ import {
   refreshTokenAPI,
 } from "../../lib/auth";
 
+import { registerAuthSetter } from "@/lib/sessionBridge"; // *adjusted*
+import { getUserDetailsById } from '@/lib/profiling';     // *adjusted*
+import { decodeUserIdFromToken } from '@/lib/jwt';        // *adjusted*
+
 /**
  * --------------------------------------------------
  * Payload Type Definitions for Each Endpoint
@@ -71,8 +75,6 @@ export type ChangePasswordPayload = {
  * Auth State and Context Types
  * --------------------------------------------------
  */
-
-// Define a user type based on your API response.
 
 // ----- nested profile interfaces -----
 export interface GopaProfile {
@@ -194,6 +196,7 @@ export type AuthContextType = {
   resetPassword: (payload: ResetPasswordPayload) => Promise<void>;
   changePassword: (payload: ChangePasswordPayload) => Promise<void>;
   refreshAuth: () => Promise<void>;
+  refetchUser: () => Promise<void>; // *adjusted*
 };
 
 // Create the AuthContext.
@@ -237,7 +240,30 @@ export const AuthProvider = ({
   // Set the global setter so that external modules (like an Axios interceptor) can update auth state.
   useEffect(() => {
     globalSetAuthData = setAuthData;
-  }, [setAuthData]);
+    registerAuthSetter(setAuthData); // *adjusted*
+  }, [setAuthData]); // *adjusted*
+
+  // --- Hydrate authoritative user from backend and replace authData.user --- // *adjusted*
+  const refetchUser = async (): Promise<void> => {                            // *adjusted*
+    try {                                                                     // *adjusted*
+      const userId =
+        (authData.user as any)?.User_ID ||
+        (authData.user as any)?.id ||
+        decodeUserIdFromToken(authData.token);                                // *adjusted*
+
+      if (!userId) return;                                                    // *adjusted*
+
+      const res = await getUserDetailsById(String(userId));                   // *adjusted*
+      const fresh =
+        (res as any)?.data?.data ?? (res as any)?.data ?? (res as any) ?? null; // *adjusted*
+
+      if (fresh) {                                                            // *adjusted*
+        setAuthData((prev) => ({ ...prev, user: fresh }));                    // *adjusted*
+      }                                                                        // *adjusted*
+    } catch (e) {                                                              // *adjusted*
+      console.error("refetchUser failed:", e);                                 // *adjusted*
+    }                                                                          // *adjusted*
+  };                                                                           // *adjusted*
 
   /**
    * Signup: Registers a new user.
@@ -259,10 +285,10 @@ export const AuthProvider = ({
     try {
       const response = await signinAPI(payload);
       setAuthData(response.data);
+      await refetchUser();                                                    // *adjusted*
     } catch (error) {
       console.error("Signin failed:", error);
       throw error;
-      
     }
   };
 
@@ -273,6 +299,7 @@ export const AuthProvider = ({
     try {
       const response = await activateAccountAPI(payload);
       setAuthData(response.data);
+      await refetchUser();                                                    // *adjusted*
     } catch (error) {
       console.error("Activate account failed:", error);
       throw error;
@@ -403,6 +430,7 @@ export const AuthProvider = ({
     resetPassword,
     changePassword,
     refreshAuth,
+    refetchUser, // *adjusted*
   };
 
   // Since this file remains a .ts file (no JSX), we use React.createElement.

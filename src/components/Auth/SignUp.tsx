@@ -194,7 +194,7 @@ const Signup: React.FC = () => {
                 >
                   <option value="">Select user type</option>
                   <option value="BUYER">Buyer</option>
-                  <option value="SELLER">Seller</option>
+                  
                 </select>
               </div>
 

@@ -1,4 +1,4 @@
-// src/components/marketing/MyAccount/index.tsx
+// src/pages/marketing/my-account/index.tsx
 import React, { Fragment, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Disclosure, Transition } from '@headlessui/react';
@@ -16,12 +16,18 @@ import GroupsRolesTab from './GroupsRolesTab';
 import AddressDetails from './AddressDetails';
 import WalletDetails from './WalletDetails';
 
+// NEW:
+import SellerDocumentsTab from './SellerDocumentsTab';
+import RiderDocumentsTab from './RiderDocumentsTab';
+
 type TabKey =
   | 'general'
   | 'gopa'
   | 'mepa'
   | 'seller'
+  | 'sellerDocs'   // NEW
   | 'deliver'
+  | 'riderDocs'    // NEW
   | 'groups'
   | 'payments'
   | 'address'
@@ -30,10 +36,16 @@ type TabKey =
 type Role = 'GOPA' | 'MEPA' | 'SELLER' | 'RIDER' | 'BUYER';
 
 const MyAccount: React.FC = () => {
-  const { authData, logout } = useAuth();
+  const { authData, logout, refetchUser } = useAuth(); // *adjusted*
   const { accountType, setAccountType } = useAccountType();
   const user = authData!.user!;
   const navigate = useNavigate();
+
+  // 🔄 Hydrate latest user (with new profiles) on first mount                 // *adjusted*
+  useEffect(() => {                                                           // *adjusted*
+    refetchUser();                                                            // *adjusted*
+    // eslint-disable-next-line react-hooks/exhaustive-deps                   // *adjusted*
+  }, []);                                                                     // *adjusted*
 
   // Format “Member Since”
   const createdMonthYear = new Date(user.createdAt).toLocaleString('default', {
@@ -57,14 +69,16 @@ const MyAccount: React.FC = () => {
   // All possible tabs
   const allTabs: Array<{ key: TabKey; label: string }> = [
     { key: 'general', label: 'General Profile' },
-    user.gopa &&    { key: 'gopa',    label: 'My GOPA Profile' },
-    user.mepa &&    { key: 'mepa',    label: 'My MEPA Profile' },
-    user.sellerDetails && { key: 'seller',  label: 'My Seller Profile' },
+    user.gopa && { key: 'gopa', label: 'My GOPA Profile' },
+    user.mepa && { key: 'mepa', label: 'My MEPA Profile' },
+    user.sellerDetails && { key: 'seller', label: 'My Seller Profile' },
+    user.sellerDetails && { key: 'sellerDocs', label: 'Seller Documents' }, // NEW
     user.deliver && { key: 'deliver', label: 'My Delivery Profile' },
-    ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups',   label: 'Groups/Roles' },
+    user.deliver && { key: 'riderDocs', label: 'Rider Documents' },         // NEW
+    ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups/Roles' },
     (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments', label: 'My Payment Accounts' },
     { key: 'address', label: 'My Addresses' },
-    { key: 'wallet',  label: 'My Wallet' },
+    { key: 'wallet', label: 'My Wallet' },
   ]
     .filter(Boolean)
     .map((item) => item as { key: TabKey; label: string });
@@ -72,11 +86,11 @@ const MyAccount: React.FC = () => {
   // Filter tabs based on selected accountType
   const filteredTabs = allTabs.filter(({ key }) => {
     if (key === 'general') return true;
-    if (accountType === 'GOPA'   && key === 'gopa')    return true;
-    if (accountType === 'MEPA'   && key === 'mepa')    return true;
-    if (accountType === 'SELLER' && key === 'seller')  return true;
-    if (accountType === 'RIDER'  && key === 'deliver') return true;
-    if (accountType === 'BUYER'  && key === 'address') return true;
+    if (accountType === 'GOPA'   && key === 'gopa')        return true;
+    if (accountType === 'MEPA'   && key === 'mepa')        return true;
+    if (accountType === 'SELLER' && (key === 'seller' || key === 'sellerDocs' || key === 'wallet'))  return true; // include docs
+    if (accountType === 'RIDER'  && (key === 'deliver' || key === 'riderDocs'))  return true; // include docs
+    if (accountType === 'BUYER'  && (key === 'address' || key === 'payments'))     return true;
     return false;
   });
 
@@ -188,15 +202,17 @@ const MyAccount: React.FC = () => {
           {/* Main Content */}
           <main className="xl:flex-1 w-full">
             <div className="bg-gray-75 rounded-2xl shadow-[0_6px_30px_rgba(92,124,250,0.1)] py-10 px-6 sm:px-10 xl:px-12">
-              {activeTab === 'general' && <GeneralDetails user={user} />}
-              {activeTab === 'gopa'    && user.gopa           && <GopaProfileTab   profile={user.gopa} />}
-              {activeTab === 'mepa'    && user.mepa           && <MepaProfileTab   profile={user.mepa} />}
-              {activeTab === 'seller'  && user.sellerDetails  && <SellerDetailsTab details={user.sellerDetails} />}
-              {activeTab === 'deliver' && user.deliver        && <DeliverProfileTab deliver={user.deliver} />}
-              {activeTab === 'groups'  && ( <GroupsRolesTab groups={user.user_groups ?? []} roles={user.user_roles ?? []} /> )}
-              {activeTab === 'payments'&& user.paymentAccounts&& <PaymentAccountsTab accounts={user.paymentAccounts} />}
-              {activeTab === 'address' && <AddressDetails />}
-              {activeTab === 'wallet'  && <WalletDetails />}
+              {activeTab === 'general'    && <GeneralDetails user={user} />}
+              {activeTab === 'gopa'       && user.gopa           && <GopaProfileTab   profile={user.gopa} />}
+              {activeTab === 'mepa'       && user.mepa           && <MepaProfileTab   profile={user.mepa} />}
+              {activeTab === 'seller'     && user.sellerDetails  && <SellerDetailsTab details={user.sellerDetails} />}
+              {activeTab === 'sellerDocs' && user.sellerDetails  && <SellerDocumentsTab />}{/* NEW */}
+              {activeTab === 'deliver'    && user.deliver        && <DeliverProfileTab deliver={user.deliver} />}
+              {activeTab === 'riderDocs'  && user.deliver        && <RiderDocumentsTab />}{/* NEW */}
+              {activeTab === 'groups'     && ( <GroupsRolesTab groups={user.user_groups ?? []} roles={user.user_roles ?? []} /> )}
+              {activeTab === 'payments'   && user.paymentAccounts&& <PaymentAccountsTab accounts={user.paymentAccounts} />}
+              {activeTab === 'address'    && <AddressDetails />}
+              {activeTab === 'wallet'     && user.sellerDetails  && <WalletDetails />}
             </div>
           </main>
         </div>
@@ -204,30 +220,35 @@ const MyAccount: React.FC = () => {
 
       {/* Profile Switcher */}
       {showSwitcher && (
-       <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10"
-                 onClick={() => setShowSwitcher(false)}>
-       <div className="bg-white rounded-lg p-6 w-80 text-center"
-           onClick={(e) => e.stopPropagation()}>
-         <h3 className="text-lg font-semibold mb-4">Switch Account Type</h3>
-         <ul className="space-y-3">
-           {availableRoles.map(role => (
-             <li key={role}>
-               <button
-                 onClick={() => { setAccountType(role); setShowSwitcher(false); }}
-                 className="w-full py-2 px-6 bg-gradient-to-r from-blue to-blue-500 text-white font-medium rounded-2xl shadow-md hover:opacity-90 transition"
-               >
-                 {role}
-               </button>
-             </li>
-           ))}
-         </ul>
-       </div>
-     </div>
-     
-     
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10"
+          onClick={() => setShowSwitcher(false)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-80 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold mb-4">Switch Account Type</h3>
+            <ul className="space-y-3">
+              {availableRoles.map((role) => (
+                <li key={role}>
+                  <button
+                    onClick={() => {
+                      setAccountType(role);
+                      setShowSwitcher(false);
+                    }}
+                    className="w-full py-2 px-6 bg-gradient-to-r from-blue to-blue-500 text-white font-medium rounded-2xl shadow-md hover:opacity-90 transition"
+                  >
+                    {role}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
       )}
     </section>
-)
-}
+  );
+};
 
 export default MyAccount;
