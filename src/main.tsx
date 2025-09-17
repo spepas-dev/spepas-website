@@ -51,6 +51,7 @@ async function getClientIP(): Promise<string | null> {
 
 //src/main.tsx
 import './index.css';
+import 'leaflet/dist/leaflet.css'; // *adjusted*
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { StrictMode } from 'react';

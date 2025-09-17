@@ -1,5 +1,5 @@
 // src/components/profiling/RiderRegistrationForm.tsx
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '@/components/common/Breadcrumb';
 import { createRiderProfileSelf, addRiderVehicleSelf } from '@/lib/profiling';
@@ -7,6 +7,7 @@ import {
   riderRegistrationSchema,
   riderVehicleRegistrationSchema
 } from '@/lib/profilingZodValidation';
+import MapPicker from '@/components/common/MapPicker'; // *added*
 
 const RiderRegistrationForm: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +20,17 @@ const RiderRegistrationForm: React.FC = () => {
   const [registrationNumber, setRegistrationNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // derived for MapPicker
+  const latNum = useMemo(() => {
+    const n = parseFloat(latitude);
+    return Number.isFinite(n) ? n : null;
+  }, [latitude]);
+
+  const lngNum = useMemo(() => {
+    const n = parseFloat(longitude);
+    return Number.isFinite(n) ? n : null;
+  }, [longitude]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -68,28 +80,51 @@ const RiderRegistrationForm: React.FC = () => {
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
-            <div className="grid grid-cols-2 gap-4 mb-5">
-              <div>
-                <label className="block mb-2.5">Longitude</label>
-                <input
-                  type="number"
-                  value={longitude}
-                  onChange={e => setLongitude(e.target.value)}
-                  className="w-full rounded-lg border bg-gray-100 p-3"
-                  required
-                />
+
+            {/* Map + Coordinates */}
+            <div className="mb-5 space-y-4">
+              <label className="block font-medium">Location</label>
+
+              <MapPicker
+                value={{ lat: latNum, lng: lngNum }}
+                onChange={(lat, lng) => {
+                  setLatitude(String(lat));
+                  setLongitude(String(lng));
+                }}
+                height={320}
+                showLocate
+                defaultZoom={12}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2.5">Longitude</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={longitude}
+                    onChange={e => setLongitude(e.target.value)}
+                    className="w-full rounded-lg border bg-gray-100 p-3"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2.5">Latitude</label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={latitude}
+                    onChange={e => setLatitude(e.target.value)}
+                    className="w-full rounded-lg border bg-gray-100 p-3"
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block mb-2.5">Latitude</label>
-                <input
-                  type="number"
-                  value={latitude}
-                  onChange={e => setLatitude(e.target.value)}
-                  className="w-full rounded-lg border bg-gray-100 p-3"
-                  required
-                />
-              </div>
+              <p className="text-xs text-gray-500">
+                Tip: Click the map or use “Use my location” to auto-fill the coordinates.
+              </p>
             </div>
+
             <label className="block mb-2.5">Vehicle Type</label>
             <input
               type="text"

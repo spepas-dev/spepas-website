@@ -234,8 +234,10 @@ const MyAccount: React.FC = () => {
                 <li key={role}>
                   <button
                     onClick={() => {
-                      setAccountType(role);
+                      // ⬇️ Stash desired role and go to OTP screen
+                      localStorage.setItem('pendingAccountType', role);
                       setShowSwitcher(false);
+                      navigate('/95668339501103956045/auth/profile-switch-otp');
                     }}
                     className="w-full py-2 px-6 bg-gradient-to-r from-blue to-blue-500 text-white font-medium rounded-2xl shadow-md hover:opacity-90 transition"
                   >

@@ -112,3 +112,52 @@ export const sparePartsResponseSchema = z.object({
   message: z.string(),
   data: z.array(sparePartSchema),
 });
+
+/**
+ * Detail response (adds nested carModel → carBrand → manufacturer)
+ */
+export const sparePartDetailResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: sparePartSchema.extend({
+    carModel: z.object({
+      id: z.number(),
+      CarModel_ID: z.string().uuid(),
+      name: z.string(),
+      yearOfMake: z.number(),
+      carBrand_ID: z.string().uuid(),
+      status: z.number(),
+      createdAt: z.string(),
+      carBrand: z.object({
+        id: z.number(),
+        CarBrand_ID: z.string().uuid(),
+        name: z.string(),
+        status: z.number(),
+        manufacturer_ID: z.string().uuid(),
+        createdAt: z.string(),
+        type: z.string(),
+        manufacturer: z.object({
+          id: z.number(),
+          Manufacturer_ID: z.string().uuid(),
+          name: z.string(),
+          country: z.string(),
+          status: z.number(),
+          createdAt: z.string(),
+        }),
+      }),
+    }).optional(),
+  }),
+});
+
+export const sparePartCategoriesResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: z.array(
+    z.object({
+      id: z.number(),
+      Category_ID: z.string().uuid(),
+      name: z.string(),
+      parent_ID: z.string().uuid().nullable(),
+    })
+  ),
+});
