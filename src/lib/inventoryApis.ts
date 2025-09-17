@@ -1,10 +1,12 @@
-// src/lib/inventoryApis.ts
+//src/lib/inventoryApis.ts
 import apiClient from './axios';
 import {
   carManufacturersResponseSchema,
   carBrandsResponseSchema,
   carModelsResponseSchema,
   sparePartsResponseSchema,
+  sparePartDetailResponseSchema,
+  sparePartCategoriesResponseSchema,
 } from './inventoryZodValidation';
 
 function cacheBusterParams() {
@@ -49,4 +51,25 @@ export const getSpareParts = async () => {
   );
   console.log('Response from sparepart-all:', data);
   return sparePartsResponseSchema.parse(data);
+};
+
+// GET: spare part detail by code (numeric code)
+export const getSparePartDetailByCode = async (spare_part_code: string | number) => {
+  const code = encodeURIComponent(String(spare_part_code));
+  const { data } = await apiClient.get(
+    `/inventry/sparepart-detail/${code}`,
+    cacheBusterParams()
+  );
+  console.log('Response from sparepart-detail:', data);
+  return sparePartDetailResponseSchema.parse(data);
+};
+
+// GET: list all spare part categories
+export const getSparePartCategories = async () => {
+  const { data } = await apiClient.get(
+    '/inventry/category-all',
+    cacheBusterParams()
+  );
+  console.log('Response from category-all:', data);
+  return sparePartCategoriesResponseSchema.parse(data);
 };

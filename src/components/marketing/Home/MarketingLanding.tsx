@@ -1,7 +1,7 @@
 // src/components/marketing/Home/MarketingLanding.tsx
 import Services from '../extras/Services';
 // import Values from '../extras/Values';
-import BestSeller from './BestSeller';
+// import BestSeller from './BestSeller';
 import Hero from './Hero';
 import Testimonials from './Testimonials';
 
@@ -14,7 +14,7 @@ const MarketingLanding = () => {
       {/* <Categories /> */}
       {/* <NewArrival /> */}
       {/* <PromoBanner /> */}
-      <BestSeller />
+      {/* <BestSeller /> */}
       {/* <CounDown /> */}
       <Testimonials />
       {/* <Newsletter /> */}
