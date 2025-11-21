@@ -12,9 +12,15 @@ export const signupRequestSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
   name: z.string().min(1, "Name is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
+  phoneNumber: z
+    .string()
+    .nonempty("Phone number is required")
+    .regex(/^\d+$/, "Phone number must contain digits only (0-9).")
+    .min(10, "Phone number is too short for a Ghana number (min 10 digits).")
+    .max(15, 'Phone number is too long.'), // allows 055... and 233...,
   user_type: z.literal("BUYER"),
 });
+
 
 // 2. Signin Request Schema
 export const signinRequestSchema = z.object({

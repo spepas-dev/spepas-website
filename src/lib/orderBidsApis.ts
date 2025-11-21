@@ -31,7 +31,7 @@ export const requestInventorySparePartAPI = async (payload: {
 }) => {
   inventorySparePartRequestSchema.parse(payload);
   const response = await apiClient.post('/request/inventory-spare-part-request', payload);
-  console.log('Response from inventory-spare-part-request:', response.data);
+  // console.log('Response from inventory-spare-part-request:', response.data);
   return response.data;
 };
 
@@ -49,7 +49,7 @@ export const requestNonInventorySparePartAPI = async (payload: {
 }) => {
   nonInventorySparePartRequestSchema.parse(payload);
   const response = await apiClient.post('/request/non-inventory-spare-part-request', payload);
-  console.log('Response from non-inventory-spare-part-request:', response.data);
+  // console.log('Response from non-inventory-spare-part-request:', response.data);
   return response.data;
 };
 
@@ -62,7 +62,7 @@ export const assignRequestToSellerAPI = async (payload: {
 }) => {
   assignRequestToSellerSchema.parse(payload);
   const response = await apiClient.post('/request/assign-request-to-seller', payload);
-  console.log('Response from assign-request-to-seller:', response.data);
+  // console.log('Response from assign-request-to-seller:', response.data);
   return response.data;
 };
 
@@ -78,7 +78,7 @@ export const submitBidAPI = async (payload: {
 }) => {
   submitBidSchema.parse(payload);
   const response = await apiClient.post('/bid/submit-bid', payload);
-  console.log('Response from submit-bid:', response.data);
+  // console.log('Response from submit-bid:', response.data);
   return response.data;
 };
 
@@ -88,7 +88,7 @@ export const submitBidAPI = async (payload: {
 export const addBidToCartAPI = async (payload: { bidding_ID: string }) => {
   addBidToCartSchema.parse(payload);
   const response = await apiClient.post('/cart/add-bid-to-cart', payload);
-  console.log('Response from add-bid-to-cart:', response.data);
+  // console.log('Response from add-bid-to-cart:', response.data);
   return response.data;
 };
 
@@ -98,7 +98,7 @@ export const addBidToCartAPI = async (payload: { bidding_ID: string }) => {
 export const removeBidFromCartAPI = async (payload: { cart_ID: string }) => {
   removeBidFromCartSchema.parse(payload);
   const response = await apiClient.post('/cart/remove-bid-from-cart', payload);
-  console.log('Response from remove-bid-from-cart:', response.data);
+  // console.log('Response from remove-bid-from-cart:', response.data);
   return response.data;
 };
 
@@ -116,7 +116,7 @@ export const uploadSparePartImagesAPI = async (payload: {
   const response = await apiClient.post('/bid/upload-sparepart-images', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
-  console.log('Response from upload-sparepart-images:', response.data);
+  // console.log('Response from upload-sparepart-images:', response.data);
   return response.data;
 };
 
@@ -128,7 +128,7 @@ export const uploadSparePartImagesAPI = async (payload: {
 export const getBuyerActiveRequestsAll = async () => {
   emptySchema.parse({});
   const response = await apiClient.get('/request/buyer-active-request-all');
-  console.log('Response from buyer-active-request-all:', response.data);
+  // console.log('Response from buyer-active-request-all:', response.data);
   return response.data;
 };
 
@@ -138,7 +138,7 @@ export const getBuyerActiveRequestsAll = async () => {
 export const getBuyerRequestHistoryAll = async () => {
   emptySchema.parse({});
   const response = await apiClient.get('/request/buyer-request-history-all');
-  console.log('Response from buyer-request-history-all:', response.data);
+  // console.log('Response from buyer-request-history-all:', response.data);
   return response.data;
 };
 
@@ -148,7 +148,7 @@ export const getBuyerRequestHistoryAll = async () => {
 export const getBidsForBuyerRequestAll = async () => {
   emptySchema.parse({});
   const response = await apiClient.get('/bid/bids-for-buyer-request-all');
-  console.log('Response from bids-for-buyer-request-all:', response.data);
+  // console.log('Response from bids-for-buyer-request-all:', response.data);
   return response.data;
 };
 
@@ -158,7 +158,7 @@ export const getBidsForBuyerRequestAll = async () => {
 export const getItemsInCartAll = async () => {
   emptySchema.parse({});
   const response = await apiClient.get('/cart/items-in-cart-all');
-  console.log('Response from items-in-cart-all:', response.data);
+  // console.log('Response from items-in-cart-all:', response.data);
   return response.data;
 };
 
@@ -168,7 +168,7 @@ export const getItemsInCartAll = async () => {
 export const getRequestDetailAPI = async (params: { request_id: string }) => {
   requestDetailParamsSchema.parse(params);
   const response = await apiClient.get(`/request/request-datail/${params.request_id}`);
-  console.log('Response from request-datail:', response.data);
+  // console.log('Response from request-datail:', response.data);
   return response.data;
 };
 
@@ -183,7 +183,7 @@ export const getGOPASellerForRequestAPI = async (params: {
   const response = await apiClient.get(
     `/request/GOPA-seller-for-request/${params.gopa_id}/${params.request_id}`
   );
-  console.log('Response from GOPA-seller-for-request:', response.data);
+  // console.log('Response from GOPA-seller-for-request:', response.data);
   return response.data;
 };
 
@@ -193,7 +193,7 @@ export const getGOPASellerForRequestAPI = async (params: {
 export const getGOPAAssignedActiveRequestsAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
   const response = await apiClient.get(`/request/GOPA-assigned-active-request/${params.user_id}`);
-  console.log('Response from GOPA-assigned-active-request:', response.data);
+  // console.log('Response from GOPA-assigned-active-request:', response.data);
   return response.data;
 };
 
@@ -203,7 +203,7 @@ export const getGOPAAssignedActiveRequestsAPI = async (params: { user_id: string
 export const getGOPAAssignedRequestHistoryAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
   const response = await apiClient.get(`/request/GOPA-assigned-request-history/${params.user_id}`);
-  console.log('Response from GOPA-assigned-request-history:', response.data);
+  // console.log('Response from GOPA-assigned-request-history:', response.data);
   return response.data;
 };
 
@@ -213,7 +213,7 @@ export const getGOPAAssignedRequestHistoryAPI = async (params: { user_id: string
 export const getGOPAUnassignedActiveRequestsAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
   const response = await apiClient.get(`/request/GOPA-unassigned-active-request/${params.user_id}`);
-  console.log('Response from GOPA-unassigned-active-request:', response.data);
+  // console.log('Response from GOPA-unassigned-active-request:', response.data);
   return response.data;
 };
 
@@ -223,7 +223,7 @@ export const getGOPAUnassignedActiveRequestsAPI = async (params: { user_id: stri
 export const getGOPAUnassignedRequestHistoryAPI = async (params: { user_id: string }) => {
   userIdParamsSchema.parse(params);
   const response = await apiClient.get(`/request/GOPA-unassigned-request-history/${params.user_id}`);
-  console.log('Response from GOPA-unassigned-request-history:', response.data);
+  // console.log('Response from GOPA-unassigned-request-history:', response.data);
   return response.data;
 };
 
@@ -233,7 +233,7 @@ export const getGOPAUnassignedRequestHistoryAPI = async (params: { user_id: stri
 export const getRequestBidsAllAPI = async (params: { request_id: string }) => {
   requestIdParamsSchema.parse(params);
   const response = await apiClient.get(`/bid/request-bids-all/${params.request_id}`);
-  console.log('Response from request-bids-all:', response.data);
+  // console.log('Response from request-bids-all:', response.data);
   return response.data;
 };
 
@@ -245,7 +245,7 @@ export const getSellerBidsForActiveRequestsAPI = async (params: { seller_id: str
   const response = await apiClient.get(
     `/bid/seller-bids-for-active-requests-all/${params.seller_id}`
   );
-  console.log('Response from seller-bids-for-active-requests-all:', response.data);
+  // console.log('Response from seller-bids-for-active-requests-all:', response.data);
   return response.data;
 };
 
@@ -257,7 +257,7 @@ export const getSellerBidsForRequestsHistoryAPI = async (params: { seller_id: st
   const response = await apiClient.get(
     `/bid/seller-bids-for-requests-history-all/${params.seller_id}`
   );
-  console.log('Response from seller-bids-for-requests-history-all:', response.data);
+  // console.log('Response from seller-bids-for-requests-history-all:', response.data);
   return response.data;
 };
 
@@ -275,7 +275,7 @@ export const checkoutWithExistingAddressAPI = async (payload: {
 }) => {
   checkoutWithExistingAddressSchema.parse(payload);
   const response = await apiClient.post('/checkout/with-existing-address', payload);
-  console.log('Response from checkout/with-existing-address:', response.data);
+  // console.log('Response from checkout/with-existing-address:', response.data);
   return response.data;
 };
 
@@ -298,7 +298,7 @@ export const checkoutWithNewAddressAPI = async (payload: {
 }) => {
   checkoutWithNewAddressSchema.parse(payload);
   const response = await apiClient.post('/checkout/with-new-address', payload);
-  console.log('Response from checkout/with-new-address:', response.data);
+  // console.log('Response from checkout/with-new-address:', response.data);
   return response.data;
 };
 
@@ -316,7 +316,7 @@ export const getUserChargesAPI = async (params: { aggeagate: string }) => {
   // response.data is:
   // { status: 1, message: "Successful", data: { MAIN_AMOUNT, SERVICE_CHARGE, … } }
   const envelope = response.data;
-  console.log('Response envelope:', envelope);
+  // console.log('Response envelope:', envelope);
 
   // return only the .data payload
   return envelope.data;

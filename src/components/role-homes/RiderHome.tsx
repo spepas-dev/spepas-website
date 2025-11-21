@@ -1,5 +1,5 @@
-// src/components/role-homes/RiderHome.tsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // ← add
 
 type RequestItem = {
   id: string;
@@ -32,36 +32,44 @@ const RiderRequestCard: React.FC<{
   onAccept?: () => void;
   onDismiss?: () => void;
   accepted?: boolean;
-}> = ({ item, onAccept, onDismiss, accepted }) => (
-  <div className="border rounded-xl p-4">
-    <div className="flex items-center justify-between mb-3">
-      <div className="text-gray-700"><span className="text-sm">Order ID:</span> <span className="font-medium">#{item.id}</span></div>
-      <div className="text-xs text-gray-500">{item.distanceKm}km</div>
-    </div>
+}> = ({ item, onAccept, onDismiss, accepted }) => {
+  const navigate = useNavigate(); // ← add
+  return (
+    <div className="border rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-gray-700"><span className="text-sm">Order ID:</span> <span className="font-medium">#{item.id}</span></div>
+        <div className="text-xs text-gray-500">{item.distanceKm}km</div>
+      </div>
 
-    <div className="space-y-3">
-      <PlaceLine label="Pick-up Address" value={item.pickup} pin="📍" />
-      <PlaceLine label="Drop-off Address" value={item.dropoff} pin="📦" />
-    </div>
+      <div className="space-y-3">
+        <PlaceLine label="Pick-up Address" value={item.pickup} pin="📍" />
+        <PlaceLine label="Drop-off Address" value={item.dropoff} pin="📦" />
+      </div>
 
-    <div className="grid grid-cols-3 gap-2 text-sm text-gray-700 mt-4">
-      <InfoCell label="Total Distance" value={`${item.distanceKm} KM`} />
-      <InfoCell label="Payment" value={`GH₵ ${item.payment}`} />
-      <InfoCell label="Estimated Time" value={item.eta} />
-    </div>
+      <div className="grid grid-cols-3 gap-2 text-sm text-gray-700 mt-4">
+        <InfoCell label="Total Distance" value={`${item.distanceKm} KM`} />
+        <InfoCell label="Payment" value={`GH₵ ${item.payment}`} />
+        <InfoCell label="Estimated Time" value={item.eta} />
+      </div>
 
-    <div className="mt-4">
-      {!accepted ? (
-        <div className="flex gap-3">
-          <button onClick={onDismiss} className="flex-1 py-2 rounded-lg border text-gray-700 hover:bg-gray-50">Dismiss</button>
-          <button onClick={onAccept} className="flex-1 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700">Accept</button>
-        </div>
-      ) : (
-        <button className="w-full py-2 rounded-lg border border-violet-300 text-violet-700 bg-violet-50">View delivery details</button>
-      )}
+      <div className="mt-4">
+        {!accepted ? (
+          <div className="flex gap-3">
+            <button onClick={onDismiss} className="flex-1 py-2 rounded-lg border text-gray-700 hover:bg-gray-50">Dismiss</button>
+            <button onClick={onAccept} className="flex-1 py-2 rounded-lg bg-violet-600 text-white hover:bg-violet-700">Accept</button>
+          </div>
+        ) : (
+          <button
+            className="w-full py-2 rounded-lg border border-violet-300 text-violet-700 bg-violet-50"
+            onClick={() => navigate(`/95668339501103956045/rider/orders/${item.id}`)} // ← goes to Order Detail (delivery details)
+          >
+            View delivery details
+          </button>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const EmptyLine: React.FC<{ text: string }> = ({ text }) => (
   <div className="text-sm text-gray-500 border rounded-md p-4 text-center">{text}</div>

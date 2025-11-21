@@ -16,6 +16,10 @@ import { buyerRoutes }         from './buyer.routes';
 import { gopaRoutes }          from './gopa.routes';
 import { gopaInvoiceRoutes }   from './gopaInvoices.routes';
 
+
+import { riderRoutes }         from './rider.routes';
+import { chatRoutes }          from './chat.routes';
+
 import ProtectedLayout         from '@/components/layout/protected/ProtectedLayout'; // *adjusted*
 import MyAccountPage           from '@/pages/marketing/my-account/page';            // *adjusted*
 
@@ -30,6 +34,12 @@ const protectedChildren = [
   ...sellerRoutes,
   ...gopaRoutes,
   ...gopaInvoiceRoutes,
+
+  
+  { path: 'rider', children: riderRoutes },
+
+
+  ...chatRoutes,
 ]; // *adjusted*
 
 export const routes = [
