@@ -37,12 +37,12 @@ export const createGopaProfileSelf = async (payload: {
   Specialties: string[];
 }) => {
   gopaRegistrationSchema.parse(payload);
-  console.log(payload);
+  // console.log(payload);
   const { data } = await apiClient.post('/user/gopa-registration-self', payload);
-  console.log('GOPA ', data);
-  console.log('GOPA ', payload);
+  // console.log('GOPA ', data);
+  // console.log('GOPA ', payload);
   return data;
-  console.log('GOPA ', data);
+  // console.log('GOPA ', data);
 };
 
 /**
@@ -52,11 +52,14 @@ export const createSellerProfileSelf = async (payload: {
   storeName: string;
   longitude: number;
   latitude: number;
+  phoneNumber: string;
+  shopAddress: string;
 }) => {
   sellerRegistrationSchema.parse(payload);
   const { data } = await apiClient.post('/user/seller-registration-self', payload);
   return data;
 };
+
 
 /**
  * 4. Create MEPA Profile (Self)

@@ -34,6 +34,18 @@ const isValidEmail = (val: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 };
 
+const validatePhone = (value: string): string | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) return 'Phone number is required';
+  if (/[^0-9]/.test(trimmed)) {
+    return 'Phone number must contain digits only (0-9).';
+  }
+  if (trimmed.length < 10) {
+    return 'Phone number is too short for a Ghana number (min 10 digits).';
+  }
+  return undefined;
+};
+
 const Signup: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
@@ -55,15 +67,18 @@ const Signup: React.FC = () => {
     email?: string;
     password?: string;
     confirmPassword?: string;
+    phoneNumber?: string;
   }>({});
   const [touched, setTouched] = useState<{
     email: boolean;
     password: boolean;
     confirmPassword: boolean;
+    phoneNumber: boolean;
   }>({
     email: false,
     password: false,
     confirmPassword: false,
+    phoneNumber: false,
   });
 
   const validateEmailField = (value: string) =>
@@ -85,17 +100,27 @@ const Signup: React.FC = () => {
     if (name === 'confirmPassword') {
       setErrors((prev) => ({ ...prev, confirmPassword: validatePwLen(value) }));
     }
+    if (name === 'phoneNumber') {
+      setErrors((prev) => ({ ...prev, phoneNumber: validatePhone(value) }));
+    }
   };
 
-  const handleBlur = (name: 'email' | 'password' | 'confirmPassword') => {
+  const handleBlur = (
+    name: 'email' | 'password' | 'confirmPassword' | 'phoneNumber'
+  ) => {
     setTouched((prev) => ({ ...prev, [name]: true }));
     const val = formData[name];
     if (name === 'email') {
       setErrors((prev) => ({ ...prev, email: validateEmailField(val) }));
-    } else {
+    } else if (name === 'password' || name === 'confirmPassword') {
       setErrors((prev) => ({
         ...prev,
         [name]: validatePwLen(val),
+      }));
+    } else if (name === 'phoneNumber') {
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: validatePhone(val),
       }));
     }
   };
@@ -103,11 +128,17 @@ const Signup: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    setTouched({ email: true, password: true, confirmPassword: true });
+    setTouched({
+      email: true,
+      password: true,
+      confirmPassword: true,
+      phoneNumber: true,
+    });
 
     const emailErr = validateEmailField(formData.email);
     const pwErr = validatePwLen(formData.password);
     const cpwErr = validatePwLen(formData.confirmPassword);
+    const phoneErr = validatePhone(formData.phoneNumber);
     const mismatch =
       formData.password.length > 0 &&
       formData.confirmPassword.length > 0 &&
@@ -117,9 +148,10 @@ const Signup: React.FC = () => {
       email: emailErr,
       password: pwErr,
       confirmPassword: cpwErr || (mismatch ? 'Passwords do not match' : undefined),
+      phoneNumber: phoneErr,
     });
 
-    if (emailErr || pwErr || cpwErr || mismatch) {
+    if (emailErr || pwErr || cpwErr || mismatch || phoneErr) {
       return;
     }
 
@@ -164,6 +196,7 @@ const Signup: React.FC = () => {
     (touched.password && Boolean(errors.password)) || showMismatch;
   const cpwInvalid =
     (touched.confirmPassword && Boolean(errors.confirmPassword)) || showMismatch;
+  const phoneInvalid = touched.phoneNumber && Boolean(errors.phoneNumber);
 
   return (
     <>
@@ -328,9 +361,19 @@ const Signup: React.FC = () => {
                   placeholder="Enter your phone number"
                   value={formData.phoneNumber}
                   onChange={handleChange}
+                  onBlur={() => handleBlur('phoneNumber')}
                   required
-                  className="rounded-lg border border-gray-300 bg-gray-100 w-full py-3 px-5"
+                  className={`rounded-lg border ${
+                    phoneInvalid ? 'border-red-500' : 'border-gray-300'
+                  } bg-gray-100 w-full py-3 px-5`}
+                  aria-invalid={phoneInvalid}
+                  aria-describedby={phoneInvalid ? 'phone-error' : undefined}
                 />
+                {phoneInvalid && (
+                  <p id="phone-error" className="mt-1 text-sm text-red-600">
+                    {errors.phoneNumber}
+                  </p>
+                )}
               </div>
 
               {/* User Type field removed; we force BUYER in payload */}

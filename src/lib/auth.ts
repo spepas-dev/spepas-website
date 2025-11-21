@@ -24,7 +24,7 @@ export const signupAPI = async (payload: {
   // Validate payload using Zod
   signupRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/signup', payload);
-  console.log('Response from Signup API:', response.data);
+  // console.log('Response from Signup API:', response.data);
   return response.data;
 };
 
@@ -37,7 +37,7 @@ export const signinAPI = async (payload: {
 }) => {
   signinRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/signin', payload);
-  console.log('Response from Signin API:', response.data);
+  // console.log('Response from Signin API:', response.data);
   return response.data;
 };
 
@@ -51,7 +51,7 @@ export const activateAccountAPI = async (payload: {
 }) => {
   activateAccountRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/activate-account', payload);
-  console.log('Response from Activate Account API:', response.data);
+  // console.log('Response from Activate Account API:', response.data);
   return response.data;
 };
 
@@ -63,7 +63,7 @@ export const signoutAPI = async () => {
   // Validate an empty payload.
   signoutRequestSchema.parse({});
   const response = await apiClient.post('/auth/signout');
-  console.log('Response from Signout API:', response.data);
+  // console.log('Response from Signout API:', response.data);
   return response.data;
 };
 
@@ -73,7 +73,7 @@ export const signoutAPI = async () => {
 export const forgotPasswordAPI = async (payload: { email: string }) => {
   forgotPasswordRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/forgot-password', payload);
-    console.log('Response from Forgot Password API:', response.data);
+    // console.log('Response from Forgot Password API:', response.data);
   return response.data;
 };
 
@@ -87,7 +87,7 @@ export const resetPasswordAPI = async (payload: {
 }) => {
   resetPasswordRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/reset-password', payload);
-  console.log('Response from Reset Password API:', response.data);
+  // console.log('Response from Reset Password API:', response.data);
   return response.data;
 };
 
@@ -100,7 +100,7 @@ export const changePasswordAPI = async (payload: {
 }) => {
   changePasswordRequestSchema.parse(payload);
   const response = await apiClient.post('/auth/change-password', payload);
-    console.log('Response from Change Password API:', response.data);
+    // console.log('Response from Change Password API:', response.data);
   return response.data;
 };
 
@@ -111,6 +111,6 @@ export const refreshTokenAPI = async () => {
   // Validate an empty payload.
   refreshTokenRequestSchema.parse({});
   const response = await apiClient.get('/auth/refresh-token');
-  console.log('Response from Refresh Token API:', response.data);
+  // console.log('Response from Refresh Token API:', response.data);
   return response.data;
 };

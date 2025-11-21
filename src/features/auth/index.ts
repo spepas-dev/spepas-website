@@ -18,12 +18,12 @@ import {
   forgotPasswordAPI,
   resetPasswordAPI,
   changePasswordAPI,
-  refreshTokenAPI,
+  // refreshTokenAPI,        // ❌ no longer used
 } from "../../lib/auth";
 
 import { registerAuthSetter } from "@/lib/sessionBridge"; // *adjusted*
-import { getUserDetailsById } from '@/lib/profiling';     // *adjusted*
-import { decodeUserIdFromToken } from '@/lib/jwt';        // *adjusted*
+import { getUserDetailsById } from "@/lib/profiling";     // *adjusted*
+// import { decodeUserIdFromToken } from "@/lib/jwt";     // ❌ no longer used
 
 /**
  * --------------------------------------------------
@@ -83,7 +83,7 @@ export interface GopaProfile {
   Specialties: string[];
   User_ID: string;
   status: number;
-  date_added: string;  // ISO
+  date_added: string; // ISO
 }
 
 export interface MepaProfile {
@@ -163,7 +163,7 @@ export type UserType = {
   phoneNumber: string;
   verificationStatus: number;
   status: number;
-  role: string;
+  role: string;          // kept for existing code
   Seller_ID: string | null;
   createdAt: string;
   updatedAt: string;
@@ -177,7 +177,7 @@ export type UserType = {
   user_roles: any[];
 };
 
-// The auth state contains the current user and tokens.
+// The auth state contains the current user (tokens unused now, but kept optional).
 export type AuthData = {
   user: UserType | null;
   token?: string;
@@ -195,8 +195,8 @@ export type AuthContextType = {
   forgotPassword: (payload: ForgotPasswordPayload) => Promise<any>;
   resetPassword: (payload: ResetPasswordPayload) => Promise<void>;
   changePassword: (payload: ChangePasswordPayload) => Promise<void>;
-  refreshAuth: () => Promise<void>;
-  refetchUser: () => Promise<void>; // *adjusted*
+  refreshAuth: () => Promise<void>;  // kept for API compatibility, now a no-op
+  refetchUser: () => Promise<void>;  // *adjusted*
 };
 
 // Create the AuthContext.
@@ -209,12 +209,11 @@ const STORAGE_KEY = "authData";
  * --------------------------------------------------
  * Global Setter for Auth State
  * --------------------------------------------------
- * This variable will hold a reference to the setAuthData function from the AuthProvider,
- * allowing external modules (e.g., Axios interceptor) to update the auth state.
  */
 let globalSetAuthData: ((newAuthData: AuthData) => void) | undefined;
-export const getGlobalSetAuthData = (): ((newAuthData: AuthData) => void) | undefined =>
-  globalSetAuthData;
+export const getGlobalSetAuthData = (): ((
+  newAuthData: AuthData
+) => void) | undefined => globalSetAuthData;
 
 /**
  * --------------------------------------------------
@@ -229,7 +228,42 @@ export const AuthProvider = ({
   // Initialize auth state from localStorage, if available.
   const [authData, setAuthData] = useState<AuthData>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : { user: null };
+    if (!stored) return { user: null };
+
+    try {
+      const parsed: any = JSON.parse(stored);
+
+      // Already in AuthData shape
+      if (parsed && typeof parsed === "object" && "user" in parsed) {
+        return {
+          user: parsed.user ?? null,
+          token: parsed.token,
+          refresh_token: parsed.refresh_token,
+        } as AuthData;
+      }
+
+      // OLD shape: { status, message, data: { token, user, refresh_token } }
+      if (parsed && typeof parsed === "object" && "data" in parsed) {
+        const data = parsed.data || {};
+        return {
+          user: data.user ?? null,
+          token: data.token,
+          refresh_token: data.refresh_token,
+        } as AuthData;
+      }
+
+      // NEW shape (previous version): { status, message, filtered: { user: {...} } }
+      if (parsed && typeof parsed === "object" && "filtered" in parsed) {
+        const filtered = parsed.filtered || {};
+        return {
+          user: filtered.user ?? null,
+        } as AuthData;
+      }
+    } catch (e) {
+      // console.error("Failed to parse authData from localStorage:", e);
+    }
+
+    return { user: null };
   });
 
   // Persist any changes to auth state back to localStorage.
@@ -240,68 +274,93 @@ export const AuthProvider = ({
   // Set the global setter so that external modules (like an Axios interceptor) can update auth state.
   useEffect(() => {
     globalSetAuthData = setAuthData;
-    registerAuthSetter(setAuthData); // *adjusted*
-  }, [setAuthData]); // *adjusted*
+    registerAuthSetter(setAuthData);
+  }, [setAuthData]);
 
-  // --- Hydrate authoritative user from backend and replace authData.user --- // *adjusted*
-  const refetchUser = async (): Promise<void> => {                            // *adjusted*
-    try {                                                                     // *adjusted*
+  // --- Optionally hydrate authoritative user from backend ---
+  const refetchUser = async (): Promise<void> => {
+    try {
       const userId =
-        (authData.user as any)?.User_ID ||
-        (authData.user as any)?.id ||
-        decodeUserIdFromToken(authData.token);                                // *adjusted*
+        (authData?.user as any)?.User_ID ||
+        (authData?.user as any)?.id ||
+        null;
 
-      if (!userId) return;                                                    // *adjusted*
+      if (!userId) return;
 
-      const res = await getUserDetailsById(String(userId));                   // *adjusted*
+      const res = await getUserDetailsById(String(userId));
       const fresh =
-        (res as any)?.data?.data ?? (res as any)?.data ?? (res as any) ?? null; // *adjusted*
+        (res as any)?.data?.data ?? (res as any)?.data ?? (res as any) ?? null;
 
-      if (fresh) {                                                            // *adjusted*
-        setAuthData((prev) => ({ ...prev, user: fresh }));                    // *adjusted*
-      }                                                                        // *adjusted*
-    } catch (e) {                                                              // *adjusted*
-      console.error("refetchUser failed:", e);                                 // *adjusted*
-    }                                                                          // *adjusted*
-  };                                                                           // *adjusted*
+      if (fresh) {
+        setAuthData((prev) => ({
+          ...(prev ?? { user: null }),
+          user: fresh,
+        }));
+      }
+    } catch (e) {
+      // console.error("refetchUser failed:", e);
+    }
+  };
 
   /**
    * Signup: Registers a new user.
-   * Does not update auth state (usually verification follows) but returns API data.
    */
   const signup = async (payload: SignupPayload): Promise<any> => {
     try {
       return await signupAPI(payload);
     } catch (error) {
-      console.error("Signup failed:", error);
+      // console.error("Signup failed:", error);
       throw error;
     }
   };
 
   /**
-   * Login: Authenticates the user and sets the auth state with tokens and user data.
+   * Login: Authenticates the user and sets the auth state with user data.
+   *
+   * Response shape (no tokens):
+   * {
+   *   "status": 1,
+   *   "message": "Success",
+   *   "filtered": { "user": { ...full user... } }
+   * }
    */
   const login = async (payload: SigninPayload): Promise<void> => {
     try {
-      const response = await signinAPI(payload);
-      setAuthData(response.data);
-      await refetchUser();                                                    // *adjusted*
+      const apiData: any = await signinAPI(payload); // signinAPI already returns response.data
+
+      const filtered = apiData.filtered || {};
+      const nextAuth: AuthData = {
+        user: (filtered.user as UserType) ?? null,
+      };
+
+      setAuthData(nextAuth);
+      // optional: if you later add a /profiling/:id that needs more data, refetchUser() can stay
+      // await refetchUser();
     } catch (error) {
-      console.error("Signin failed:", error);
+      // console.error("Signin failed:", error);
       throw error;
     }
   };
 
   /**
    * Activate Account: Verifies the account and updates auth state.
+   * Assume similar shape to signin (status/message/filtered.user).
    */
-  const activateAccount = async (payload: ActivateAccountPayload): Promise<void> => {
+  const activateAccount = async (
+    payload: ActivateAccountPayload
+  ): Promise<void> => {
     try {
-      const response = await activateAccountAPI(payload);
-      setAuthData(response.data);
-      await refetchUser();                                                    // *adjusted*
+      const apiData: any = await activateAccountAPI(payload);
+
+      const filtered = apiData.filtered || apiData.data || {};
+      const nextAuth: AuthData = {
+        user: (filtered.user as UserType) ?? null,
+      };
+
+      setAuthData(nextAuth);
+      // await refetchUser(); // optional
     } catch (error) {
-      console.error("Activate account failed:", error);
+      // console.error("Activate account failed:", error);
       throw error;
     }
   };
@@ -312,11 +371,12 @@ export const AuthProvider = ({
   const logout = async (): Promise<void> => {
     try {
       await signoutAPI();
+    } catch (error) {
+      // even if backend says 401/500 here, we still clear local state
+      // console.error("Logout failed:", error);
+    } finally {
       setAuthData({ user: null });
       localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-      console.error("Logout failed:", error);
-      throw error;
     }
   };
 
@@ -329,27 +389,36 @@ export const AuthProvider = ({
     try {
       return await forgotPasswordAPI(payload);
     } catch (error) {
-      console.error("Forgot password failed:", error);
+      // console.error("Forgot password failed:", error);
       throw error;
     }
   };
 
   /**
-   * Reset Password: Resets the password and, upon success, updates auth state.
+   * Reset Password: Resets the password and MAY update auth state.
+   * (Kept minimal since response shape not fully specified.)
    */
-  const resetPassword = async (payload: ResetPasswordPayload): Promise<void> => {
+  const resetPassword = async (
+    payload: ResetPasswordPayload
+  ): Promise<void> => {
     try {
-      const response = await resetPasswordAPI(payload);
-      setAuthData(response.data);
+      const apiData: any = await resetPasswordAPI(payload);
+
+      if (apiData.filtered || apiData.data || apiData.user) {
+        const filtered = apiData.filtered || apiData.data || {};
+        const nextAuth: AuthData = {
+          user: (filtered.user as UserType) ?? apiData.user ?? authData.user,
+        };
+        setAuthData(nextAuth);
+      }
     } catch (error) {
-      console.error("Reset password failed:", error);
+      // console.error("Reset password failed:", error);
       throw error;
     }
   };
 
   /**
    * Change Password: Changes the user password.
-   * Typically no state update is needed unless your API returns new tokens.
    */
   const changePassword = async (
     payload: ChangePasswordPayload
@@ -357,33 +426,23 @@ export const AuthProvider = ({
     try {
       await changePasswordAPI(payload);
     } catch (error) {
-      console.error("Change password failed:", error);
+      // console.error("Change password failed:", error);
       throw error;
     }
   };
 
   /**
-   * Refresh Auth: Refreshes tokens and updates auth state.
+   * Refresh Auth:
+   * With backend-managed sessions and no tokens, there's nothing to refresh on the client.
+   * Kept only to satisfy existing callers; it simply resolves.
    */
   const refreshAuth = async (): Promise<void> => {
-    try {
-      const data = await refreshTokenAPI();
-      setAuthData((prev) => ({
-        ...prev,
-        token: data.newAccessToken,
-        refresh_token: data.newRefreshToken,
-      }));
-    } catch (error) {
-      console.error("Refresh token failed:", error);
-      // Optionally clear auth state if token refresh fails.
-      setAuthData({ user: null });
-      localStorage.removeItem(STORAGE_KEY);
-      throw error;
-    }
+    return Promise.resolve();
   };
 
   /**
    * Auto-logout after 2 hours of inactivity.
+   * This is still valid: it just calls backend /auth/signout and clears local state.
    */
   useEffect(() => {
     const INACTIVITY_MS = 1000 * 60 * 60 * 2; // 2 hours
@@ -396,7 +455,6 @@ export const AuthProvider = ({
       }, INACTIVITY_MS);
     };
 
-    // List of events that constitute “activity”
     const activityEvents: (keyof WindowEventMap)[] = [
       "mousemove",
       "mousedown",
@@ -419,9 +477,11 @@ export const AuthProvider = ({
   }, [logout]);
 
   // Prepare the context value.
+  const safeAuthData: AuthData = authData ?? { user: null };
+
   const value: AuthContextType = {
-    authData,
-    isAuthenticated: Boolean(authData.user),
+    authData: safeAuthData,
+    isAuthenticated: Boolean(safeAuthData.user),
     signup,
     login,
     activateAccount,
@@ -430,7 +490,7 @@ export const AuthProvider = ({
     resetPassword,
     changePassword,
     refreshAuth,
-    refetchUser, // *adjusted*
+    refetchUser,
   };
 
   // Since this file remains a .ts file (no JSX), we use React.createElement.

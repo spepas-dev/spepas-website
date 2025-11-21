@@ -20,7 +20,7 @@ const SingleGridItem: React.FC<SingleGridItemProps> = ({ item }) => {
           className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-500"
         />
         <Link
-          to={`/shop/${item.linkId}`}
+          to={`/95668339501103956045/shop/${item.linkId}`}
           className="absolute inset-0"
           aria-label={`Open ${item.title}`}
         >
@@ -35,7 +35,7 @@ const SingleGridItem: React.FC<SingleGridItemProps> = ({ item }) => {
       {/* Content */}
       <div className="p-3 flex flex-col items-center text-center space-y-1">
         <Link
-          to={`/shop/${item.linkId}`}
+          to={`/95668339501103956045/shop/${item.linkId}`}
           className="text-base font-semibold text-gray-800 hover:text-blue-600 transition-colors duration-150"
         >
           {item.title}

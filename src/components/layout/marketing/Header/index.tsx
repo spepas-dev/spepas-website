@@ -27,7 +27,7 @@ const Header = () => {
   const { isAuthenticated, authData } = useAuth();
   const { accountType } = useAccountType();
 
-  console.log('authData', authData);
+  // console.log('authData', authData);
 
     const sellerId = authData?.user?.sellerDetails?.Seller_ID;
     const gopaId   = authData?.user?.gopa?.Gopa_ID;

@@ -1,83 +1,57 @@
-// src/components/marketing/ShopWithSidebar/CustomSelect.tsx
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
-export interface Option {
-  label: string;
-  value: string | number;
-}
+export type Option = { label: string; value: string };
 
-interface CustomSelectProps {
+export type CustomSelectProps = {
   options: Option[];
-  /** Called whenever the user picks a new option */
-  onChange?: (option: Option) => void;
-}
+  /** Controlled value (preferred). */
+  value?: string;
+  /** Uncontrolled initial value (fallback when value is undefined). */
+  defaultValue?: string;
+  /** Callback with the *string* value. */
+  onChange?: (value: string) => void;
+  className?: string;
+  selectProps?: React.SelectHTMLAttributes<HTMLSelectElement>;
+};
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<Option>(options[0]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+const base =
+  'h-10 rounded-lg border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
-  // Close dropdown on outside clicks
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        containerRef.current && 
-        !containerRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+const CustomSelect: React.FC<CustomSelectProps> = ({
+  options,
+  value,
+  defaultValue,
+  onChange,
+  className = '',
+  selectProps,
+}) => {
+  const [internal, setInternal] = React.useState<string>(
+    defaultValue ?? options[0]?.value ?? ''
+  );
 
-  const toggle = () => setIsOpen(open => !open);
+  // Use controlled value if provided; otherwise internal
+  const current = value ?? internal;
 
-  const handleSelect = (opt: Option) => {
-    setSelectedOption(opt);
-    onChange?.(opt);
-    setIsOpen(false);
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const v = e.target.value;
+    if (onChange) onChange(v);
+    // only update internal when uncontrolled
+    if (value === undefined) setInternal(v);
   };
 
   return (
-    <div className="relative inline-block" ref={containerRef}>
-      <button
-        type="button"
-        className="select-selected px-4 py-2 border rounded cursor-pointer flex items-center justify-between w-48"
-        onClick={toggle}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-      >
-        <span>{selectedOption.label}</span>
-        <span
-          className="ml-2 transform transition-transform"
-          style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        >
-          
-        </span>
-      </button>
-
-      {isOpen && (
-        <ul
-          role="listbox"
-          className="select-items absolute z-10 mt-1 w-48 bg-white border rounded shadow"
-        >
-          {options.map((opt, idx) => (
-            <li
-              key={idx}
-              role="option"
-              aria-selected={opt.value === selectedOption.value}
-              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
-                opt.value === selectedOption.value ? 'bg-gray-200' : ''
-              }`}
-              onClick={() => handleSelect(opt)}
-            >
-              {opt.label}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <select
+      value={current}
+      onChange={handleChange}
+      className={`${base} ${className}`}
+      {...selectProps}
+    >
+      {options.map((opt) => (
+        <option key={opt.value} value={opt.value}>
+          {opt.label}
+        </option>
+      ))}
+    </select>
   );
 };
 

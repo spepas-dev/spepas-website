@@ -12,7 +12,7 @@ const SingleListItem: React.FC<SingleListItemProps> = ({ item }) => {
     <div className="group rounded-lg bg-white shadow">
       <div className="flex">
         <Link
-          to={`/shop/${item.linkId}`}
+          to={`/95668339501103956045/shop/${item.linkId}`}
           className="relative overflow-hidden flex items-center justify-center w-64 h-64 p-4"
           aria-label={`Open ${item.title}`}
         >
@@ -26,7 +26,7 @@ const SingleListItem: React.FC<SingleListItemProps> = ({ item }) => {
         <div className="flex-1 p-4 flex flex-col justify-between">
           <div>
             <h3 className="text-lg font-medium mb-2">
-              <Link to={`/shop/${item.linkId}`}>{item.title}</Link>
+              <Link to={`/95668339501103956045/shop/${item.linkId}`}>{item.title}</Link>
             </h3>
             <div className="flex items-center gap-2 text-xl font-semibold">
               <span className="line-through text-gray-500">

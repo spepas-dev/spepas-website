@@ -14,37 +14,37 @@ export const apiClient = axios.create({
   baseURL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true
+  withCredentials: true,
 });
 
 // ensure no Authorization header ever sneaks in
 delete apiClient.defaults.headers.common['Authorization'];
 
 // ---- Global 401 handler (no refresh attempt) ----
-const PROTECTED_ROOT = '/95668339501103956045';            // *adjusted*
-const AUTH_PREFIX    = '/95668339501103956045/auth/';       // *adjusted*
-const SIGNIN_PATH    = '/95668339501103956045/auth/signin'; // *adjusted*
+const SIGNIN_PATH = '/95668339501103956045/auth/signin'; // *adjusted*
 
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error?.response?.status;
-    if (status === 401) {                                  // *adjusted*
-      clearAuthEverywhere();                               // *adjusted*
 
-      // Optional redirect: only if user is inside the protected marketing area
-      // and not already on an auth page.
-      try {                                               // *adjusted*
-        const path = window.location.pathname;            // *adjusted*
-        const inProtected = path.startsWith(PROTECTED_ROOT);
-        const inAuth = path.startsWith(AUTH_PREFIX);
-        if (inProtected && !inAuth) {
-          window.location.replace(SIGNIN_PATH);           // *adjusted*
+    if (status === 401) {
+      // clear local auth state everywhere (context + localStorage)
+      clearAuthEverywhere();
+
+      // always push user to signin when unauthenticated
+      try {
+        const path = window.location.pathname;
+        if (path !== SIGNIN_PATH) {
+          window.location.replace(SIGNIN_PATH);
         }
-      } catch {}                                          // *adjusted*
+      } catch {
+        // ignore any window errors (SSR etc.)
+      }
     }
+
     return Promise.reject(error);
   }
-); // *adjusted*
+);
 
 export default apiClient;

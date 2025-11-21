@@ -10,8 +10,11 @@ const SellerRegistrationForm: React.FC = () => {
   const [storeName, setStoreName] = useState('');
   const [longitude, setLongitude] = useState(''); // keep as string for inputs
   const [latitude, setLatitude] = useState('');   // keep as string for inputs
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [shopAddress, setShopAddress] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   // Derive numeric values for the map and payload
   const latNum = useMemo(() => {
@@ -24,15 +27,39 @@ const SellerRegistrationForm: React.FC = () => {
     return Number.isFinite(n) ? n : null;
   }, [longitude]);
 
+  const validatePhone = (value: string): string | null => {
+    if (!value) return 'Phone number is required.';
+    if (/[^0-9]/.test(value)) {
+      return 'Phone number must contain digits only (0-9).';
+    }
+    if (value.length < 10) {
+      return 'Phone number is too short for a Ghana number (min 10 digits).';
+    }
+    if (value.length > 15) {
+      return 'Phone number is too long.';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
+    setPhoneError('');
     setLoading(true);
     try {
+      const phoneValidationMessage = validatePhone(phoneNumber);
+      if (phoneValidationMessage) {
+        setPhoneError(phoneValidationMessage);
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         storeName,
         longitude: parseFloat(longitude),
         latitude: parseFloat(latitude),
+        phoneNumber,
+        shopAddress,
       };
       sellerRegistrationSchema.parse(payload);
       await createSellerProfileSelf(payload);
@@ -61,6 +88,38 @@ const SellerRegistrationForm: React.FC = () => {
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
                 className="w-full rounded-lg border bg-gray-100 p-3"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-2.5 font-medium">Phone Number</label>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setPhoneNumber(value);
+                  const msg = validatePhone(value);
+                  setPhoneError(msg ?? '');
+                }}
+                className="w-full rounded-lg border bg-gray-100 p-3"
+                required
+              />
+              {phoneError && (
+                <p className="mt-1 text-xs text-red-500">
+                  {phoneError}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block mb-2.5 font-medium">Shop Address</label>
+              <textarea
+                value={shopAddress}
+                onChange={(e) => setShopAddress(e.target.value)}
+                className="w-full rounded-lg border bg-gray-100 p-3"
+                rows={3}
                 required
               />
             </div>

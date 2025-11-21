@@ -23,7 +23,15 @@ export const sellerRegistrationSchema = z.object({
   storeName: z.string().nonempty(),
   longitude: z.number(),
   latitude: z.number(),
-})
+  phoneNumber: z
+    .string()
+    .nonempty('Phone number is required')
+    .regex(/^\d+$/, 'Phone number must contain digits only (0-9).')
+    .min(10, 'Phone number is too short for a Ghana number (min 10 digits).')
+    .max(15, 'Phone number is too long.'), // allows 055... and 233...
+  shopAddress: z.string().nonempty(),
+});
+
 
 // 4. Create MEPA Profile (Self)
 export const mepaRegistrationSchema = z.object({

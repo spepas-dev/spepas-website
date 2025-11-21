@@ -19,7 +19,7 @@ export const getCarManufacturers = async () => {
     '/inventry/car-manufacturers-all',
     cacheBusterParams()
   );
-  console.log('Response from car-manufacturers-all:', data);
+  // console.log('Response from car-manufacturers-all:', data);
   return carManufacturersResponseSchema.parse(data);
 };
 
@@ -29,7 +29,7 @@ export const getCarBrands = async () => {
     '/inventry/car-brands-all',
     cacheBusterParams()
   );
-  console.log('Response from car-brands-all:', data);
+  // console.log('Response from car-brands-all:', data);
   return carBrandsResponseSchema.parse(data);
 };
 
@@ -39,7 +39,7 @@ export const getCarModels = async () => {
     '/inventry/car-models-all',
     cacheBusterParams()
   );
-  console.log('Response from car-models-all:', data);
+  // console.log('Response from car-models-all:', data);
   return carModelsResponseSchema.parse(data);
 };
 
@@ -49,7 +49,7 @@ export const getSpareParts = async () => {
     '/inventry/sparepart-all',
     cacheBusterParams()
   );
-  console.log('Response from sparepart-all:', data);
+  // console.log('Response from sparepart-all:', data);
   return sparePartsResponseSchema.parse(data);
 };
 
@@ -60,7 +60,7 @@ export const getSparePartDetailByCode = async (spare_part_code: string | number)
     `/inventry/sparepart-detail/${code}`,
     cacheBusterParams()
   );
-  console.log('Response from sparepart-detail:', data);
+  // console.log('Response from sparepart-detail:', data);
   return sparePartDetailResponseSchema.parse(data);
 };
 
@@ -70,6 +70,6 @@ export const getSparePartCategories = async () => {
     '/inventry/category-all',
     cacheBusterParams()
   );
-  console.log('Response from category-all:', data);
+  // console.log('Response from category-all:', data);
   return sparePartCategoriesResponseSchema.parse(data);
 };

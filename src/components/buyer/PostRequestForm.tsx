@@ -36,6 +36,9 @@ const PostRequestForm: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // ✅ derived validation for quantity
+  const qtyInvalid = qty <= 0;
+
   // Fetch manufacturers
   useEffect(() => {
     getCarManufacturers()
@@ -58,53 +61,58 @@ const PostRequestForm: React.FC = () => {
       : []
 
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  //API promise
-  const apiPromise = requestNonInventorySparePartAPI({
-    require_image: requireImage ? 1 : 0,
-    quantity: qty,
-    sparePartDetail: {
-      name,
-      description: desc,
-      carModel_ID: selectedModel,
-    },
-  })
+    // ✅ block submit if quantity is invalid (extra safety)
+    if (qtyInvalid) {
+      return;
+    }
 
-  //Toast.promise
-  toast
-    .promise(
-      apiPromise,
-      {
-        loading: 'Posting your request…',
-        success: 'Request posted!',
-        error: 'Failed to post request. Please try again.',
+    //API promise
+    const apiPromise = requestNonInventorySparePartAPI({
+      require_image: requireImage ? 1 : 0,
+      quantity: qty,
+      sparePartDetail: {
+        name,
+        description: desc,
+        carModel_ID: selectedModel,
       },
-      {
-        duration: 3000,
-        position: 'bottom-center',
-      }
-    )
-    //reset & navigate
-    .then(() => {
-      setName('')
-      setQty(1)
-      setDesc('')
-      setRequireImage(false)
-      setSelectedManufacturer('')
-      setSelectedBrand('')
-      setSelectedModel('')
-      navigate('/95668339501103956045/buyer/requests')
     })
-    
-    .catch(() => {
-      // Handle error if needed
-      console.error('Error posting request')
-    })
-}
+
+    //Toast.promise
+    toast
+      .promise(
+        apiPromise,
+        {
+          loading: 'Posting your request…',
+          success: 'Request posted!',
+          error: 'Failed to post request. Please try again.',
+        },
+        {
+          duration: 3000,
+          position: 'bottom-center',
+        }
+      )
+      //reset & navigate
+      .then(() => {
+        setName('')
+        setQty(1)
+        setDesc('')
+        setRequireImage(false)
+        setSelectedManufacturer('')
+        setSelectedBrand('')
+        setSelectedModel('')
+        navigate('/95668339501103956045/buyer/requests')
+      })
+      
+      .catch(() => {
+        // Handle error if needed
+        console.error('Error posting request')
+      })
+  }
 
   console.log('selectedManufacturer:', selectedManufacturer);
-console.log('brands:', brands);
+  console.log('brands:', brands);
 
   return (
     <>
@@ -251,8 +259,19 @@ console.log('brands:', brands);
             onChange={e => setQty(+e.target.value)}
             min={1}
             required
-            className="w-full border border-gray-300 rounded-lg px-4 py-2"
+            aria-invalid={qtyInvalid}
+            aria-describedby={qtyInvalid ? 'qty-error' : undefined}
+            className={`w-full border rounded-lg px-4 py-2 ${
+              qtyInvalid
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                : 'border-gray-300'
+            }`}
           />
+          {qtyInvalid && (
+            <p id="qty-error" className="mt-1 text-xs text-red-600">
+              Quantity cannot be zero
+            </p>
+          )}
         </div>
 
         <div className="flex items-center space-x-2">
@@ -283,14 +302,16 @@ console.log('brands:', brands);
       {/* Submit */}
       <button
         type="submit"
-        className="
+        disabled={qtyInvalid}
+        className={`
           w-full
           bg-blue hover:bg-indigo-700
           text-white font-medium
           px-4 py-2 text-sm rounded-full drop-shadow-md
           sm:px-6 sm:py-3 sm:text-base sm:rounded-lg
           transition
-        "
+          ${qtyInvalid ? 'opacity-50 cursor-not-allowed' : ''}
+        `}
       >
         Post Request
       </button>
