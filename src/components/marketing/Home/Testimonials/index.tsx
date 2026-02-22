@@ -44,7 +44,7 @@ const Testimonials: React.FC = () => {
   const translateX = -(index * (100 / visible))
 
   return (
-    <section className="overflow-hidden pb-16">
+    <section className="overflow-hidden pb-16 pt-20">
       <div className="max-w-4xl mx-auto px-4">
         {/* header */}
         <div className="flex items-center justify-between mb-8">

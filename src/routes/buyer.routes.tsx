@@ -9,6 +9,7 @@ import OffersPage from '@/pages/buyer/OffersPage';
 
 // NEW
 import OfferBidDetailPage from '@/pages/buyer/OfferBidDetailPage';
+import BuyerInvoicesPage from '@/pages/buyer/InvoicesPage';
 
 export const buyerRoutes: RouteObject[] = [
   { path: 'buyer/cart', element: <CartPage /> },
@@ -20,4 +21,7 @@ export const buyerRoutes: RouteObject[] = [
 
   // NEW: detail by unique bidding ID
   { path: 'buyer/requests/offers/:biddingId', element: <OfferBidDetailPage /> },
+
+  // Invoices
+  { path: 'buyer/invoices', element: <BuyerInvoicesPage /> },
 ];
