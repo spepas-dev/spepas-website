@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { defineConfig, loadEnv, ProxyOptions } from 'vite';
 import svgr from 'vite-plugin-svgr';
+import { localInventoryPlugin } from './vite-plugin-local-inventory';
 
 interface ProxyError extends Error {
   statusCode?: number;
@@ -114,8 +115,10 @@ export default ({ mode }: { mode: string }) => {
     }
   };
 
+  const useLocalData = process.env.VITE_USE_LOCAL_DATA === 'true';
+
   const config = {
-    plugins: [react(), tailwindcss(), svgr()],
+    plugins: [react(), tailwindcss(), svgr(), ...(useLocalData ? [localInventoryPlugin()] : [])],
     resolve: {
       alias: {
         '@': resolve(__dirname, './src')

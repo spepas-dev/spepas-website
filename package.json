@@ -10,7 +10,9 @@
     "lint:fix": "eslint src --ext ts,tsx,js,jsx --fix",
     "prettier:check": "prettier --check 'src/**/*.{ts,tsx,js,jsx,json}'",
     "prettier:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json}'",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "local-data:import": "node scripts/import-local-inventory.mjs",
+    "local-data:import:quick": "node scripts/import-local-inventory.mjs --vehicles=500"
   },
   "dependencies": {
     "@elastic/apm-rum": "^5.17.0",
@@ -88,6 +90,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "better-sqlite3": "^11.9.1",
+    "@types/better-sqlite3": "^7.6.12",
     "@eslint/js": "^9.23.0",
     "@types/leaflet": "^1.9.20",
     "@types/node": "^22.13.4",
