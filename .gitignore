@@ -13,6 +13,11 @@ build
 dist-ssr
 *.local
 local-data/*.db
+.github
+.claude
+certs
+NUL
+tree
 
 # Editor directories and files
 .vscode/*

@@ -36,7 +36,7 @@ export const getGopaAcceptedInvoices = async () => {
 export const getGopaAcceptedInvoiceDetails = async (invoice_id: string) => {
   getGopaAcceptedInvoiceDetailsParamsSchema.parse({ invoice_id });
   const { data } = await apiClient.get(
-    `/invoice/get-gopa-accepted-invoice-details/${invoice_id}`
+    `/invoice/get-invoice-details/${invoice_id}`
   );
   // console.log('GOPA Accepted Invoice Details:', data);
   return data;
@@ -46,7 +46,7 @@ export const getGopaAcceptedInvoiceDetails = async (invoice_id: string) => {
 export const getGopaAcceptedInvoiceItemDetails = async (item_id: string) => {
   getGopaAcceptedInvoiceItemDetailsParamsSchema.parse({ item_id });
   const { data } = await apiClient.get(
-    `/invoice/get-gopa-accepted-invoice-item-details/${item_id}`
+    `/invoice/get-invoice-item-details/${item_id}`
   );
   // console.log('GOPA Accepted Invoice Item Details:', data);
   return data;
