@@ -10,23 +10,23 @@ const NotFound: FC = () => {
           <h1 className="font-heading-1 text-heading-1 mb-5 text-dark">404</h1>
           <svg className="mx-auto mb-10 w-full max-w-[400px]" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
             {/* Background Elements */}
-            <circle cx="400" cy="200" r="150" fill="#E1E8FF" opacity="0.5" />
-            <path d="M300,250 Q400,150 500,250" stroke="#3C50E0" strokeWidth="8" fill="none" />
+            <circle cx="400" cy="200" r="150" fill="#edebfd" opacity="0.5" />
+            <path d="M300,250 Q400,150 500,250" stroke="#4A36EC" strokeWidth="8" fill="none" />
 
             {/* Broken Link Icon */}
             <g transform="translate(350,170)">
-              <path d="M40,20 L60,20 A20,20 0 1,1 60,60 L40,60" stroke="#1C274C" strokeWidth="8" fill="none" strokeLinecap="round" />
-              <path d="M60,20 L40,20 A20,20 0 1,0 40,60 L60,60" stroke="#3C50E0" strokeWidth="8" fill="none" strokeLinecap="round" />
+              <path d="M40,20 L60,20 A20,20 0 1,1 60,60 L40,60" stroke="#1C1D20" strokeWidth="8" fill="none" strokeLinecap="round" />
+              <path d="M60,20 L40,20 A20,20 0 1,0 40,60 L60,60" stroke="#4A36EC" strokeWidth="8" fill="none" strokeLinecap="round" />
             </g>
 
             {/* Decorative Elements */}
-            <circle cx="300" cy="150" r="10" fill="#ADBCF2" />
-            <circle cx="500" cy="250" r="8" fill="#5475E5" />
-            <circle cx="450" cy="150" r="6" fill="#C3CEF6" />
-            <circle cx="350" cy="280" r="7" fill="#8099EC" />
+            <circle cx="300" cy="150" r="10" fill="#aca3f6" />
+            <circle cx="500" cy="250" r="8" fill="#6e5ef0" />
+            <circle cx="450" cy="150" r="6" fill="#c7c1f9" />
+            <circle cx="350" cy="280" r="7" fill="#8678f2" />
 
             {/* Text Elements */}
-            <text x="400" y="320" textAnchor="middle" fill="#1C274C" fontSize="24" fontFamily="sans-serif">
+            <text x="400" y="320" textAnchor="middle" fill="#1C1D20" fontSize="24" fontFamily="sans-serif">
               Page Not Found
             </text>
           </svg>
