@@ -7,11 +7,35 @@ import {
   sparePartsResponseSchema,
   sparePartDetailResponseSchema,
   sparePartCategoriesResponseSchema,
+  carYearsResponseSchema,
 } from './inventoryZodValidation';
+
+// Filter interfaces — query params forwarded to the API (see docs/issue-tracking.md INV-3..5)
+export interface SparePartsFilter {
+  brandId?: string;
+  categoryId?: string;
+  fuelType?: string;
+  bodyType?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface CategoryFilter {
+  brandId?: string;
+  fuelType?: string;
+  bodyType?: string;
+}
 
 function cacheBusterParams() {
   return { params: { ts: Date.now() } };
 }
+
+// GET: distinct manufacture years — local mock only until INV-2 lands on real API
+export const getCarYears = async () => {
+  const { data } = await apiClient.get('/inventry/car-years-all', cacheBusterParams());
+  return carYearsResponseSchema.parse(data);
+};
 
 // GET: list all car manufacturers
 export const getCarManufacturers = async () => {
@@ -43,13 +67,11 @@ export const getCarModels = async () => {
   return carModelsResponseSchema.parse(data);
 };
 
-// GET: list all spare parts
-export const getSpareParts = async () => {
-  const { data } = await apiClient.get(
-    '/inventry/sparepart-all',
-    cacheBusterParams()
-  );
-  // console.log('Response from sparepart-all:', data);
+// GET: list all spare parts (filters forwarded as query params — see INV-3)
+export const getSpareParts = async (filters?: SparePartsFilter) => {
+  const { data } = await apiClient.get('/inventry/sparepart-all', {
+    params: { ts: Date.now(), ...filters },
+  });
   return sparePartsResponseSchema.parse(data);
 };
 
@@ -64,12 +86,10 @@ export const getSparePartDetailByCode = async (spare_part_code: string | number)
   return sparePartDetailResponseSchema.parse(data);
 };
 
-// GET: list all spare part categories
-export const getSparePartCategories = async () => {
-  const { data } = await apiClient.get(
-    '/inventry/category-all',
-    cacheBusterParams()
-  );
-  // console.log('Response from category-all:', data);
+// GET: list all spare part categories (filters scope part counts — see INV-4)
+export const getSparePartCategories = async (filters?: CategoryFilter) => {
+  const { data } = await apiClient.get('/inventry/category-all', {
+    params: { ts: Date.now(), ...filters },
+  });
   return sparePartCategoriesResponseSchema.parse(data);
 };

@@ -36,6 +36,9 @@ const carModelSchema = z.object({
   carBrand_ID: z.string().uuid(),
   status: z.number(),
   createdAt: z.string(),
+  // fuelType + bodyType: returned by local mock (TecDoc data); pending INV-1 on real API
+  fuelType: z.string().optional(),
+  bodyType: z.string().optional(),
   spareParts: z.array(sparePartSchema),
   carBrand: z
     .object({
@@ -60,7 +63,8 @@ const carModelSchema = z.object({
 
 const carBrandSchema = z.object({
   id: z.number(),
-  CarBrand_ID: z.string().uuid(),
+  // loosened from .uuid(): local mock returns pipe-separated UUIDs for grouped brand variants (pending INV-2)
+  CarBrand_ID: z.string(),
   name: z.string(),
   status: z.number(),
   manufacturer_ID: z.string().uuid(),
@@ -147,6 +151,13 @@ export const sparePartDetailResponseSchema = z.object({
       }),
     }).optional(),
   }),
+});
+
+// Pending INV-2: real API does not yet have this endpoint; served by local mock only
+export const carYearsResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: z.array(z.number()),
 });
 
 export const sparePartCategoriesResponseSchema = z.object({
