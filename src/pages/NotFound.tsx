@@ -41,7 +41,7 @@ const NotFound: FC = () => {
 
           {/* Back to Home Button */}
           <Link
-            to="/"
+            to="/95668339501103956045/home"
             className="inline-flex items-center justify-center rounded-md bg-blue px-7 py-3 text-base font-medium text-white transition duration-300 ease-in-out hover:bg-blue-dark"
           >
             Back to Homepage
