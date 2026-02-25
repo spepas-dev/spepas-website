@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 const imageSchema = z.object({
   id: z.number(),
-  image_ID: z.string().uuid(),
-  SparePart_ID: z.string().uuid(),
+  image_ID: z.string(),
+  SparePart_ID: z.string(),
   createdAt: z.string(),
   status: z.number(),
   // loosened: accept any string or undefined
@@ -14,14 +14,14 @@ const imageSchema = z.object({
 
 const sparePartSchema = z.object({
   id: z.number(),
-  SparePart_ID: z.string().uuid(),
+  SparePart_ID: z.string(),
   name: z.string(),
   description: z.string(),
   price: z.number(),
   status: z.number(),
   discount_ID: z.string().nullable(),
   category_ID: z.string().nullable(),
-  carModel_ID: z.string().uuid(),
+  carModel_ID: z.string(),
   seller_ID: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -30,10 +30,10 @@ const sparePartSchema = z.object({
 
 const carModelSchema = z.object({
   id: z.number(),
-  CarModel_ID: z.string().uuid(),
+  CarModel_ID: z.string(),
   name: z.string(),
   yearOfMake: z.number(),
-  carBrand_ID: z.string().uuid(),
+  carBrand_ID: z.string(),
   status: z.number(),
   createdAt: z.string(),
   // fuelType + bodyType: returned by local mock (TecDoc data); pending INV-1 on real API
@@ -43,15 +43,15 @@ const carModelSchema = z.object({
   carBrand: z
     .object({
       id: z.number(),
-      CarBrand_ID: z.string().uuid(),
+      CarBrand_ID: z.string(),
       name: z.string(),
       status: z.number(),
-      manufacturer_ID: z.string().uuid(),
+      manufacturer_ID: z.string(),
       createdAt: z.string(),
       type: z.string(),
       manufacturer: z.object({
         id: z.number(),
-        Manufacturer_ID: z.string().uuid(),
+        Manufacturer_ID: z.string(),
         name: z.string(),
         country: z.string(),
         status: z.number(),
@@ -67,14 +67,14 @@ const carBrandSchema = z.object({
   CarBrand_ID: z.string(),
   name: z.string(),
   status: z.number(),
-  manufacturer_ID: z.string().uuid(),
+  manufacturer_ID: z.string(),
   createdAt: z.string(),
   type: z.string(),
   models: z.array(carModelSchema),
   manufacturer: z
     .object({
       id: z.number(),
-      Manufacturer_ID: z.string().uuid(),
+      Manufacturer_ID: z.string(),
       name: z.string(),
       country: z.string(),
       status: z.number(),
@@ -85,7 +85,7 @@ const carBrandSchema = z.object({
 
 const manufacturerSchema = z.object({
   id: z.number(),
-  Manufacturer_ID: z.string().uuid(),
+  Manufacturer_ID: z.string(),
   name: z.string(),
   country: z.string(),
   status: z.number(),
@@ -127,23 +127,23 @@ export const sparePartDetailResponseSchema = z.object({
   data: sparePartSchema.extend({
     carModel: z.object({
       id: z.number(),
-      CarModel_ID: z.string().uuid(),
+      CarModel_ID: z.string(),
       name: z.string(),
       yearOfMake: z.number(),
-      carBrand_ID: z.string().uuid(),
+      carBrand_ID: z.string(),
       status: z.number(),
       createdAt: z.string(),
       carBrand: z.object({
         id: z.number(),
-        CarBrand_ID: z.string().uuid(),
+        CarBrand_ID: z.string(),
         name: z.string(),
         status: z.number(),
-        manufacturer_ID: z.string().uuid(),
+        manufacturer_ID: z.string(),
         createdAt: z.string(),
         type: z.string(),
         manufacturer: z.object({
           id: z.number(),
-          Manufacturer_ID: z.string().uuid(),
+          Manufacturer_ID: z.string(),
           name: z.string(),
           country: z.string(),
           status: z.number(),
@@ -167,9 +167,9 @@ export const sparePartCategoriesResponseSchema = z.object({
   data: z.array(
     z.object({
       id: z.number(),
-      Category_ID: z.string().uuid(),
+      Category_ID: z.string(),
       name: z.string(),
-      parent_ID: z.string().uuid().nullable(),
+      parent_ID: z.string().nullable(),
       count: z.number().optional(),
     })
   ),

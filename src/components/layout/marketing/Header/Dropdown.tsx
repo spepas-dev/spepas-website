@@ -25,7 +25,7 @@ const Dropdown: React.FC<DropdownProps> = ({ menuItem, stickyMenu }) => {
         href="#"
         className={`
           hover:text-blue text-custom-sm font-medium text-dark flex items-center gap-1.5 capitalize
-          ${stickyMenu ? 'xl:py-4' : 'xl:py-6'}
+          ${stickyMenu ? 'xl:py-4' : 'xl:py-4'}
           ${pathUrl.includes(menuItem.title) ? '!text-blue' : ''}
         `}
       >
@@ -60,7 +60,7 @@ const Dropdown: React.FC<DropdownProps> = ({ menuItem, stickyMenu }) => {
               to={sub.path!}
               className={`
                 flex text-custom-sm hover:text-blue hover:bg-gray-1
-                py-[7px] px-4.5
+                py-1.5 px-3
                 ${pathUrl === sub.path ? 'text-blue bg-gray-1' : ''}
               `}
             >

@@ -56,16 +56,29 @@ const ShopWithoutSidebar: React.FC = () => {
     staleTime: 10 * 60_000,
   });
 
+  const mfrFilters = useMemo(
+    () => (selectedYear ? { year: selectedYear } : undefined),
+    [selectedYear]
+  );
   const { data: manufacturersData, isLoading: makesLoading } = useQuery({
-    queryKey: ['car-manufacturers'],
-    queryFn: getCarManufacturers,
+    queryKey: ['car-manufacturers', mfrFilters],
+    queryFn: () => getCarManufacturers(mfrFilters),
     staleTime: 10 * 60_000,
+    enabled: !!selectedYear,
   });
 
+  const brandFilters = useMemo(
+    () => ({
+      ...(selectedYear ? { year: selectedYear } : {}),
+      ...(selectedMake ? { manufacturerId: selectedMake } : {}),
+    }),
+    [selectedYear, selectedMake]
+  );
   const { data: brandsData, isLoading: modelsLoading } = useQuery({
-    queryKey: ['car-brands'],
-    queryFn: getCarBrands,
+    queryKey: ['car-brands', brandFilters],
+    queryFn: () => getCarBrands(brandFilters),
     staleTime: 10 * 60_000,
+    enabled: !!selectedMake,
   });
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -76,26 +89,12 @@ const ShopWithoutSidebar: React.FC = () => {
   }, [yearsData]);
 
   const makeOptions = useMemo(() => {
-    const allMfrs = manufacturersData?.data ?? [];
-    if (!selectedYear) return allMfrs;
-    const yr = Number(selectedYear);
-    // Keep manufacturers that have at least one brand with a model in the selected year
-    return allMfrs.filter((m: any) =>
-      (m.brands ?? []).some((b: any) =>
-        (b.models ?? []).some(
-          (mod: any) => mod.yearOfMake != null && mod.yearOfMake === yr
-        )
-      )
-    );
-  }, [manufacturersData, selectedYear]);
+    return manufacturersData?.data ?? [];
+  }, [manufacturersData]);
 
   const modelOptions = useMemo(() => {
-    const allBrands = brandsData?.data ?? [];
-    if (!selectedMake) return [];
-    return allBrands.filter(
-      (b: any) => b.manufacturer_ID === selectedMake
-    );
-  }, [brandsData, selectedMake]);
+    return brandsData?.data ?? [];
+  }, [brandsData]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Queries — categories (scoped to selected brand)
@@ -112,6 +111,7 @@ const ShopWithoutSidebar: React.FC = () => {
     queryKey: ['sparepart-categories', categoryFilters],
     queryFn: () => getSparePartCategories(categoryFilters),
     staleTime: 5 * 60_000,
+    enabled: !!selectedModel,
   });
 
   // Group categories by parent
@@ -170,6 +170,8 @@ const ShopWithoutSidebar: React.FC = () => {
     [selectedModel, selectedCategory, search, page]
   );
 
+  const vehicleSelected = !!selectedModel;
+
   const {
     data: partsData,
     isLoading: partsLoading,
@@ -178,6 +180,7 @@ const ShopWithoutSidebar: React.FC = () => {
     queryKey: ['spareparts', partsFilters],
     queryFn: () => getSpareParts(partsFilters),
     staleTime: 60_000,
+    enabled: vehicleSelected,
   });
 
   const total = partsData?.total ?? partsData?.data?.length ?? 0;
@@ -326,8 +329,8 @@ const ShopWithoutSidebar: React.FC = () => {
 
           {/* ── Main layout: sidebar + content ────────────────────── */}
           <div className="flex gap-6">
-            {/* Sidebar — categories */}
-            <aside className="hidden lg:block w-64 shrink-0">
+            {/* Sidebar — categories (hidden until vehicle selected) */}
+            <aside className={`w-64 shrink-0 ${vehicleSelected ? 'hidden lg:block' : 'hidden'}`}>
               <div className="bg-white rounded-xl shadow-sm p-4 sticky top-24">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">
                   Categories
@@ -383,8 +386,8 @@ const ShopWithoutSidebar: React.FC = () => {
 
             {/* Main content */}
             <div className="flex-1 min-w-0">
-              {/* Search + view toggle + filter chips */}
-              <div className="flex flex-col gap-3 mb-6">
+              {/* Search + view toggle + filter chips (hidden until vehicle selected) */}
+              {vehicleSelected && <div className="flex flex-col gap-3 mb-6">
                 {/* Row: search, result count, view toggle */}
                 <div className="flex flex-wrap items-center gap-3 justify-between">
                   <div className="flex items-center gap-3">
@@ -485,7 +488,7 @@ const ShopWithoutSidebar: React.FC = () => {
                     ))}
                   </select>
                 </div>
-              </div>
+              </div>}
 
               {/* Loading skeleton */}
               {partsLoading && (
@@ -503,8 +506,18 @@ const ShopWithoutSidebar: React.FC = () => {
                 </div>
               )}
 
+              {/* Prompt to select vehicle */}
+              {!vehicleSelected && (
+                <div className="text-center py-16 text-gray-500">
+                  <p className="text-lg font-medium mb-1">Select your vehicle to get started</p>
+                  <p className="text-sm">
+                    Choose a year, make, and model above to browse available parts.
+                  </p>
+                </div>
+              )}
+
               {/* Empty state */}
-              {!partsLoading && !partsError && items.length === 0 && (
+              {vehicleSelected && !partsLoading && !partsError && items.length === 0 && (
                 <div className="text-center py-16 text-gray-500">
                   <p className="text-lg font-medium mb-1">No parts found</p>
                   <p className="text-sm">

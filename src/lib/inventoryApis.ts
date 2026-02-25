@@ -37,23 +37,19 @@ export const getCarYears = async () => {
   return carYearsResponseSchema.parse(data);
 };
 
-// GET: list all car manufacturers
-export const getCarManufacturers = async () => {
-  const { data } = await apiClient.get(
-    '/inventry/car-manufacturers-all',
-    cacheBusterParams()
-  );
-  // console.log('Response from car-manufacturers-all:', data);
+// GET: list car manufacturers (optionally scoped by year)
+export const getCarManufacturers = async (filters?: { year?: string }) => {
+  const { data } = await apiClient.get('/inventry/car-manufacturers-all', {
+    params: { ts: Date.now(), ...filters },
+  });
   return carManufacturersResponseSchema.parse(data);
 };
 
-// GET: list all car brands
-export const getCarBrands = async () => {
-  const { data } = await apiClient.get(
-    '/inventry/car-brands-all',
-    cacheBusterParams()
-  );
-  // console.log('Response from car-brands-all:', data);
+// GET: list car brands (optionally scoped by year + manufacturer)
+export const getCarBrands = async (filters?: { year?: string; manufacturerId?: string }) => {
+  const { data } = await apiClient.get('/inventry/car-brands-all', {
+    params: { ts: Date.now(), ...filters },
+  });
   return carBrandsResponseSchema.parse(data);
 };
 

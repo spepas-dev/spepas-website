@@ -116,6 +116,7 @@ export default ({ mode }: { mode: string }) => {
   };
 
   const useLocalData = process.env.VITE_USE_LOCAL_DATA === 'true';
+  console.log(`📦 VITE_USE_LOCAL_DATA=${process.env.VITE_USE_LOCAL_DATA} → local inventory: ${useLocalData ? 'ON' : 'OFF'}`);
 
   const config = {
     plugins: [react(), tailwindcss(), svgr(), ...(useLocalData ? [localInventoryPlugin()] : [])],

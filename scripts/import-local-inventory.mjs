@@ -178,8 +178,8 @@ async function main() {
     const rows = await readCsv(file);
     const run = db.transaction(() => {
       for (const row of rows) {
-        const name = (row.mfa_brand || row.name || '').trim();
-        const uuid = row.mfa_id ? String(row.mfa_id) : randomUUID();
+        const name = (row.mfa_brand || row.manufacturerName || row.name || '').trim();
+        const uuid = row.mfa_id ? String(row.mfa_id) : row.manufacturerId ? String(row.manufacturerId) : randomUUID();
         if (!name) continue;
         insertMfr.run(name, uuid);
         const existing = db.prepare('SELECT id FROM manufacturers WHERE name = ?').get(name);
@@ -208,12 +208,14 @@ async function main() {
     const rows = await readCsv(file);
     const run = db.transaction(() => {
       for (const row of rows) {
-        const name = (row.mmo_name || row.name || '').trim();
-        const uuid = row.mmo_id ? String(row.mmo_id) : randomUUID();
-        const yearFrom = parseInt(row.mmo_pcon_start) || null;
-        const yearTo = parseInt(row.mmo_pcon_end) || null;
-        const mfrUuid = String(row.mfa_id || '');
-        const mfrId = mfrUuidToId.get(mfrUuid) ?? mfrNameToIdFull.get(row.mfa_brand) ?? null;
+        const name = (row.mmo_name || row.modelName || row.name || '').trim();
+        const uuid = row.mmo_id ? String(row.mmo_id) : row.modelId ? String(row.modelId) : randomUUID();
+        const yearFromRaw = row.mmo_pcon_start || row.modelYearFrom || '';
+        const yearToRaw = row.mmo_pcon_end || row.modelYearTo || '';
+        const yearFrom = parseInt(yearFromRaw) || null;
+        const yearTo = parseInt(yearToRaw) || null;
+        const mfrUuid = String(row.mfa_id || row.manufacturerId || '');
+        const mfrId = mfrUuidToId.get(mfrUuid) ?? mfrNameToIdFull.get(row.mfa_brand || row.manufacturer) ?? null;
         if (!name || !mfrId) continue;
         insertBrand.run(name, yearFrom, yearTo, mfrId, uuid);
         brandCount++;
@@ -243,17 +245,19 @@ async function main() {
     const run = db.transaction(() => {
       for (const row of rows) {
         if (vehicleCount >= MAX_VEHICLES) return;
-        const uuid = String(row.passanger_car_id || row.typ_id || randomUUID());
-        const yearStart = parseInt(row.typ_pcon_start) || null;
+        const uuid = String(row.passanger_car_id || row.vehicleId || row.typ_id || randomUUID());
+        const yearStartRaw = row.typ_pcon_start || row.constructionStart || '';
+        const yearStart = parseInt(yearStartRaw) || null;
         if (!yearStart || yearStart < MIN_YEAR) { skipped++; continue; }
-        const brandUuid = String(row.mmo_id || '');
+        const brandUuid = String(row.mmo_id || row.modelId || '');
         const brandId = brandUuidToId.get(brandUuid) ?? null;
         if (!brandId) { skipped++; continue; }
-        const typeName = (row.typ_name || row.type_name || '').trim();
-        const yearEnd = parseInt(row.typ_pcon_end) || null;
-        const fuelType = (row.typ_motor || row.fuel_type || '').trim();
-        const bodyType = (row.typ_karosserieform || row.body_type || '').trim();
-        const powerPs = parseInt(row.typ_kw_von) || 0;
+        const typeName = (row.typ_name || row.typeEngineName || row.type_name || '').trim();
+        const yearEndRaw = row.typ_pcon_end || row.constructionEnd || '';
+        const yearEnd = parseInt(yearEndRaw) || null;
+        const fuelType = (row.typ_motor || row.fuelType || row.fuel_type || '').trim();
+        const bodyType = (row.typ_karosserieform || row.bodyType || row.body_type || '').trim();
+        const powerPs = parseInt(row.typ_kw_von || row.powerPs) || 0;
         insertModel.run(typeName, yearStart, yearEnd, fuelType, bodyType, powerPs, brandId, uuid);
         vehicleCount++;
       }
@@ -267,7 +271,7 @@ async function main() {
 
   // ── 4. Categories ─────────────────────────────────────────────────────────
   log('Importing categories…');
-  const catFiles = await globFiles(`${SRC_ROOT}/categories*.csv`);
+  const catFiles = await globFiles(`${SRC_ROOT}/*categories*.csv`);
   const insertCat = db.prepare(
     `INSERT OR IGNORE INTO categories (name, parent_id, level, uuid) VALUES (?, ?, ?, ?)`
   );
@@ -277,11 +281,11 @@ async function main() {
     // First pass: insert parent categories
     const run1 = db.transaction(() => {
       for (const row of rows) {
-        const name = (row.str_node_des || row.name || '').trim();
-        const uuid = String(row.str_id || randomUUID());
-        const parentUuid = String(row.str_id_parent || '');
+        const name = (row.str_node_des || row.categoryName || row.name || '').trim();
+        const uuid = String(row.str_id || row.categoryId || randomUUID());
+        const parentUuid = String(row.str_id_parent || row.parentCategoryId || '');
         if (!parentUuid || parentUuid === '0' || parentUuid === '') {
-          insertCat.run(name, null, 0, uuid);
+          insertCat.run(name, null, parseInt(row.level) || 0, uuid);
         }
       }
     });
@@ -294,9 +298,9 @@ async function main() {
     // Second pass: insert child categories
     const run2 = db.transaction(() => {
       for (const row of rows) {
-        const name = (row.str_node_des || row.name || '').trim();
-        const uuid = String(row.str_id || randomUUID());
-        const parentUuid = String(row.str_id_parent || '');
+        const name = (row.str_node_des || row.categoryName || row.name || '').trim();
+        const uuid = String(row.str_id || row.categoryId || randomUUID());
+        const parentUuid = String(row.str_id_parent || row.parentCategoryId || '');
         if (parentUuid && parentUuid !== '0') {
           const parentId = catUuidToId.get(parentUuid) ?? null;
           insertCat.run(name, parentId, 1, uuid);

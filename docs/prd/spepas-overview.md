@@ -1,6 +1,6 @@
 # SpePas — Product Overview & Requirements
 
-> Last updated: 2026-02-22
+> Last updated: 2026-02-25
 
 ---
 
@@ -10,7 +10,11 @@ SpePas is a one-stop online marketplace for car parts in Ghana. It connects buye
 
 The platform addresses a real gap: Ghana's high frequency of car repairs (due to traffic and road conditions) combined with a fragmented, offline-only spare parts market where buyers have to travel to physical markets, prices are opaque, and there is no reliable delivery infrastructure.
 
-The platform is accessible via a **web app** for smartphone users and via **SMS/USSD** for users without data access — ensuring reach across Ghana's full range of connectivity.
+The platform is accessible through three channels, in priority order:
+
+1. **MVP0 — Phone Call + USSD** (primary): Buyers call a SpePas phone line to place orders with a human agent. All tracking, bid review, cart, checkout, and delivery happen via USSD (`*773727#`) on any mobile phone — no data or smartphone required. See [USSD & Phone Orders PRD](ussd-and-phone-orders-prd.md) for full specification.
+2. **MVP1 — Web App**: Full self-service experience at spepas.com for smartphone users with data access.
+3. No mobile app is planned for MVP.
 
 ---
 
@@ -72,17 +76,35 @@ Survey of 100 car part buyers across commercial drivers, mechanics, and private 
 
 ## Access Channels
 
-### Web App
-Full-featured React web app at spepas.com. Requires a smartphone with internet access. Supports all roles and all flows.
+### Phone Call (MVP0 — Primary)
+Buyers place orders by calling a SpePas phone line staffed by human agents (up to 5–6 concurrent lines via 3CX). The agent captures vehicle details and parts, creates the request in the Admin Portal, and sends the buyer an SMS with a tracking code + USSD instructions. **PIN is never collected on phone calls** — bid acceptance and checkout happen exclusively in USSD.
 
-### USSD / SMS
-Accessible from any mobile phone by dialling a USSD code — no data, no app, no smartphone required. The USSD interface mirrors the core marketplace flows (posting requests, bidding, cart, checkout, delivery management, wallet) via sequential numbered menus. Each session is stateful: the system remembers where a user is in a flow across menu selections.
+### USSD / SMS (MVP0 — Primary)
+Accessible from any mobile phone by dialling `*773727#` — no data, no app, no smartphone required. The USSD interface handles bid review, cart, checkout (with PIN + MoMo), delivery tracking, and wallet management via sequential numbered menus. Each session is stateful: the system remembers where a user is in a flow across menu selections. Delivery confirmation uses a **numeric delivery code** (given to buyer at checkout) instead of QR scanning.
 
-USSD access is available for: **Buyer, Seller, Rider**.
+USSD access is available for: **Buyer, Seller, Rider, GoPa, MePa**.
+
+### Web App (MVP1)
+Full-featured React web app at spepas.com. Requires a smartphone with internet access. Supports all roles and all flows. Uses QR code scanning for delivery confirmation.
 
 ---
 
 ## Key User Flows
+
+### Buyer — Phone Order (MVP0 Primary Flow)
+1. Buyer calls SpePas phone line
+2. Agent identifies caller (existing profile or creates minimal profile)
+3. Agent collects vehicle details: year, brand, model, drivetrain/fuel
+4. Agent maps parts to catalog codes using Code Builder widget in Admin Portal
+5. Agent reads back order summary: "You requested [Year Brand Model], parts: [list]"
+6. Agent creates request in Admin Portal (one per part type, source = Phone)
+7. System sends SMS to buyer: "Request R48291 created. Review bids via `*773727#` → My requests." + link to part images
+8. Sellers receive the request and submit bids via USSD or web
+9. Buyer receives SMS when bids arrive: "New bids for R48291. Dial `*773727#` → My bids"
+10. Buyer reviews bids, accepts, checks out, and pays via USSD (PIN + MoMo)
+11. Seller marks order ready → Rider picks up → Rider delivers using delivery code
+
+---
 
 ### Buyer — Purchasing a Listed Part (Direct / Inventory)
 1. Buyer searches for a part by car make/model/year (e.g. "2014 Toyota Vitz spark plug")
