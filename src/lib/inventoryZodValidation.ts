@@ -114,6 +114,7 @@ export const carModelsResponseSchema = z.object({
 export const sparePartsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
+  total: z.number().optional(),
   data: z.array(sparePartSchema),
 });
 
@@ -169,6 +170,7 @@ export const sparePartCategoriesResponseSchema = z.object({
       Category_ID: z.string().uuid(),
       name: z.string(),
       parent_ID: z.string().uuid().nullable(),
+      count: z.number().optional(),
     })
   ),
 });

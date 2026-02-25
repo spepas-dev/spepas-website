@@ -4,366 +4,297 @@ import { useQuery } from '@tanstack/react-query';
 import Breadcrumb from '../Common/Breadcrumb';
 import SingleGridItem from '../Shop/SingleGridItem';
 import SingleListItem from '../Shop/SingleListItem';
-import CustomSelect from '../ShopWithSidebar/CustomSelect';
 
 import {
   getSpareParts,
   getSparePartCategories,
+  getCarYears,
   getCarManufacturers,
   getCarBrands,
-  getCarModels,
 } from '@/lib/inventoryApis';
 
 import { ProductVM } from '../Shop/shopTypes';
 
-const sortOptions = [
-  { label: 'Latest Products', value: 'latest' },
-  { label: 'Best Selling', value: 'popular' }, // placeholder
-  { label: 'Old Products', value: 'oldest' },
-];
-
 type ViewMode = 'grid' | 'list';
 
-function normalizeStr(x: unknown) {
-  return String(x ?? '').toLowerCase();
+const PAGE_SIZE = 48;
+
+// ── Pagination helper ──────────────────────────────────────────────────────
+function pageNumbers(current: number, total: number): (number | '...')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | '...')[] = [1];
+  const left = Math.max(2, current - 1);
+  const right = Math.min(total - 1, current + 1);
+  if (left > 2) pages.push('...');
+  for (let i = left; i <= right; i++) pages.push(i);
+  if (right < total - 1) pages.push('...');
+  pages.push(total);
+  return pages;
 }
 
-// ---- robust getters that tolerate both shapes ----
-// manufacturer: object.Manufacturer_ID OR string manufacturer_ID
-const getManufacturerId = (sp: any): string =>
-  sp?.carModel?.carBrand?.manufacturer?.Manufacturer_ID ??
-  sp?.carModel?.carBrand?.manufacturer_ID ??
-  '';
-
-// brand: object.CarBrand_ID OR string carBrand_ID
-const getBrandId = (sp: any): string =>
-  sp?.carModel?.carBrand?.CarBrand_ID ??
-  sp?.carModel?.carBrand_ID ??
-  '';
-
-// model: object.CarModel_ID OR string carModel_ID
-const getModelId = (sp: any): string =>
-  sp?.carModel?.CarModel_ID ??
-  sp?.carModel_ID ??
-  '';
-
+// ── Component ──────────────────────────────────────────────────────────────
 const ShopWithoutSidebar: React.FC = () => {
-  const [view] = useState<ViewMode>('grid');
+  // View
+  const [view, setView] = useState<ViewMode>('grid');
 
-  // Top filters
-  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-  const [selectedManufacturer, setSelectedManufacturer] = useState<string>('');
-  const [selectedBrand, setSelectedBrand] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState<string>('');
-  const [sort, setSort] = useState<string>('latest');
+  // Vehicle selector
+  const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedMake, setSelectedMake] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<string>(''); // brand = model line
+
+  // Filters
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [search, setSearch] = useState<string>('');
+  const [page, setPage] = useState<number>(1);
 
-  // ======================
-  // Queries
-  // ======================
-  const { data: partsData, isLoading: partsLoading, isError: partsError } = useQuery({
-    queryKey: ['spareparts'],
-    queryFn: getSpareParts,
-    staleTime: 60_000,
+  // ══════════════════════════════════════════════════════════════════════════
+  // Queries — vehicle cascade
+  // ══════════════════════════════════════════════════════════════════════════
+  const { data: yearsData, isLoading: yearsLoading } = useQuery({
+    queryKey: ['car-years'],
+    queryFn: getCarYears,
+    staleTime: 10 * 60_000,
   });
 
-  const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    isError: categoriesError,
-  } = useQuery({
-    queryKey: ['sparepart-categories'],
-    queryFn: getSparePartCategories,
-    staleTime: 5 * 60_000,
-  });
-
-  const { data: manufacturersData, isLoading: manufacturersLoading } = useQuery({
+  const { data: manufacturersData, isLoading: makesLoading } = useQuery({
     queryKey: ['car-manufacturers'],
     queryFn: getCarManufacturers,
     staleTime: 10 * 60_000,
   });
 
-  const { data: brandsData, isLoading: brandsLoading } = useQuery({
+  const { data: brandsData, isLoading: modelsLoading } = useQuery({
     queryKey: ['car-brands'],
     queryFn: getCarBrands,
     staleTime: 10 * 60_000,
   });
 
-  const { data: modelsData, isLoading: modelsLoading } = useQuery({
-    queryKey: ['car-models'],
-    queryFn: getCarModels,
-    staleTime: 10 * 60_000,
-  });
+  // ══════════════════════════════════════════════════════════════════════════
+  // Cascade derived options
+  // ══════════════════════════════════════════════════════════════════════════
+  const yearOptions = useMemo(() => {
+    return (yearsData?.data ?? []).map((y) => String(y));
+  }, [yearsData]);
 
-  // ======================
-  // Option lists (derived)
-  // ======================
-  const manufacturerOptions = useMemo(() => {
-    const list = manufacturersData?.data ?? [];
-    return list.map((m: any) => ({ value: m.Manufacturer_ID, label: m.name }));
-  }, [manufacturersData]);
-
-  const brandOptions = useMemo(() => {
-    const all = brandsData?.data ?? [];
-    const scoped = selectedManufacturer
-      ? all.filter((b: any) => b.manufacturer_ID === selectedManufacturer)
-      : all;
-    return scoped.map((b: any) => ({
-      value: b.CarBrand_ID,
-      label: b.name,
-      manufacturer_ID: b.manufacturer_ID,
-    }));
-  }, [brandsData, selectedManufacturer]);
+  const makeOptions = useMemo(() => {
+    const allMfrs = manufacturersData?.data ?? [];
+    if (!selectedYear) return allMfrs;
+    const yr = Number(selectedYear);
+    // Keep manufacturers that have at least one brand with a model in the selected year
+    return allMfrs.filter((m: any) =>
+      (m.brands ?? []).some((b: any) =>
+        (b.models ?? []).some(
+          (mod: any) => mod.yearOfMake != null && mod.yearOfMake === yr
+        )
+      )
+    );
+  }, [manufacturersData, selectedYear]);
 
   const modelOptions = useMemo(() => {
-    const all = modelsData?.data ?? [];
+    const allBrands = brandsData?.data ?? [];
+    if (!selectedMake) return [];
+    return allBrands.filter(
+      (b: any) => b.manufacturer_ID === selectedMake
+    );
+  }, [brandsData, selectedMake]);
 
-    // if brand is selected, show models under that brand
-    if (selectedBrand) {
-      return all
-        .filter((m: any) => m.carBrand_ID === selectedBrand)
-        .map((m: any) => ({ value: m.CarModel_ID, label: m.name, carBrand_ID: m.carBrand_ID }));
-    }
+  // ══════════════════════════════════════════════════════════════════════════
+  // Queries — categories (scoped to selected brand)
+  // ══════════════════════════════════════════════════════════════════════════
+  const categoryFilters = useMemo(
+    () => (selectedModel ? { brandId: selectedModel } : undefined),
+    [selectedModel]
+  );
 
-    // if only manufacturer selected, include models that belong to any brand of that manufacturer
-    if (selectedManufacturer) {
-      const brandIdsForMfr = new Set(
-        brandOptions
-          .filter(b => b.manufacturer_ID === selectedManufacturer)
-          .map(b => b.value)
-      );
-      return all
-        .filter((m: any) => brandIdsForMfr.has(m.carBrand_ID))
-        .map((m: any) => ({ value: m.CarModel_ID, label: m.name, carBrand_ID: m.carBrand_ID }));
-    }
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+  } = useQuery({
+    queryKey: ['sparepart-categories', categoryFilters],
+    queryFn: () => getSparePartCategories(categoryFilters),
+    staleTime: 5 * 60_000,
+  });
 
-    // otherwise all
-    return all.map((m: any) => ({ value: m.CarModel_ID, label: m.name, carBrand_ID: m.carBrand_ID }));
-  }, [modelsData, selectedBrand, selectedManufacturer, brandOptions]);
-
-  // ======================
-  // Category pills
-  // ======================
-  const categoryPills = useMemo(() => {
+  // Group categories by parent
+  const categoryGroups = useMemo(() => {
     const list = categoriesData?.data ?? [];
-    return [{ Category_ID: 'ALL', name: 'All' }, ...list];
+    const groups = new Map<
+      string | null,
+      Array<{ Category_ID: string; name: string; count?: number; parent_ID: string | null }>
+    >();
+    for (const cat of list) {
+      const key = cat.parent_ID ?? null;
+      const arr = groups.get(key) ?? [];
+      arr.push(cat);
+      groups.set(key, arr);
+    }
+    return groups;
   }, [categoriesData]);
 
-  const pillClass = (active: boolean) =>
-    `px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition
-     ${active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
-
-  // ======================
-  // Filtering logic (client-side)
-  // ======================
-  const filteredRaw = useMemo(() => {
-    let raw = partsData?.data ?? [];
-
-    // 1) Category
-    if (selectedCategory && selectedCategory !== 'ALL') {
-      raw = raw.filter((sp: any) => sp?.category_ID === selectedCategory);
+  // Top-level parents first, then their children
+  const orderedCategories = useMemo(() => {
+    const topLevel = categoryGroups.get(null) ?? [];
+    const result: Array<{
+      Category_ID: string;
+      name: string;
+      count?: number;
+      isParent: boolean;
+    }> = [];
+    for (const parent of topLevel) {
+      result.push({ ...parent, isParent: true });
+      const children = categoryGroups.get(parent.Category_ID) ?? [];
+      for (const child of children) {
+        result.push({ ...child, isParent: false });
+      }
     }
-
-    // 2) Manufacturer (check both shapes)
-    if (selectedManufacturer) {
-      raw = raw.filter((sp: any) => getManufacturerId(sp) === selectedManufacturer);
+    // Also include categories with no parent grouping (flat list from real API)
+    if (topLevel.length === 0) {
+      const list = categoriesData?.data ?? [];
+      for (const cat of list) {
+        result.push({ ...cat, isParent: false });
+      }
     }
+    return result;
+  }, [categoryGroups, categoriesData]);
 
-    // 3) Brand (check both shapes)
-    if (selectedBrand) {
-      raw = raw.filter((sp: any) => getBrandId(sp) === selectedBrand);
-    }
+  // ══════════════════════════════════════════════════════════════════════════
+  // Query — parts (server-side filtered + paginated)
+  // ══════════════════════════════════════════════════════════════════════════
+  const partsFilters = useMemo(
+    () => ({
+      ...(selectedModel ? { brandId: selectedModel } : {}),
+      ...(selectedCategory ? { categoryId: selectedCategory } : {}),
+      ...(search.trim() ? { search: search.trim() } : {}),
+      limit: PAGE_SIZE,
+      offset: (page - 1) * PAGE_SIZE,
+    }),
+    [selectedModel, selectedCategory, search, page]
+  );
 
-    // 4) Model (check both shapes)
-    if (selectedModel) {
-      raw = raw.filter((sp: any) => getModelId(sp) === selectedModel);
-    }
+  const {
+    data: partsData,
+    isLoading: partsLoading,
+    isError: partsError,
+  } = useQuery({
+    queryKey: ['spareparts', partsFilters],
+    queryFn: () => getSpareParts(partsFilters),
+    staleTime: 60_000,
+  });
 
-    // 5) Search in name
-    if (search.trim()) {
-      const q = normalizeStr(search);
-      raw = raw.filter((sp: any) => normalizeStr(sp?.name).includes(q));
-    }
+  const total = partsData?.total ?? partsData?.data?.length ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-    // 6) Sort (createdAt best-effort)
-    if (sort === 'latest') {
-      raw = [...raw].sort((a: any, b: any) =>
-        String(b?.createdAt ?? '').localeCompare(String(a?.createdAt ?? ''))
-      );
-    } else if (sort === 'oldest') {
-      raw = [...raw].sort((a: any, b: any) =>
-        String(a?.createdAt ?? '').localeCompare(String(b?.createdAt ?? ''))
-      );
-    }
-
-    return raw;
-  }, [partsData, selectedCategory, selectedManufacturer, selectedBrand, selectedModel, search, sort]);
-
-  // Map to VM for cards
   const items: ProductVM[] = useMemo(() => {
-    return (filteredRaw ?? []).map((sp: any) => ({
+    return (partsData?.data ?? []).map((sp: any) => ({
       linkId: String(sp.id ?? sp.SparePart_ID ?? ''),
       title: sp.name,
-      price: sp.price ?? 0,
-      reviews: 0,
       image:
         sp.images?.find((i: any) => !!i?.image_url)?.image_url ??
         '/images/placeholder.jpg',
     }));
-  }, [filteredRaw]);
+  }, [partsData]);
 
-  // ======================
-  // Helpers
-  // ======================
-  const clearFilters = () => {
-    setSelectedCategory('ALL');
-    setSelectedManufacturer('');
-    setSelectedBrand('');
-    setSelectedModel('');
+  // ══════════════════════════════════════════════════════════════════════════
+  // Filter chips
+  // ══════════════════════════════════════════════════════════════════════════
+  const activeFilters = useMemo(() => {
+    const chips: { key: string; label: string; onClear: () => void }[] = [];
+    if (selectedCategory) {
+      const catName =
+        categoriesData?.data?.find((c) => c.Category_ID === selectedCategory)?.name ?? 'Category';
+      chips.push({
+        key: 'category',
+        label: catName,
+        onClear: () => { setSelectedCategory(''); setPage(1); },
+      });
+    }
+    if (search.trim()) {
+      chips.push({
+        key: 'search',
+        label: `"${search.trim()}"`,
+        onClear: () => { setSearch(''); setPage(1); },
+      });
+    }
+    return chips;
+  }, [selectedCategory, search, categoriesData]);
+
+  const clearAllFilters = () => {
+    setSelectedCategory('');
     setSearch('');
-    setSort('latest');
+    setPage(1);
   };
 
-  // Reset child filters when parent changes
-  const onChangeManufacturer = (val: string) => {
-    setSelectedManufacturer(val);
-    setSelectedBrand('');
+  // ══════════════════════════════════════════════════════════════════════════
+  // Cascade change handlers (reset children)
+  // ══════════════════════════════════════════════════════════════════════════
+  const onChangeYear = (val: string) => {
+    setSelectedYear(val);
+    setSelectedMake('');
     setSelectedModel('');
+    setSelectedCategory('');
+    setPage(1);
   };
-  const onChangeBrand = (val: string) => {
-    setSelectedBrand(val);
+  const onChangeMake = (val: string) => {
+    setSelectedMake(val);
     setSelectedModel('');
+    setSelectedCategory('');
+    setPage(1);
+  };
+  const onChangeModel = (val: string) => {
+    setSelectedModel(val);
+    setSelectedCategory('');
+    setPage(1);
   };
 
-  // ======================
-  // UI (cleaner/minimal filter bar, no heavy border)
-  // ======================
+  // ══════════════════════════════════════════════════════════════════════════
+  // Render
+  // ══════════════════════════════════════════════════════════════════════════
   return (
     <>
       <Breadcrumb title="Explore All Products" pages={['shop']} />
 
-      <section className="py-8 lg:py-16 flex justify-center">
-        <div className="w-[80%] mx-auto">
-          {/* Controls */}
-          <div className="flex flex-col gap-4 bg-white rounded-xl px-6 py-5 mb-8 shadow-sm">
-            {/* Row: sort + search + count + clear */}
-            <div className="flex flex-wrap items-center gap-3 justify-between">
-              <div className="flex items-center gap-3">
-                <CustomSelect
-                  options={sortOptions}
-                  value={sort}
-                  onChange={(v: any) => setSort(v?.value ?? v)}
-                />
-
-                <div className="relative">
-                  <input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search parts…"
-                    className="h-10 w-56 sm:w-64 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {/* clean magnifying-glass */}
-                  <svg
-                    className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21 21l-4.35-4.35m1.1-4.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z"
-                    />
-                  </svg>
-                </div>
-
-                <span className="text-sm text-gray-600 hidden sm:inline">
-                  {items.length} result{items.length !== 1 ? 's' : ''}
-                </span>
-              </div>
-
-              <button
-                onClick={clearFilters}
-                className="text-sm px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-50"
-                title="Clear all filters"
-              >
-                Clear filters
-              </button>
-            </div>
-
-            {/* Category pills */}
-            <div className="overflow-x-auto -mx-1 px-1">
-              <div className="flex items-center gap-2 min-w-max pb-1">
-                {categoriesLoading && (
-                  <>
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-8 w-20 rounded-full bg-gray-100 animate-pulse"
-                      />
-                    ))}
-                  </>
-                )}
-
-                {!categoriesLoading &&
-                  !categoriesError &&
-                  categoryPills.map((c: any) => (
-                    <button
-                      key={c.Category_ID}
-                      className={pillClass(selectedCategory === c.Category_ID)}
-                      onClick={() => setSelectedCategory(c.Category_ID)}
-                    >
-                      {c.name}
-                    </button>
-                  ))}
-
-                {!categoriesLoading && categoriesError && (
-                  <span className="text-sm text-red-600">
-                    Failed to load categories
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Cascading selects */}
+      <section className="py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* ── Vehicle selector ──────────────────────────────────── */}
+          <div className="bg-white rounded-xl px-6 py-5 mb-6 shadow-sm">
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">
+              Select your vehicle
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {/* Manufacturer */}
+              {/* Year */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Manufacturer
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Year
                 </label>
                 <select
-                  value={selectedManufacturer}
-                  onChange={(e) => onChangeManufacturer(e.target.value)}
+                  value={selectedYear}
+                  onChange={(e) => onChangeYear(e.target.value)}
                   className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  disabled={manufacturersLoading}
+                  disabled={yearsLoading}
                 >
-                  <option value="">All manufacturers</option>
-                  {manufacturerOptions.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
-                    </option>
+                  <option value="">All years</option>
+                  {yearOptions.map((y) => (
+                    <option key={y} value={y}>{y}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Brand */}
+              {/* Make */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Brand
+                <label className="block text-xs font-medium text-gray-500 mb-1">
+                  Make
                 </label>
                 <select
-                  value={selectedBrand}
-                  onChange={(e) => onChangeBrand(e.target.value)}
+                  value={selectedMake}
+                  onChange={(e) => onChangeMake(e.target.value)}
                   className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  disabled={brandsLoading || (!brandOptions.length && !selectedManufacturer)}
+                  disabled={makesLoading || !selectedYear}
                 >
-                  <option value="">All brands</option>
-                  {brandOptions.map((b) => (
-                    <option key={b.value} value={b.value}>
-                      {b.label}
+                  <option value="">
+                    {selectedYear ? 'All makes' : 'Select a year first'}
+                  </option>
+                  {makeOptions.map((m: any) => (
+                    <option key={m.Manufacturer_ID} value={m.Manufacturer_ID}>
+                      {m.name}
                     </option>
                   ))}
                 </select>
@@ -371,19 +302,21 @@ const ShopWithoutSidebar: React.FC = () => {
 
               {/* Model */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
+                <label className="block text-xs font-medium text-gray-500 mb-1">
                   Model
                 </label>
                 <select
                   value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
+                  onChange={(e) => onChangeModel(e.target.value)}
                   className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  disabled={modelsLoading || (!modelOptions.length && !selectedBrand && !selectedManufacturer)}
+                  disabled={modelsLoading || !selectedMake}
                 >
-                  <option value="">All models</option>
-                  {modelOptions.map((m) => (
-                    <option key={m.value} value={m.value}>
-                      {m.label}
+                  <option value="">
+                    {selectedMake ? 'All models' : 'Select a make first'}
+                  </option>
+                  {modelOptions.map((b: any) => (
+                    <option key={b.CarBrand_ID} value={b.CarBrand_ID}>
+                      {b.name}
                     </option>
                   ))}
                 </select>
@@ -391,37 +324,258 @@ const ShopWithoutSidebar: React.FC = () => {
             </div>
           </div>
 
-          {/* Loading / error states for products */}
-          {partsLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="animate-pulse bg-white rounded-lg h-60" />
-              ))}
-            </div>
-          )}
+          {/* ── Main layout: sidebar + content ────────────────────── */}
+          <div className="flex gap-6">
+            {/* Sidebar — categories */}
+            <aside className="hidden lg:block w-64 shrink-0">
+              <div className="bg-white rounded-xl shadow-sm p-4 sticky top-24">
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                  Categories
+                </h3>
 
-          {partsError && (
-            <div className="text-center text-red-600">Failed to load products.</div>
-          )}
+                {/* All parts button */}
+                <button
+                  onClick={() => { setSelectedCategory(''); setPage(1); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm mb-1 transition-colors ${
+                    !selectedCategory
+                      ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  All parts
+                  {total > 0 && !selectedCategory && (
+                    <span className="float-right text-xs text-gray-400">
+                      {total}
+                    </span>
+                  )}
+                </button>
 
-          {/* Product list */}
-          {!partsLoading && !partsError && (
-            <div
-              className={
-                view === 'grid'
-                  ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6'
-                  : 'flex flex-col gap-6'
-              }
-            >
-              {items.map((item) =>
-                view === 'grid' ? (
-                  <SingleGridItem item={item} key={item.linkId} />
-                ) : (
-                  <SingleListItem item={item} key={item.linkId} />
-                )
+                {categoriesLoading && (
+                  <div className="space-y-2 mt-2">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="h-8 rounded-lg bg-gray-100 animate-pulse" />
+                    ))}
+                  </div>
+                )}
+
+                {!categoriesLoading && orderedCategories.map((cat) => (
+                  <button
+                    key={cat.Category_ID}
+                    onClick={() => { setSelectedCategory(cat.Category_ID); setPage(1); }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      cat.isParent ? 'font-medium mt-2' : 'pl-6'
+                    } ${
+                      selectedCategory === cat.Category_ID
+                        ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {cat.name}
+                    {cat.count != null && cat.count > 0 && (
+                      <span className="float-right text-xs text-gray-400">
+                        {cat.count}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </aside>
+
+            {/* Main content */}
+            <div className="flex-1 min-w-0">
+              {/* Search + view toggle + filter chips */}
+              <div className="flex flex-col gap-3 mb-6">
+                {/* Row: search, result count, view toggle */}
+                <div className="flex flex-wrap items-center gap-3 justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* Search */}
+                    <div className="relative">
+                      <input
+                        value={search}
+                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        placeholder="Search parts…"
+                        className="h-10 w-56 sm:w-64 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                      />
+                      <svg
+                        className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M21 21l-4.35-4.35m1.1-4.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z"
+                        />
+                      </svg>
+                    </div>
+
+                    <span className="text-sm text-gray-500 hidden sm:inline">
+                      {total} result{total !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  {/* View toggle */}
+                  <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setView('grid')}
+                      className={`p-2 ${view === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                      aria-label="Grid view"
+                    >
+                      <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setView('list')}
+                      className={`p-2 ${view === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                      aria-label="List view"
+                    >
+                      <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter chips */}
+                {activeFilters.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {activeFilters.map((chip) => (
+                      <span
+                        key={chip.key}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-sm"
+                      >
+                        {chip.label}
+                        <button
+                          onClick={chip.onClear}
+                          className="ml-0.5 hover:text-[var(--color-primary-900)]"
+                          aria-label={`Remove ${chip.label} filter`}
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                    {activeFilters.length > 1 && (
+                      <button
+                        onClick={clearAllFilters}
+                        className="text-sm text-gray-500 hover:text-gray-700 underline"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Mobile category selector (visible on small screens) */}
+                <div className="lg:hidden">
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
+                    className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
+                  >
+                    <option value="">All categories</option>
+                    {orderedCategories.map((cat) => (
+                      <option key={cat.Category_ID} value={cat.Category_ID}>
+                        {cat.isParent ? cat.name : `  ${cat.name}`}
+                        {cat.count != null ? ` (${cat.count})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Loading skeleton */}
+              {partsLoading && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <div key={i} className="animate-pulse bg-white rounded-lg h-60" />
+                  ))}
+                </div>
+              )}
+
+              {/* Error state */}
+              {partsError && (
+                <div className="text-center text-red-600 py-12">
+                  Failed to load products.
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!partsLoading && !partsError && items.length === 0 && (
+                <div className="text-center py-16 text-gray-500">
+                  <p className="text-lg font-medium mb-1">No parts found</p>
+                  <p className="text-sm">
+                    Try adjusting your vehicle selection or clearing filters.
+                  </p>
+                </div>
+              )}
+
+              {/* Product grid / list */}
+              {!partsLoading && !partsError && items.length > 0 && (
+                <>
+                  <div
+                    className={
+                      view === 'grid'
+                        ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                        : 'flex flex-col gap-4'
+                    }
+                  >
+                    {items.map((item) =>
+                      view === 'grid' ? (
+                        <SingleGridItem item={item} key={item.linkId} />
+                      ) : (
+                        <SingleListItem item={item} key={item.linkId} />
+                      )
+                    )}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <nav className="flex justify-center items-center gap-1 mt-10">
+                      <button
+                        disabled={page <= 1}
+                        onClick={() => setPage(page - 1)}
+                        className="px-3 py-2 rounded-lg text-sm border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                      >
+                        Prev
+                      </button>
+
+                      {pageNumbers(page, totalPages).map((p, idx) =>
+                        p === '...' ? (
+                          <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">
+                            &hellip;
+                          </span>
+                        ) : (
+                          <button
+                            key={p}
+                            onClick={() => setPage(p)}
+                            className={`px-3 py-2 rounded-lg text-sm border ${
+                              p === page
+                                ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-500)]'
+                                : 'border-gray-200 hover:bg-gray-50'
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        )
+                      )}
+
+                      <button
+                        disabled={page >= totalPages}
+                        onClick={() => setPage(page + 1)}
+                        className="px-3 py-2 rounded-lg text-sm border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  )}
+                </>
               )}
             </div>
-          )}
+          </div>
         </div>
       </section>
     </>
