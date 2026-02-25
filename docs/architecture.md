@@ -17,6 +17,8 @@ flowchart TD
     subgraph clients["Clients"]
         WEB["Web App
         spepas.com · :3000"]
+        ADMIN["Admin Portal
+        admin.spepas.com"]
         MOCK["USSD Mocker
         mocker.spepas.com"]
         SMS["SMS / USSD
@@ -53,6 +55,7 @@ flowchart TD
 
     WEB -->|"HTTPS /api/gateway/v1/*"| GW
     WEB <-->|"WebSocket chat"| GW
+    ADMIN -->|"HTTPS /api/gateway/v1/*"| GW
     MOCK -->|"HTTP /spussd/api/v1/*"| USSD
     SMS -->|"SMS gateway"| USSD
 
@@ -192,6 +195,24 @@ A web UI that simulates a USSD handset session. Calls the USSD Service directly 
 **Repo:** `spepas-website` | **Port:** 3000 (dev) | **Stack:** React 19 + TypeScript + Vite 6 + Tailwind v4
 
 See sections 6–10 for the full frontend breakdown.
+
+---
+
+### 3.8 Admin Portal
+**Repo:** `spepas-web-admin` | **URL:** `admin.spepas.com` | **Stack:** React SPA
+
+The back-office management tool for platform administration and phone order agent workspace. Authenticates via `api.spepas.com` using cookie-based sessions (same gateway as the web app).
+
+**Key modules:**
+- **Access Management:** Permissions, Roles, Applications, Menus, Groups
+- **User Management:** Admin users, Sellers, Buyers, Riders, Mepa, Gopa (with Google Maps integration)
+- **Call-In Order Management:** 4-step phone order wizard (Search Customer → Confirm Buyer → Order Details → Review & Submit)
+- **Order Management:** Active Requests, Spare Parts Orders, Gopa Orders, Seller Orders
+- **Wallet Management:** Platform wallets (revenue + suspense)
+- **Inventory Management:** Categories, Manufacturers, Brands, Models, Spare Parts
+- **Settings:** Profile, Security
+
+See [Admin Portal PRD](prd/admin-portal-prd.md) for full details.
 
 ---
 

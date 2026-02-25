@@ -380,27 +380,32 @@ Payment accounts (bank account, mobile wallet, PayPal) are added during or after
 
 Which flows are available on which access channel:
 
-| Flow | Web App | USSD |
-|---|---|---|
-| Sign up / log in | ✓ | — |
-| Browse parts catalogue | ✓ | — |
-| Post a request (by part code) | ✓ | ✓ (Buyer) |
-| View bids on a request | ✓ | ✓ (Buyer) |
-| Add bid to cart | ✓ | ✓ (Buyer) |
-| Checkout | ✓ | ✓ (Buyer) |
-| Remove item from cart | ✓ | ✓ (Buyer) |
-| Submit a bid (Seller) | ✓ | ✓ (Seller) |
-| Browse requests by brand/part | ✓ | ✓ (Seller) |
-| Mark item ready for pickup | ✓ | ✓ (Seller) |
-| View / accept invoices (GOPA) | ✓ | — |
-| View pickup jobs | ✓ | ✓ (Rider) |
-| Confirm pickup (QR scan) | ✓ | — |
-| Confirm delivery (QR scan) | ✓ | — |
-| View delivery history | ✓ | ✓ (Rider) |
-| View wallet balance | ✓ | ✓ (Rider) |
-| Request wallet withdrawal | ✓ | ✓ (Rider) |
-| Profiling / onboarding | ✓ | — |
-| Chat / messaging | ✓ | — |
+| Flow | Phone Call | USSD | Web App | Admin Portal |
+|---|---|---|---|---|
+| Sign up / log in | — | — | ✓ | ✓ (admin accounts) |
+| Browse parts catalogue | — | — | ✓ | — |
+| Post a request (by part code) | ✓ (agent creates) | ✓ (Buyer) | ✓ | ✓ (Call-In wizard) |
+| View bids on a request | ✓ (agent reads, read-only) | ✓ (Buyer) | ✓ | ✓ (read-only) |
+| Accept bid / add to cart | **Not allowed** (PIN required) | ✓ (Buyer, PIN) | ✓ | — |
+| Checkout / payment | **Not allowed** (PIN required) | ✓ (Buyer, PIN + MoMo) | ✓ | — |
+| Remove item from cart | — | ✓ (Buyer) | ✓ | — |
+| Submit a bid (Seller) | — | ✓ (Seller) | ✓ | — |
+| Browse requests by brand/part | — | ✓ (Seller) | ✓ | — |
+| Mark item ready for pickup | — | ✓ (Seller, PIN) | ✓ | — |
+| Browse / forward requests (GOPA) | — | ✓ (GoPa) | ✓ | — |
+| View / accept invoices (GOPA) | — | — | ✓ | — |
+| View pickup jobs | — | ✓ (Rider) | ✓ | — |
+| Confirm pickup | — | ✓ (Rider) | ✓ (QR scan) | — |
+| Confirm delivery | — | ✓ (delivery code) | ✓ (QR scan) | — |
+| View delivery history | — | ✓ (Rider) | ✓ | — |
+| View wallet balance | — | ✓ (Rider/Seller) | ✓ | ✓ (admin view) |
+| Request wallet withdrawal | — | ✓ (Rider/Seller, PIN) | ✓ | — |
+| Profiling / onboarding | — | — | ✓ | — |
+| Chat / messaging | — | — | ✓ | — |
+| User management | — | — | — | ✓ |
+| Order / bid monitoring | — | — | — | ✓ |
+| Access management (roles) | — | — | — | ✓ |
+| Inventory management | — | — | — | ✓ |
 
 ---
 
@@ -474,7 +479,7 @@ Gaps are organized by layer. Status key: ✓ Done · ⚠ Partial · — Not star
 | GOPA profiling | ✓ | — | ✓ | |
 | MEPA profiling | ✓ | — | ✓ | |
 | Rider profiling | ✓ | — | ✓ | |
-| Admin account management | — | — | ⚠ | No admin UI; backend roles exist in schema |
+| Admin account management | ✓ | — | ✓ | Admin portal at `admin.spepas.com`; see [Admin Portal PRD](admin-portal-prd.md) |
 | Social login (Google / Facebook) | — | — | — | Listed as priority 2; not implemented |
 
 ---
@@ -521,13 +526,13 @@ Gaps are organized by layer. Status key: ✓ Done · ⚠ Partial · — Not star
 
 | Feature | Web | USSD | Backend | Notes |
 |---|---|---|---|---|
-| View unassigned requests | ✓ | — | ✓ | GOPA has no USSD interface |
-| Assign requests to sellers | ✓ | — | ✓ | |
+| View unassigned requests | ✓ | ✓ | ✓ | USSD: Browse requests menu |
+| Assign / forward requests to sellers | ✓ | ✓ | ✓ | USSD: Forward to sellers in network |
 | View seller network | ✓ | — | ✓ | |
 | Accept / reject invoices | ✓ | — | ✓ | |
-| View assigned request history | ✓ | — | ✓ | |
+| View assigned / forwarded request history | ✓ | ✓ | ✓ | USSD: Forwarded requests menu |
 | View referral statistics | — | — | ⚠ | Priority 2; not implemented |
-| Wallet / commission payouts | — | — | ⚠ | Schema exists; no payout flow built |
+| Wallet / commission payouts | — | ✓ | ⚠ | USSD wallet menu exists; payout flow not fully built |
 
 ---
 
@@ -562,20 +567,24 @@ Gaps are organized by layer. Status key: ✓ Done · ⚠ Partial · — Not star
 
 ### Admin Flows
 
-| Feature | Web | USSD | Backend | Notes |
-|---|---|---|---|---|
-| Analytics dashboard (sales, signups, reviews) | — | — | ✓ | No frontend built |
-| Search / view user profiles | — | — | ✓ | No frontend built |
-| View / filter all orders | — | — | ✓ | No frontend built |
-| View wallet details (all roles) | — | — | ✓ | No frontend built |
-| Approve / deny seller & rider applications | — | — | ✓ | No frontend built |
-| Suspend / ban accounts | — | — | ✓ | No frontend built |
-| View support chat history | — | — | ⚠ | Partially wired |
-| View all bids | — | — | ✓ | No frontend built |
-| Update part attributes & categories | — | — | ✓ | No frontend built |
-| Configure charges, fees, taxes | — | — | ✓ | No frontend built |
-| Upload educational content | — | — | — | Priority 2; not started |
-| Manage promo sliders / ads | — | — | — | Priority 2; not started |
+Admin portal is live at `admin.spepas.com` (separate codebase: `spepas-web-admin`). See [Admin Portal PRD](admin-portal-prd.md) for full details.
+
+| Feature | Admin Portal | Backend | Notes |
+|---|---|---|---|
+| Analytics dashboard (sales, signups, reviews) | ⚠ | ✓ | Dashboard exists but KPIs appear hardcoded; chart placeholder |
+| Search / view user profiles | ✓ | ✓ | Buyers, Sellers, Riders, Mepa, Gopa lists with search |
+| View / filter all orders | ✓ | ✓ | Active Requests, Spare Parts Orders, Gopa Orders, Seller Orders |
+| View wallet details (all roles) | ✓ | ✓ | 4 wallets visible (revenue + suspense) |
+| Approve / deny seller & rider applications | ⚠ | ✓ | User lists exist; approval workflow not confirmed |
+| Suspend / ban accounts | ⚠ | ✓ | Status column exists; action buttons not confirmed |
+| View support chat history | — | ⚠ | Not in admin portal |
+| View all bids | ✓ | ✓ | Via Active Requests → View |
+| Update part attributes & categories | ✓ | ✓ | Categories, Manufacturers, Brands, Models, Spare Parts pages |
+| Configure charges, fees, taxes | — | ✓ | Not in admin portal |
+| Call-In Order Management (Phone Orders) | ⚠ | ✓ | 4-step wizard exists; missing Code Builder, vehicle entry, SMS trigger |
+| Access management (roles, permissions, groups) | ✓ | ✓ | Infrastructure exists; MVP0 roles not configured |
+| Upload educational content | — | — | Priority 2; not started |
+| Manage promo sliders / ads | — | — | Priority 2; not started |
 
 ---
 
