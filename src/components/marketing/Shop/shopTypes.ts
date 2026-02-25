@@ -1,14 +1,12 @@
 //src/components/marketing/Shop/shopTypes.ts
+
 export type ProductVM = {
-    /** what we put in the URL: usually numeric id (code) */
-    linkId: string;
-    title: string;
-    price: number;
-    reviews: number; // API doesn’t supply; keep your UI happy
-    image: string;   // main image url or placeholder
-  };
-  
-  // Helper to pick the first image url or a placeholder
-  export const firstImage = (images?: Array<{ image_url?: string }>) =>
-    images?.find((i) => !!i.image_url)?.image_url ?? '/images/placeholder.jpg';
-  
+  /** URL identifier: numeric id or spare-part code */
+  linkId: string;
+  title: string;
+  image: string; // main image url or placeholder
+};
+
+/** Pick the first non-empty image url from an images array, or fall back to placeholder */
+export const firstImage = (images?: Array<{ image_url?: string }>) =>
+  images?.find((i) => !!i.image_url)?.image_url ?? '/images/placeholder.jpg';
