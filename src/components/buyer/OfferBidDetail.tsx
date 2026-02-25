@@ -1,57 +1,40 @@
-// src/components/buyer/OfferBidDetail.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, Store, MapPin, CalendarDays, MessageSquare } from 'lucide-react';
 
 const IMAGES: string[] = [
-  // Replace with actual URLs later
   'https://www.serac-group.com/wp-content/uploads/2019/09/Parts.jpg',
   'https://thumbs.dreamstime.com/b/set-grey-metal-car-brake-discs-black-pads-photographed-clean-white-background-essential-auto-spare-parts-effective-398612931.jpg',
   'https://blogs.gomechanic.com/wp-content/uploads/2020/07/How-to-spot-Counterfiet-fake-spare-parts-01.jpg',
 ];
-
-const Badge: React.FC<{ tone?: 'gray' | 'indigo' | 'green' | 'amber'; children: React.ReactNode }> = ({
-  children,
-  tone = 'gray',
-}) => {
-  const toneMap = {
-    gray: 'bg-gray-100 text-gray-700',
-    indigo: 'bg-indigo-100 text-indigo-700',
-    green: 'bg-green-100 text-green-700',
-    amber: 'bg-amber-100 text-amber-700',
-  } as const;
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${toneMap[tone]}`}>
-      {children}
-    </span>
-  );
-};
 
 const OfferBidDetail: React.FC = () => {
   const navigate = useNavigate();
   const [active, setActive] = useState(0);
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-10">
+    <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        {/* <button
-          onClick={() => navigate(-1)}
-          className="rounded-full border px-3 py-1.5 hover:bg-gray-50"
-          title="Back"
-        >
-          ←
-        </button> */}
-        <h1 className="text-xl sm:text-2xl font-bold">Offer Details</h1>
-        <div className="ml-auto">
-          <Badge tone="indigo">Pending</Badge>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-blue-light-5 flex items-center justify-center">
+            <Eye className="h-5 w-5 text-blue" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-dark">Offer Details</h1>
+            <p className="text-sm text-dark-4">Review this seller's bid</p>
+          </div>
         </div>
+        <span className="text-[10px] px-2.5 py-1 rounded-full font-medium bg-yellow-50 text-yellow-600">
+          Pending
+        </span>
       </div>
 
       <div className="grid lg:grid-cols-5 gap-6">
-        {/* IMAGES */}
+        {/* Images */}
         <div className="lg:col-span-3">
-          <div className="rounded-2xl bg-white  shadow-sm p-3 sm:p-4">
-            <div className="aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
+          <div className="bg-white rounded-2xl border border-gray-3 shadow-1 p-4">
+            <div className="aspect-video w-full overflow-hidden rounded-xl bg-gray-1">
               <img
                 src={IMAGES[active]}
                 alt={`Offer image ${active + 1}`}
@@ -64,78 +47,84 @@ const OfferBidDetail: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => setActive(i)}
-                  className={`relative overflow-hidden rounded-lg border ${
-                    active === i ? 'ring-2 ring-indigo-500' : 'hover:opacity-90'
+                  className={`relative overflow-hidden rounded-lg border-2 transition-all ${
+                    active === i ? 'border-blue ring-1 ring-blue/20' : 'border-gray-3 hover:border-dark-5'
                   }`}
-                  title={`Image ${i + 1}`}
                 >
-                  <img src={src} className="h-16 w-full object-cover" />
+                  <img src={src} className="h-16 w-full object-cover" alt="" />
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* DETAILS */}
+        {/* Details */}
         <div className="lg:col-span-2">
-          <div className="rounded-2xl bg-white  shadow-sm p-4 sm:p-5 space-y-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">Radiator</h2>
-                <p className="text-gray-600 text-sm">Toyota • Camry • 2018</p>
-              </div>
-              <Badge tone="gray">Qty: 5</Badge>
+          <div className="bg-white rounded-2xl border border-gray-3 shadow-1 p-5 space-y-5">
+            <div>
+              <h2 className="text-lg font-semibold text-dark">Radiator</h2>
+              <p className="text-sm text-dark-4 mt-0.5">Toyota - Camry - 2018</p>
             </div>
 
-            <p className="text-gray-700 text-sm leading-relaxed">
+            <p className="text-sm text-dark-3 leading-relaxed">
               Brand new radiator with 12-month warranty. OEM grade fit and finish.
               Ready for immediate pickup or delivery.
             </p>
 
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <div className="text-gray-500">Total Price</div>
-                <div className="font-medium">GH₵ 2,500</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Unit Price</div>
-                <div className="font-medium">GH₵ 500</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Date Assigned</div>
-                <div className="font-medium">01 Oct 2025, 08:55 PM</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Date Accepted</div>
-                <div className="font-medium">—</div>
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between">
+            <div className="bg-gray-1 rounded-xl border border-gray-3 p-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-xs text-gray-500">Seller</div>
-                  <div className="font-medium">A and A Ventures</div>
+                  <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Total Price</p>
+                  <p className="text-base font-bold text-dark mt-0.5">GH&#x20B5; 2,500</p>
                 </div>
-                <div className="flex gap-2">
-                  <button className="px-3 py-1.5 rounded-lg border hover:bg-gray-50 text-sm">
-                    View Store
-                  </button>
-                  <a
-                    href="/95668339501103956045/chat/c1"
-                    className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm"
-                  >
-                    Contact
-                  </a>
+                <div>
+                  <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Unit Price</p>
+                  <p className="text-base font-bold text-dark mt-0.5">GH&#x20B5; 500</p>
+                </div>
+                <div>
+                  <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Quantity</p>
+                  <p className="text-sm font-medium text-dark mt-0.5">5</p>
+                </div>
+                <div>
+                  <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Date</p>
+                  <p className="text-sm font-medium text-dark mt-0.5">01 Oct 2025</p>
                 </div>
               </div>
-
-              <div className="mt-2 text-xs text-gray-500">Coords: 40.7831, -73.9712</div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span>Added:</span>
-              <span>09 Jan 2025, 07:00 PM</span>
+            {/* Seller */}
+            <div className="border-t border-gray-3 pt-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-9 w-9 rounded-lg bg-blue-light-5 flex items-center justify-center">
+                  <Store className="h-4 w-4 text-blue" />
+                </div>
+                <div>
+                  <p className="text-xs text-dark-4">Seller</p>
+                  <p className="text-sm font-semibold text-dark">A and A Ventures</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-dark-5 mb-3">
+                <MapPin className="h-3 w-3" />
+                40.7831, -73.9712
+              </div>
+              <div className="flex gap-2">
+                <button className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-1 text-dark font-medium text-sm py-2.5 rounded-xl border border-gray-3 hover:bg-gray-2 transition-colors duration-200">
+                  <Store className="h-4 w-4" />
+                  View Store
+                </button>
+                <a
+                  href="/95668339501103956045/chat/c1"
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-blue text-white font-medium text-sm py-2.5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Contact
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs text-dark-5">
+              <CalendarDays className="h-3 w-3" />
+              Added: 09 Jan 2025, 07:00 PM
             </div>
           </div>
         </div>

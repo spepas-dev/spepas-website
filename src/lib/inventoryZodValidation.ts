@@ -1,13 +1,22 @@
 // src/lib/inventoryZodValidation.ts
 import { z } from 'zod';
 
+/* ── pagination meta (shared across all list endpoints) ── */
+const paginationMetaSchema = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+});
+
+export type PaginationMeta = z.infer<typeof paginationMetaSchema>;
+
 const imageSchema = z.object({
   id: z.number(),
   image_ID: z.string().uuid(),
   SparePart_ID: z.string().uuid(),
   createdAt: z.string(),
   status: z.number(),
-  // loosened: accept any string or undefined
   image_url: z.string().optional(),
   image_ob: z.any(),
 });
@@ -36,7 +45,7 @@ const carModelSchema = z.object({
   carBrand_ID: z.string().uuid(),
   status: z.number(),
   createdAt: z.string(),
-  spareParts: z.array(sparePartSchema),
+  spareParts: z.array(sparePartSchema).optional(),
   carBrand: z
     .object({
       id: z.number(),
@@ -66,7 +75,7 @@ const carBrandSchema = z.object({
   manufacturer_ID: z.string().uuid(),
   createdAt: z.string(),
   type: z.string(),
-  models: z.array(carModelSchema),
+  models: z.array(carModelSchema).optional(),
   manufacturer: z
     .object({
       id: z.number(),
@@ -86,31 +95,35 @@ const manufacturerSchema = z.object({
   country: z.string(),
   status: z.number(),
   createdAt: z.string(),
-  brands: z.array(carBrandSchema),
+  brands: z.array(carBrandSchema).optional(),
 });
 
 export const carManufacturersResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(manufacturerSchema),
+  meta: paginationMetaSchema.optional(),
 });
 
 export const carBrandsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(carBrandSchema),
+  meta: paginationMetaSchema.optional(),
 });
 
 export const carModelsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(carModelSchema),
+  meta: paginationMetaSchema.optional(),
 });
 
 export const sparePartsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(sparePartSchema),
+  meta: paginationMetaSchema.optional(),
 });
 
 /**
@@ -152,12 +165,16 @@ export const sparePartDetailResponseSchema = z.object({
 export const sparePartCategoriesResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
-  data: z.array(
-    z.object({
-      id: z.number(),
-      Category_ID: z.string().uuid(),
-      name: z.string(),
-      parent_ID: z.string().uuid().nullable(),
-    })
-  ),
+  data: z.object({
+    categories: z.array(
+      z.object({
+        id: z.number(),
+        Category_ID: z.string().uuid(),
+        name: z.string(),
+        parent_ID: z.string().uuid().nullable(),
+        externalID: z.number().optional(),
+      })
+    ),
+    meta: paginationMetaSchema.optional(),
+  }),
 });

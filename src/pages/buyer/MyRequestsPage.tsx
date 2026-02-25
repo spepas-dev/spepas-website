@@ -1,71 +1,65 @@
-// src/pages/buyer/MyRequestsPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import RequestList from '../../components/buyer/RequestList';
+import RequestList from '@/components/buyer/RequestList';
+import { ClipboardList, Plus } from 'lucide-react';
 
 const MyRequestsPage: React.FC = () => {
   const [tab, setTab] = useState<'active' | 'history'>('active');
   const navigate = useNavigate();
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
-      <section className="pt-10"></section>
-      {/* Header + Create button */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <h1 className="text-2xl font-bold text-blue-800">My Requests</h1>
-        <button
-          type="button"
-          onClick={() => navigate('/95668339501103956045/buyer/post-request')}
-          className="flex items-center mt-3 sm:mt-0 px-4 py-2 text-sm text-blue-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="w-4 h-4 mr-2"
+    <section className="pt-24 pb-10 sm:pt-28 sm:pb-16 bg-gray-1 min-h-screen">
+      <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-blue-light-5 flex items-center justify-center">
+              <ClipboardList className="h-5 w-5 text-blue" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-dark">My Requests</h1>
+              <p className="text-sm text-dark-4">View and manage your spare part requests</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/95668339501103956045/buyer/post-request')}
+            className="inline-flex items-center justify-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 5v14m-7-7h14"
-            />
-          </svg>
-          Create Request
-        </button>
+            <Plus className="h-4 w-4" />
+            New Request
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            type="button"
+            onClick={() => setTab('active')}
+            className={`font-medium text-sm py-2 px-4 rounded-lg transition-colors duration-200 ${
+              tab === 'active'
+                ? 'bg-blue text-white'
+                : 'bg-white text-dark-2 border border-gray-3 hover:bg-gray-2'
+            }`}
+          >
+            Active
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab('history')}
+            className={`font-medium text-sm py-2 px-4 rounded-lg transition-colors duration-200 ${
+              tab === 'history'
+                ? 'bg-blue text-white'
+                : 'bg-white text-dark-2 border border-gray-3 hover:bg-gray-2'
+            }`}
+          >
+            History
+          </button>
+        </div>
+
+        <RequestList mode={tab} />
       </div>
-
-      {/* Subtitle */}
-      <h2 className="text-lg text-gray-600 mb-6">
-        View and manage your requests below.
-      </h2>
-
-      {/* Tabs */}
-      <div className="mb-4">
-        <button
-          type="button"
-          onClick={() => setTab('active')}
-          className={`mr-4 pb-1 border-b-2 ${
-            tab === 'active' ? 'border-indigo-600' : 'border-transparent'
-          }`}
-        >
-          Active
-        </button>
-        <button
-          type="button"
-          onClick={() => setTab('history')}
-          className={`pb-1 border-b-2 ${
-            tab === 'history' ? 'border-indigo-600' : 'border-transparent'
-          }`}
-        >
-          History
-        </button>
-      </div>
-
-      {/* Request list */}
-      <RequestList mode={tab} />
-    </div>
+    </section>
   );
 };
 

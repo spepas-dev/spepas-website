@@ -9,21 +9,9 @@ export const menuData: Menu[] = [
   },
   {
     id: 2,
-    title: 'Contact',
+    title: 'Shop',
     newTab: false,
-    path: '/95668339501103956045/contact'
-  },
-  {
-    id: 3,
-    title: 'About Us',
-    newTab: false,
-    path: '/95668339501103956045/about-us'
-  },
-  {
-    id: 4,
-    title: 'FAQs',
-    newTab: false,
-    path: '/95668339501103956045/faqs'
+    path: '/95668339501103956045/shop'
   },
   // {
   //   id: 6,

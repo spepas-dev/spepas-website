@@ -1,59 +1,39 @@
-// src/components/buyer/RequestCard.tsx 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Package, ArrowRight } from 'lucide-react';
 
 interface RequestCardProps {
   req: any;
 }
 
 const RequestCard: React.FC<RequestCardProps> = ({ req }) => {
-  const img = req.sparePart.images?.[0];
+  const img = req.sparePart?.images?.[0];
+  const name = req.sparePart?.name || 'Unknown Part';
+  const description = req.sparePart?.description || '';
 
   return (
-    <div
-      className="
-        flex flex-col
-        sm:flex-row
-        items-start sm:items-center
-        bg-white shadow rounded-lg
-        overflow-hidden
-        mb-4
-      "
-    >
-      {img && (
-        <img
-          src={img}
-          alt={req.sparePart.name}
-          className="
-            w-full h-48
-            sm:w-16 sm:h-16
-            object-cover
-          "
-        />
-      )}
-
-      <div className="flex-grow p-4 space-y-2">
-        <h2 className="text-lg sm:text-base font-semibold text-gray-800">
-          {req.sparePart.name}
-        </h2>
-        <p className="text-sm sm:text-xs text-gray-600 line-clamp-3">
-          {req.sparePart.description}
-        </p>
+    <div className="bg-white rounded-2xl border border-gray-3 shadow-1 overflow-hidden hover:shadow-2 transition-shadow">
+      {/* Image */}
+      <div className="aspect-[4/3] bg-gray-1 flex items-center justify-center overflow-hidden">
+        {img ? (
+          <img src={img} alt={name} className="w-full h-full object-cover" />
+        ) : (
+          <Package className="h-10 w-10 text-dark-5" />
+        )}
       </div>
 
+      {/* Content */}
       <div className="p-4">
+        <h3 className="text-sm font-semibold text-dark truncate">{name}</h3>
+        {description && (
+          <p className="text-xs text-dark-4 mt-1 line-clamp-2">{description}</p>
+        )}
         <Link
           to={`/95668339501103956045/buyer/requests/${req.request_ID}/offers`}
-          className="
-            block w-full text-center
-            bg-indigo-500 hover:bg-indigo-600
-            text-white font-medium
-            py-2 px-4 rounded-md
-            transition
-            sm:inline-block sm:w-auto sm:text-sm
-          "
+          className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-blue hover:text-blue-dark transition-colors"
         >
           View Offers
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     </div>

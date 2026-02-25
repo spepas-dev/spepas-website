@@ -9,6 +9,14 @@ import {
   getGOPAUnassignedRequestHistoryAPI,
 } from "@/lib/orderBidsApis";
 import GopaInvoicesPanel from "./GopaInvoicesPanel";
+import SpepasLoader from "@/components/common/SpepasLoader";
+import {
+  ShieldCheck,
+  RefreshCw,
+  ClipboardList,
+  Inbox,
+  AlertTriangle,
+} from "lucide-react";
 
 type TabKey =
   | "ASSIGNED_ACTIVE"
@@ -23,7 +31,17 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "UNASSIGNED_HISTORY", label: "Unassigned (History)" },
 ];
 
-const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId }) => {
+const EMPTY_MESSAGES: Record<TabKey, string> = {
+  ASSIGNED_ACTIVE: "No active requests assigned to you.",
+  ASSIGNED_HISTORY: "No assignment history found.",
+  UNASSIGNED_ACTIVE: "No unassigned active requests found.",
+  UNASSIGNED_HISTORY: "No unassigned request history found.",
+};
+
+const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({
+  name,
+  gopaId,
+}) => {
   const { authData } = useAuth();
   const effectiveGopaId = gopaId ?? authData?.user?.gopa?.Gopa_ID ?? null;
 
@@ -72,71 +90,138 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
     if (effectiveGopaId) load(activeTab);
   }, [activeTab, effectiveGopaId]);
 
+  /* ---- No GOPA profile guard ---- */
   if (!effectiveGopaId) {
     return (
-      <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0 py-6">
-        <h1 className="text-2xl font-semibold mb-3">Home</h1>
-        <div className="bg-white border rounded-xl p-6">
-          <p className="mb-2 font-medium">Hi {name},</p>
-          <p className="text-gray-600">No GOPA profile found.</p>
+      <section className="bg-gray-1 min-h-screen pt-24 pb-10 sm:pt-28 sm:pb-16">
+        <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
+          {/* Page header */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-blue-light-5 flex items-center justify-center">
+              <ShieldCheck className="h-5 w-5 text-blue" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold text-dark">GOPA Dashboard</h1>
+              <p className="text-sm text-dark-4">Manage requests and invoices</p>
+            </div>
+          </div>
+
+          {/* Empty state */}
+          <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="h-12 w-12 rounded-xl bg-blue-light-5 flex items-center justify-center mb-4">
+                <AlertTriangle className="h-6 w-6 text-blue" />
+              </div>
+              <p className="text-base font-medium text-dark mb-1">
+                Hi {name},
+              </p>
+              <p className="text-sm text-dark-4">
+                No GOPA profile found. Please contact support.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0 py-6 pt-20">
-      <h1 className="text-2xl font-semibold mb-5">Home</h1>
-
-      {/* ---------- Requests section (tabs) ---------- */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
-              className={`px-3 py-2 rounded-lg text-sm ${
-                activeTab === t.key
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-          <div className="ml-auto">
-            <button
-              onClick={() => load(activeTab, true)}
-              className="px-3 py-2 rounded-lg text-sm border hover:bg-gray-50"
-            >
-              Refresh
-            </button>
+    <section className="bg-gray-1 min-h-screen pt-24 pb-10 sm:pt-28 sm:pb-16">
+      <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
+        {/* Page header */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="h-10 w-10 rounded-xl bg-blue-light-5 flex items-center justify-center">
+            <ShieldCheck className="h-5 w-5 text-blue" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold text-dark">GOPA Dashboard</h1>
+            <p className="text-sm text-dark-4">
+              Manage requests and invoices
+            </p>
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-6 text-sm text-gray-500">Loading…</div>
-        ) : error ? (
-          <div className="p-6 text-sm text-red-600">{error}</div>
-        ) : cache[activeTab]?.length ? (
-          <RequestList requests={cache[activeTab]} />
-        ) : (
-          <div className="p-6 text-sm text-gray-500">
-            {activeTab === "ASSIGNED_ACTIVE" && "No active requests assigned to you."}
-            {activeTab === "ASSIGNED_HISTORY" && "No assignment history found."}
-            {activeTab === "UNASSIGNED_ACTIVE" && "No unassigned active requests found."}
-            {activeTab === "UNASSIGNED_HISTORY" && "No unassigned request history found."}
+        {/* ---------- Requests section ---------- */}
+        <div className="bg-white rounded-2xl border border-gray-3 shadow-1 p-5 sm:p-6 mb-6">
+          {/* Section title */}
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="h-8 w-8 rounded-lg bg-blue-light-5 flex items-center justify-center">
+              <ClipboardList className="h-4 w-4 text-blue" />
+            </div>
+            <h2 className="text-base font-semibold text-dark">
+              Request Management
+            </h2>
           </div>
-        )}
+
+          {/* Tabs row */}
+          <div className="flex flex-wrap items-center gap-2 mb-5">
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={
+                  activeTab === t.key
+                    ? "bg-blue text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors duration-200"
+                    : "bg-white text-dark-2 font-medium text-sm py-2 px-4 rounded-lg border border-gray-3 hover:bg-gray-2 transition-colors duration-200"
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+
+            <button
+              onClick={() => load(activeTab, true)}
+              className="ml-auto inline-flex items-center gap-1.5 bg-gray-1 text-dark font-medium text-sm py-2.5 px-5 rounded-xl border border-gray-3 hover:bg-gray-2 transition-colors duration-200"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh
+            </button>
+          </div>
+
+          {/* Content */}
+          {loading ? (
+            <SpepasLoader size="md" label="Loading requests..." fullSection />
+          ) : error ? (
+            <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
+              <div className="flex flex-col items-center justify-center py-16 px-4">
+                <div className="h-12 w-12 rounded-xl bg-red-50 flex items-center justify-center mb-4">
+                  <AlertTriangle className="h-6 w-6 text-red-500" />
+                </div>
+                <p className="text-sm font-medium text-dark mb-1">
+                  Something went wrong
+                </p>
+                <p className="text-sm text-dark-4 text-center max-w-sm">
+                  {error}
+                </p>
+                <button
+                  onClick={() => load(activeTab, true)}
+                  className="mt-4 bg-blue text-white font-medium text-sm py-2.5 px-5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          ) : cache[activeTab]?.length ? (
+            <RequestList requests={cache[activeTab]} />
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="h-12 w-12 rounded-xl bg-blue-light-5 flex items-center justify-center mb-4">
+                <Inbox className="h-6 w-6 text-blue" />
+              </div>
+              <p className="text-sm font-medium text-dark mb-1">
+                No requests found
+              </p>
+              <p className="text-sm text-dark-4 text-center max-w-sm">
+                {EMPTY_MESSAGES[activeTab]}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* ---------- Invoices section ---------- */}
+        <GopaInvoicesPanel />
       </div>
-
-      {/* ---------- Invoices section (own tabs) ---------- */}
-      <GopaInvoicesPanel />
-
-      <p className="text-xs text-gray-500 mt-6">
-        Signed in as <span className="font-medium">{name}</span> (GOPA #{effectiveGopaId})
-      </p>
-    </div>
+    </section>
   );
 };
 

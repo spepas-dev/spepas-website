@@ -1,6 +1,7 @@
-// src/components/marketing/MyAccount/AddressDetails.tsx
 import React, { useEffect, useState } from 'react';
 import { getMyAddresses, addAddress } from '@/lib/addressApis';
+import { MapPin, Plus, Navigation, Loader2 } from 'lucide-react';
+import SpepasLoader from '@/components/common/SpepasLoader';
 
 interface Address {
   address_id: string;
@@ -39,7 +40,7 @@ const AddressDetails: React.FC = () => {
   const handleChange = (field: keyof typeof form) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setForm(prev => ({ ...prev, [field]: e.target.value }));
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,81 +61,137 @@ const AddressDetails: React.FC = () => {
   };
 
   if (loading) {
-    return <p>Loading addresses…</p>;
+    return <SpepasLoader size="lg" label="Loading addresses..." fullSection />;
   }
 
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">My Addresses</h3>
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-dark">My Addresses</h3>
+        <p className="text-sm text-dark-4 mt-1">Manage your saved delivery addresses</p>
+      </div>
+
+      {/* Address list */}
       {addresses.length === 0 ? (
-        <p className="text-gray-500 mb-6">No addresses found.</p>
+        <div className="flex flex-col items-center justify-center py-12 bg-gray-1 rounded-xl border border-gray-3">
+          <div className="h-14 w-14 rounded-full bg-gray-2 flex items-center justify-center mb-4">
+            <MapPin className="h-6 w-6 text-dark-4" />
+          </div>
+          <p className="text-sm font-medium text-dark-2">No addresses yet</p>
+          <p className="text-xs text-dark-4 mt-1">Add your first delivery address below</p>
+        </div>
       ) : (
-        <ul className="mb-6 space-y-4">
-          {addresses.map(addr => (
-            <li key={addr.address_id} className="p-4 border rounded-lg">
-              <p><strong>{addr.title}</strong></p>
-              <p>{addr.addressDetails}</p>
-              <p className="text-sm text-gray-500">
-                Coordinates: {addr.location.coordinates[1]}, {addr.location.coordinates[0]}
-              </p>
-            </li>
+        <div className="space-y-3 mb-8">
+          {addresses.map((addr) => (
+            <div
+              key={addr.address_id}
+              className="bg-gray-1 rounded-xl border border-gray-3 p-5 hover:shadow-1 transition-shadow"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-blue-light-5 flex items-center justify-center mt-0.5">
+                  <MapPin className="h-4 w-4 text-blue" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-semibold text-dark">{addr.title}</p>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                      addr.status === 1
+                        ? 'bg-green-50 text-green-600'
+                        : 'bg-gray-2 text-dark-4'
+                    }`}>
+                      {addr.status === 1 ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-dark-3 mt-1">{addr.addressDetails}</p>
+                  <div className="flex items-center gap-1 mt-2">
+                    <Navigation className="h-3 w-3 text-dark-5" />
+                    <p className="text-xs text-dark-5">
+                      {addr.location.coordinates[1].toFixed(6)}, {addr.location.coordinates[0].toFixed(6)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
-      <h3 className="text-lg font-semibold mb-4">Add New Address</h3>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
-        <div>
-          <label className="block mb-1 font-medium">Title</label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={handleChange('title')}
-            required
-            className="w-full border rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Address Details</label>
-          <textarea
-            value={form.addressDetails}
-            onChange={handleChange('addressDetails')}
-            required
-            className="w-full border rounded px-3 py-2"
-          />
-        </div>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block mb-1 font-medium">Longitude</label>
+      {/* Add address form */}
+      <div className="mt-8 pt-6 border-t border-gray-3">
+        <h4 className="text-base font-semibold text-dark mb-4 flex items-center gap-2">
+          <Plus className="h-4 w-4" />
+          Add New Address
+        </h4>
+
+        <form onSubmit={handleSubmit} className="space-y-5 max-w-lg">
+          <div>
+            <label className="block mb-2 text-sm font-medium text-dark">Title</label>
             <input
-              type="number"
-              step="any"
-              value={form.longitude}
-              onChange={handleChange('longitude')}
+              type="text"
+              value={form.title}
+              onChange={handleChange('title')}
               required
-              className="w-full border rounded px-3 py-2"
+              placeholder="e.g. Home, Office, Warehouse"
+              className="w-full h-11 rounded-lg border border-gray-3 bg-gray-1 px-4 text-sm text-dark placeholder:text-dark-5 focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition"
             />
           </div>
-          <div className="flex-1">
-            <label className="block mb-1 font-medium">Latitude</label>
-            <input
-              type="number"
-              step="any"
-              value={form.latitude}
-              onChange={handleChange('latitude')}
+
+          <div>
+            <label className="block mb-2 text-sm font-medium text-dark">Address Details</label>
+            <textarea
+              value={form.addressDetails}
+              onChange={handleChange('addressDetails')}
               required
-              className="w-full border rounded px-3 py-2"
+              rows={3}
+              placeholder="Full street address"
+              className="w-full rounded-lg border border-gray-3 bg-gray-1 px-4 py-3 text-sm text-dark placeholder:text-dark-5 focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition resize-none"
             />
           </div>
-        </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition"
-        >
-          {saving ? 'Saving…' : 'Add Address'}
-        </button>
-      </form>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block mb-2 text-sm font-medium text-dark">Longitude</label>
+              <input
+                type="number"
+                step="any"
+                value={form.longitude}
+                onChange={handleChange('longitude')}
+                required
+                className="w-full h-11 rounded-lg border border-gray-3 bg-gray-1 px-4 text-sm text-dark focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition"
+              />
+            </div>
+            <div>
+              <label className="block mb-2 text-sm font-medium text-dark">Latitude</label>
+              <input
+                type="number"
+                step="any"
+                value={form.latitude}
+                onChange={handleChange('latitude')}
+                required
+                className="w-full h-11 rounded-lg border border-gray-3 bg-gray-1 px-4 text-sm text-dark focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving}
+            className="inline-flex items-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-6 rounded-xl hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4" />
+                Add Address
+              </>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

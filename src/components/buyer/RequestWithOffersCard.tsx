@@ -1,63 +1,66 @@
-// src/components/buyer/RequestWithOffersCard.tsx
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { Package, ArrowRight, Store } from 'lucide-react'
 
 interface Props { req: any }
 
 const RequestWithOffersCard: React.FC<Props> = ({ req }) => {
-  const img = req.sparePart.images?.[0]
+  const img = req.sparePart?.images?.[0]
+  const name = req.sparePart?.name || 'Unknown Part'
   const bids = Array.isArray(req.bidings) ? req.bidings : []
 
   return (
-    <div className="bg-white p-4 shadow rounded mb-4">
-      <div className="flex items-center mb-3">
-        {img && (
-          <img
-            src={img}
-            className="w-16 h-16 mr-4 rounded"
-            alt={req.sparePart.name}
-          />
+    <div className="bg-white rounded-2xl border border-gray-3 shadow-1 overflow-hidden hover:shadow-2 transition-shadow flex flex-col">
+      {/* Image */}
+      <div className="aspect-[4/3] bg-gray-1 flex items-center justify-center overflow-hidden">
+        {img ? (
+          <img src={img} alt={name} className="w-full h-full object-cover" />
+        ) : (
+          <Package className="h-10 w-10 text-dark-5" />
         )}
-        <div>
-          <h3 className="font-semibold">{req.sparePart.name}</h3>
-          <p className="text-sm text-gray-600">
-            {req.sparePart.description}
-          </p>
-        </div>
       </div>
 
-      <ul className="mb-3 space-y-2">
-        {bids.length > 0 ? (
-          bids.map((b: any) => (
-            <li key={b.bidding_ID} className="flex justify-between">
-              <span className="text-sm">
-                {b.seller?.storeName ?? 'Unknown Seller'}
-              </span>
-              <span className="text-sm font-medium">GH₵{b.price}</span>
-            </li>
-          ))
-        ) : (
-          <li className="text-gray-500 text-sm">
-            No bids yet.
-          </li>
-        )}
-      </ul>
+      {/* Content */}
+      <div className="p-4 flex-1 flex flex-col">
+        <h3 className="text-sm font-semibold text-dark truncate">{name}</h3>
 
-      {bids.length > 0 ? (
-        <Link
-          to={`/95668339501103956045/buyer/requests/${req.request_ID}/offers`}
-          className="inline-block bg-indigo-500 text-white px-3 py-1 rounded"
-        >
-          View all offers
-        </Link>
-      ) : (
-        <button
-          disabled
-          className="inline-block bg-gray-300 text-gray-600 px-3 py-1 rounded cursor-not-allowed"
-        >
-          No offers
-        </button>
-      )}
+        {/* Bids preview */}
+        <div className="mt-3 space-y-1.5 flex-1">
+          {bids.length > 0 ? (
+            bids.slice(0, 3).map((b: any) => (
+              <div key={b.bidding_ID} className="flex items-center justify-between text-xs">
+                <span className="text-dark-3 flex items-center gap-1 truncate">
+                  <Store className="h-3 w-3 flex-shrink-0" />
+                  {b.seller?.storeName ?? 'Seller'}
+                </span>
+                <span className="font-semibold text-dark ml-2 flex-shrink-0">
+                  GH&#x20B5; {b.price}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-dark-5">No bids yet</p>
+          )}
+          {bids.length > 3 && (
+            <p className="text-xs text-dark-4">+{bids.length - 3} more</p>
+          )}
+        </div>
+
+        {/* Action */}
+        <div className="mt-3 pt-3 border-t border-gray-3">
+          {bids.length > 0 ? (
+            <Link
+              to={`/95668339501103956045/buyer/requests/${req.request_ID}/offers`}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-blue hover:text-blue-dark transition-colors"
+            >
+              View all offers
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <span className="text-xs text-dark-5">Waiting for seller bids...</span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

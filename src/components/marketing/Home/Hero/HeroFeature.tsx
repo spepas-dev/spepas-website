@@ -1,37 +1,36 @@
 const featureData = [
-  // {
-  //   img: "/images/icons/icon-01.svg",
-  //   title: "Speedy Delivery",
-  //   description: "Time is Money",
-  // },
   {
     img: '/images/icons/icon-02.svg',
-    title: '1 & 1 Returns',
-    description: 'Exchanges Guaranteed'
+    title: 'Hassle-Free Returns',
+    description: 'Easy exchanges guaranteed',
   },
   {
     img: '/images/icons/icon-03.svg',
-    title: '100% Secure Payments',
-    description: 'Gurantee secure payments'
+    title: 'Secure Payments',
+    description: '100% protected transactions',
   },
   {
     img: '/images/icons/icon-04.svg',
-    title: '24/7 Dedicated Support',
-    description: 'Anywhere & anytime'
-  }
+    title: '24/7 Support',
+    description: 'Help anytime, anywhere',
+  },
 ];
 
 const HeroFeature = () => {
   return (
-    <div className="max-w-[1117px] w-full mx-auto px-4 sm:px-8 xl:px-0">
-      <div className="flex flex-wrap items-center gap-7.5 xl:gap-12.5 mt-24">
+    <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 mt-8 sm:mt-10 lg:mt-14">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         {featureData.map((item, key) => (
-          <div className="flex items-center gap-4" key={key}>
-            <img src={item.img} alt="icons" width={40} height={41} />
-
+          <div
+            key={key}
+            className="flex items-center gap-4 bg-white rounded-xl px-5 py-5 shadow-1 border border-gray-3/50 hover:shadow-2 transition-shadow duration-300"
+          >
+            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-light-5 flex-shrink-0">
+              <img src={item.img} alt={item.title} width={28} height={28} />
+            </div>
             <div>
-              <h3 className="font-medium text-lg text-dark">{item.title}</h3>
-              <p className="text-sm">{item.description}</p>
+              <h3 className="font-semibold text-dark text-sm sm:text-base">{item.title}</h3>
+              <p className="text-dark-4 text-xs sm:text-sm">{item.description}</p>
             </div>
           </div>
         ))}
