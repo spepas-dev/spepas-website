@@ -90,7 +90,7 @@ const RefundPolicy: React.FC = () => {
       <Breadcrumb title="Return & Exchange Policy" pages={['Shop', 'Return & Exchange Policy']} />
 
       <section className="bg-white py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           {/* Header */}
           <header className="text-center space-y-2">
             <h1 className="text-3xl sm:text-4xl font-semibold text-blue">

@@ -43,8 +43,18 @@ const Contact = () => {
     <>
       <Breadcrumb title={'Contact'} pages={['contact']} />
 
-      <section className="overflow-hidden py-20 bg-gray-2">
-        <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
+      <section className="overflow-hidden py-12 bg-white">
+        <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          {/* Header */}
+          <header className="text-center space-y-3">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-blue">
+              Contact Us
+            </h1>
+            <p className="text-gray-700 sm:text-lg">
+              Have a question or need help? Get in touch with our team.
+            </p>
+          </header>
+
           <div className="flex flex-col xl:flex-row gap-7.5">
             <div className="xl:max-w-[370px] w-full bg-white rounded-xl shadow-1">
               <div className="py-5 px-4 sm:px-7.5 border-b border-gray-3">
