@@ -3,6 +3,16 @@ import React, { useRef } from 'react';
 import HeroCarousel from './HeroCarousel';
 import HeroFeature from './HeroFeature';
 
+const featuredParts = [
+  { name: 'Radiator',             category: 'Cooling System',   img: '/images/products/part 1.jpg' },
+  { name: 'Alternator',           category: 'Engine Electrics', img: '/images/products/part 2.jpg' },
+  { name: 'Cylinder Head',        category: 'Engine',           img: '/images/products/part 3.jpg' },
+  { name: 'Crankshaft & Pistons', category: 'Crankshaft Drive', img: '/images/products/part 4.jpg' },
+  { name: 'Door Panel, front',    category: 'Body Parts',       img: '/images/products/part 5.jpg' },
+  { name: 'Side Mirror',          category: 'Mirrors',          img: '/images/products/part 6.jpg' },
+  { name: 'Shock Absorber',       category: 'Suspension',       img: '/images/products/part 7.jpg' },
+];
+
 const Hero: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollOffset = 300;
@@ -50,23 +60,26 @@ const Hero: React.FC = () => {
               style={{ scrollbarWidth: 'none' }}
             >
               <div className="flex gap-5">
-                {[1,2,3,4,5,6,7,8].map((n) => (
+                {featuredParts.map((part) => (
                   <div
-                    key={n}
+                    key={part.name}
                     className="min-w-[250px] rounded-[10px] bg-white p-4 sm:p-7.5 flex-shrink-0"
                   >
                     <div className="flex items-center gap-14">
                       <div>
-                        <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-5">
-                          <a href="#">{`Item ${n}`}</a>
+                        <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-1.5">
+                          <a href="#">{part.name}</a>
                         </h2>
-                        <p className="font-medium text-gray-500 text-sm mb-1.5">
+                        <p className="font-medium text-gray-400 text-xs mb-1.5">
+                          {part.category}
+                        </p>
+                        <p className="font-medium text-gray-500 text-sm">
                           Contact for price
                         </p>
                       </div>
                       <img
-                        src={`/images/products/part ${n}.jpg`}
-                        alt={`Item ${n}`}
+                        src={part.img}
+                        alt={part.name}
                         width={123}
                         height={161}
                       />

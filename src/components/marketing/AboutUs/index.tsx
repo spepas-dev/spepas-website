@@ -1,9 +1,12 @@
 // src/components/marketing/AboutUs/index.tsx
 import React from 'react'
+import Breadcrumb from '../Common/Breadcrumb'
 
 const AboutUs: React.FC = () => {
   return (
-    <main className="space-y-16">
+    <>
+      <Breadcrumb title="About Us" pages={['About Us']} />
+      <main className="space-y-16">
 
       {/* Intro Section */}
       <section className="max-w-[1170px] mx-auto px-6 py-12 text-center">
@@ -71,53 +74,60 @@ const AboutUs: React.FC = () => {
       </section>
 
       {/* Team Section */}
-      <section className="max-w-[1170px] mx-auto px-6">
+      <section className="max-w-[1170px] mx-auto px-6 pb-12">
         <h2 className="text-3xl font-bold text-blue mb-4">Our Team</h2>
         <p className="text-lg text-gray-700 mb-8">
           Our team is passionate about making auto parts accessible across Ghana.
         </p>
 
-        {/* Leadership */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-12">
-          {/* Replace src and names with your real data */}
-          <div className="text-center">
-            <img src="/images/team/user-04.jpg" alt="Kofi Mensah" className="w-32 h-32 mx-auto rounded-full mb-4 object-cover"/>
-            <h3 className="font-semibold text-gray-800">Ben Kwame</h3>
-            <p className="text-sm text-gray-600">Co-Founder & CEO</p>
-          </div>
-          <div className="text-center">
-            <img src="/images/team/user-03.jpg" alt="Ama Asante" className="w-32 h-32 mx-auto rounded-full mb-4 object-cover"/>
-            <h3 className="font-semibold text-gray-800">Gaia Carini</h3>
-            <p className="text-sm text-gray-600">Chief Technology Officer</p>
-          </div>
-          <div className="text-center">
-            <img src="/images/team/user-04.jpg" alt="Thomas Badu" className="w-32 h-32 mx-auto rounded-full mb-4 object-cover"/>
-            <h3 className="font-semibold text-gray-800">Joseph Boadi</h3>
-            <p className="text-sm text-gray-600">Head of Operations</p>
-          </div>
-          <div className="text-center">
-            <img src="/images/team/user-03.jpg" alt="Selina Opoku" className="w-32 h-32 mx-auto rounded-full mb-4 object-cover"/>
-            <h3 className="font-semibold text-gray-800">Abigail Ayisi-Addo</h3>
-            <p className="text-sm text-gray-600">Marketing Lead</p>
-          </div>
+        {/* Executive Team */}
+        <h3 className="text-2xl font-semibold text-gray-800 mb-6">Executive Team</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8 mb-12">
+          {[
+            { name: 'Ben Kwame',         role: 'Co-Founder & CEO' },
+            { name: 'Gaia Carini',       role: 'Chief Product Officer' },
+            { name: 'Jeremiah Osekre',   role: 'Chief Information Officer' },
+            { name: 'Abigail Ayisi-Addo', role: 'Chief of Staff' },
+            { name: 'Joseph Boadi',      role: 'Chief Technology Officer' },
+            { name: 'Gloria Ofori',      role: 'General Counsel' },
+          ].map((member) => (
+            <div key={member.name} className="text-center">
+              <div className="w-28 h-28 mx-auto rounded-full mb-4 bg-gray-100 flex items-center justify-center">
+                <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.5-1.632Z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-800">{member.name}</h3>
+              <p className="text-sm text-gray-600">{member.role}</p>
+            </div>
+          ))}
         </div>
 
-        {/* SpePas Family */}
-        <h3 className="text-2xl font-semibold text-gray-800 mb-4">The SpePas Family</h3>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
-          
-          {[...Array(12)].map((_, i) => (
-            <img
-              key={i}
-              src={`/images/team/avatar-${i + 1}.jpg`}
-              alt={`Team member ${i + 1}`}
-              className="w-16 h-16 rounded-full object-cover"
-            />
+        {/* Engineering Team */}
+        <h3 className="text-2xl font-semibold text-gray-800 mb-6">Engineering Team</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+          {[
+            { name: 'Kofi Bassaw',        role: 'Lead Backend Engineer' },
+            { name: 'Ernest Otu',          role: 'Operations & Marketing' },
+            { name: 'Joseph Addai',        role: 'Frontend Engineer' },
+            { name: 'Michael Gyamfi',      role: 'Mobile Engineer' },
+            { name: 'Stephen Osei-Bonsu',  role: 'Frontend Engineer' },
+          ].map((member) => (
+            <div key={member.name} className="text-center">
+              <div className="w-24 h-24 mx-auto rounded-full mb-4 bg-gray-100 flex items-center justify-center">
+                <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.5 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.5-1.632Z" />
+                </svg>
+              </div>
+              <h3 className="font-semibold text-gray-800">{member.name}</h3>
+              <p className="text-sm text-gray-600">{member.role}</p>
+            </div>
           ))}
         </div>
       </section>
       
     </main>
+    </>
   )
 }
 
