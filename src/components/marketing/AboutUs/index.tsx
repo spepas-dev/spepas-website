@@ -6,37 +6,24 @@ const AboutUs: React.FC = () => {
   return (
     <>
       <Breadcrumb title="About Us" pages={['About Us']} />
-      <main className="space-y-16">
+      <main className="space-y-12">
 
       {/* Intro Section */}
-      <section className="max-w-[1170px] mx-auto px-6 py-12 text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold text-blue mb-6">
+      <section className="max-w-[1170px] mx-auto px-6 py-10">
+        <h1 className="text-4xl sm:text-5xl font-semibold text-blue mb-6 text-center">
           About SpePas
         </h1>
-        <p className="max-w-2xl mx-auto text-lg text-gray-700 mb-4">
-          SpePas is Ghana's online marketplace for new and used auto parts. We connect buyers, sellers, and mechanics —
-          making it easy to find the right part and get it delivered.
-        </p>
-        <p className="max-w-2xl mx-auto text-lg text-gray-700">
-          Our mission is to make finding and selling auto parts simple, trusted, and accessible —
-          starting in Ghana, expanding across West Africa.
-        </p>
-
-        {/* Stats */}
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-3xl font-semibold text-blue">10K+</h3>
-            <p className="text-sm text-gray-600">Auto parts (target)</p>
-          </div>
-          <div>
-            <h3 className="text-3xl font-semibold text-blue">500+</h3>
-            <p className="text-sm text-gray-600">Sellers (target)</p>
-          </div>
-          <div>
-            <h3 className="text-3xl font-semibold text-blue">20K+</h3>
-            <p className="text-sm text-gray-600">Buyers (target)</p>
-          </div>
+        <div className="max-w-2xl mx-auto space-y-4">
+          <p className="text-lg text-gray-700">
+            SpePas is Ghana's online marketplace for new and used auto parts. We connect buyers, sellers, and mechanics —
+            making it easy to find the right part and get it delivered.
+          </p>
+          <p className="text-lg text-gray-700">
+            Our mission is to make finding and selling auto parts simple, trusted, and accessible —
+            starting in Ghana, expanding across West Africa.
+          </p>
         </div>
+
       </section>
 
       {/* Values Grid */}
@@ -75,7 +62,7 @@ const AboutUs: React.FC = () => {
 
       {/* Team Section */}
       <section className="max-w-[1170px] mx-auto px-6 pb-12">
-        <h2 className="text-3xl font-bold text-blue mb-4">Our Team</h2>
+        <h2 className="text-3xl font-semibold text-blue mb-4">Our Team</h2>
         <p className="text-lg text-gray-700 mb-8">
           Our team is passionate about making auto parts accessible across Ghana.
         </p>
@@ -103,8 +90,8 @@ const AboutUs: React.FC = () => {
           ))}
         </div>
 
-        {/* Engineering Team */}
-        <h3 className="text-2xl font-semibold text-gray-800 mb-6">Engineering Team</h3>
+        {/* Team */}
+        <h3 className="text-2xl font-semibold text-gray-800 mb-6">Team</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
           {[
             { name: 'Kofi Bassaw',        role: 'Lead Backend Engineer' },
