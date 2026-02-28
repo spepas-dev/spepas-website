@@ -1,7 +1,8 @@
 // src/components/marketing/ShopDetails/index.tsx
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import Breadcrumb from '../Common/Breadcrumb';
 import { getSparePartDetailByCode, getSpareParts } from '@/lib/inventoryApis';
 
 type DetailPayload =
@@ -46,106 +47,133 @@ const ShopDetails: React.FC = () => {
     refetchOnWindowFocus: false,
   });
 
+  const item = query.data?.item;
+  const title = item?.name ?? 'Product';
+
+  // Vehicle info — Make & Model only
+  const make = item?.carModel?.carBrand?.manufacturer?.name;
+  const model = item?.carModel?.carBrand?.name;
+
   // Loading skeleton
   if (query.isLoading) {
     return (
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col md:flex-row gap-8 mt-8 animate-pulse">
-          <div className="w-full md:w-1/2 h-80 bg-gray-200 rounded-lg" />
-          <div className="w-full md:flex-1 space-y-4">
-            <div className="h-8 w-3/4 bg-gray-200 rounded" />
-            <div className="h-6 w-1/3 bg-gray-200 rounded" />
-            <div className="space-y-2">
-              <div className="h-4 w-1/2 bg-gray-200 rounded" />
-              <div className="h-4 w-2/5 bg-gray-200 rounded" />
-              <div className="h-4 w-1/3 bg-gray-200 rounded" />
+      <>
+        <Breadcrumb title="Part Details" pages={['Shop']} />
+        <section className="py-8 lg:py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex flex-col md:flex-row gap-8 animate-pulse">
+                <div className="w-full md:w-1/2 h-80 bg-gray-200 rounded-lg" />
+                <div className="w-full md:flex-1 space-y-4">
+                  <div className="h-8 w-3/4 bg-gray-200 rounded" />
+                  <div className="h-6 w-1/3 bg-gray-200 rounded" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-1/2 bg-gray-200 rounded" />
+                    <div className="h-4 w-2/5 bg-gray-200 rounded" />
+                  </div>
+                  <div className="h-12 w-40 bg-gray-200 rounded-lg" />
+                </div>
+              </div>
             </div>
-            <div className="h-12 w-40 bg-gray-200 rounded-lg" />
           </div>
-        </div>
-      </div>
+        </section>
+      </>
     );
   }
-
-  const item = query.data?.item;
 
   // Graceful "not found" UI
   if (!item) {
     return (
-      <div className="w-full max-w-lg mx-auto py-20 text-center px-4">
-        <p className="text-xl text-gray-700 mb-4">Part not found.</p>
-        <button
-          className="px-4 py-2 bg-[var(--color-primary-500)] text-white rounded hover:bg-[var(--color-primary-600)] transition"
-          onClick={() => navigate(-1)}
-        >
-          Go Back
-        </button>
-      </div>
+      <>
+        <Breadcrumb title="Part Details" pages={['Shop']} />
+        <section className="py-8 lg:py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-16">
+            <p className="text-xl text-gray-700 mb-4">Part not found.</p>
+            <button
+              className="px-4 py-2 bg-[var(--color-primary-500)] text-white rounded-lg hover:bg-[var(--color-primary-600)] transition"
+              onClick={() => navigate(-1)}
+            >
+              Go Back
+            </button>
+          </div>
+        </section>
+      </>
     );
   }
 
   const imgSrc =
     item?.images?.find((i: any) => i?.image_url)?.image_url ?? '/images/placeholder.jpg';
-  const title = item?.name ?? 'Product';
-
-  // Vehicle info — renamed: Make / Model / Variant
-  const make = item?.carModel?.carBrand?.manufacturer?.name;
-  const model = item?.carModel?.carBrand?.name;
-  const variant = item?.carModel?.name;
-  const year = item?.carModel?.yearOfMake;
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex flex-col md:flex-row gap-8 mt-8">
-        {/* Image */}
-        <div className="w-full md:w-1/2">
-          <img
-            src={imgSrc}
-            alt={title}
-            loading="lazy"
-            className="w-full h-auto rounded-lg shadow-md object-cover"
-          />
-        </div>
+    <>
+      <Breadcrumb title="Part Details" pages={['Shop', title]} />
 
-        {/* Details */}
-        <div className="w-full md:flex-1 space-y-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+      <section className="py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back to Shop */}
+          <Link
+            to="../shop"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-[var(--color-primary-600)] mb-6 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Back to Shop
+          </Link>
 
-          <span className="inline-block text-lg text-gray-500 italic">
-            Contact Seller for Price
-          </span>
+          {/* Detail card */}
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex flex-col md:flex-row gap-8">
+              {/* Image */}
+              <div className="w-full md:w-1/2">
+                <img
+                  src={imgSrc}
+                  alt={title}
+                  loading="lazy"
+                  className="w-full h-auto rounded-lg object-cover"
+                />
+              </div>
 
-          {(make || model || variant || year) && (
-            <div className="text-sm text-gray-600 space-y-1">
-              {make && (
-                <div>
-                  <span className="font-semibold">Make:</span> {make}
-                </div>
-              )}
-              {model && (
-                <div>
-                  <span className="font-semibold">Model:</span> {model}
-                </div>
-              )}
-              {variant && (
-                <div>
-                  <span className="font-semibold">Variant:</span> {variant}
-                </div>
-              )}
-              {year && (
-                <div>
-                  <span className="font-semibold">Year:</span> {year}
-                </div>
-              )}
+              {/* Details */}
+              <div className="w-full md:flex-1 space-y-6">
+                <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+
+                <span className="inline-block text-lg text-gray-500 italic">
+                  Contact Seller for Price
+                </span>
+
+                {(make || model) && (
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {make && (
+                      <div>
+                        <span className="font-semibold">Make:</span> {make}
+                      </div>
+                    )}
+                    {model && (
+                      <div>
+                        <span className="font-semibold">Model:</span> {model}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <Link
+                  to="../buyer/post-request"
+                  state={{
+                    partName: title,
+                    manufacturerName: make,
+                    brandName: model,
+                  }}
+                  className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition"
+                >
+                  Request This Part
+                </Link>
+              </div>
             </div>
-          )}
-
-          <button className="w-full sm:w-auto block bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition">
-            Request This Part
-          </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 };
 

@@ -4,7 +4,7 @@ import { requestNonInventorySparePartAPI } from '@/lib/orderBidsApis'
 import { getCarManufacturers } from '@/lib/inventoryApis'
 // import { toastConfig } from '@/lib/toast'
 import { toast } from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 interface CarModel {
   CarModel_ID: string
@@ -35,6 +35,12 @@ const PostRequestForm: React.FC = () => {
   const [requireImage, setRequireImage] = useState(false)
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const prefill = location.state as {
+    partName?: string;
+    manufacturerName?: string;
+    brandName?: string;
+  } | null;
 
   // ✅ derived validation for quantity
   const qtyInvalid = qty <= 0;
@@ -42,9 +48,32 @@ const PostRequestForm: React.FC = () => {
   // Fetch manufacturers
   useEffect(() => {
     getCarManufacturers()
-      .then(res => setManufacturers(res.data))
+      .then(res => {
+        setManufacturers(res.data)
+
+        // Pre-fill from navigation state (e.g. "Request This Part" on detail page)
+        if (prefill) {
+          if (prefill.partName) setName(prefill.partName)
+
+          if (prefill.manufacturerName) {
+            const mfr = (res.data as Manufacturer[]).find(
+              m => m.name.toLowerCase() === prefill.manufacturerName!.toLowerCase()
+            )
+            if (mfr) {
+              setSelectedManufacturer(mfr.Manufacturer_ID)
+
+              if (prefill.brandName) {
+                const brand = mfr.brands.find(
+                  b => b.name.toLowerCase() === prefill.brandName!.toLowerCase()
+                )
+                if (brand) setSelectedBrand(brand.CarBrand_ID)
+              }
+            }
+          }
+        }
+      })
       .catch(console.error)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive brand list
   const brands: CarBrand[] =

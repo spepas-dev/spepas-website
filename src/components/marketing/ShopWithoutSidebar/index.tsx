@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import Breadcrumb from '../Common/Breadcrumb';
+import SearchableCombobox from '../Common/SearchableCombobox';
 import SingleGridItem from '../Shop/SingleGridItem';
 import SingleListItem from '../Shop/SingleListItem';
 
@@ -268,17 +269,13 @@ const ShopWithoutSidebar: React.FC = () => {
                 <label className="block text-xs font-medium text-gray-500 mb-1">
                   Year
                 </label>
-                <select
+                <SearchableCombobox
+                  options={yearOptions.map((y) => ({ value: y, label: y }))}
                   value={selectedYear}
-                  onChange={(e) => onChangeYear(e.target.value)}
-                  className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  disabled={yearsLoading}
-                >
-                  <option value="">All years</option>
-                  {yearOptions.map((y) => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
+                  onChange={onChangeYear}
+                  placeholderLabel="All years"
+                  isLoading={yearsLoading}
+                />
               </div>
 
               {/* Make */}
@@ -286,21 +283,14 @@ const ShopWithoutSidebar: React.FC = () => {
                 <label className="block text-xs font-medium text-gray-500 mb-1">
                   Make
                 </label>
-                <select
+                <SearchableCombobox
+                  options={makeOptions.map((m: any) => ({ value: m.Manufacturer_ID, label: m.name }))}
                   value={selectedMake}
-                  onChange={(e) => onChangeMake(e.target.value)}
-                  className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  disabled={makesLoading || !selectedYear}
-                >
-                  <option value="">
-                    {selectedYear ? 'All makes' : 'Select a year first'}
-                  </option>
-                  {makeOptions.map((m: any) => (
-                    <option key={m.Manufacturer_ID} value={m.Manufacturer_ID}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={onChangeMake}
+                  placeholderLabel={selectedYear ? 'All makes' : 'Select a year first'}
+                  isLoading={makesLoading}
+                  disabled={!selectedYear}
+                />
               </div>
 
               {/* Model */}
@@ -308,21 +298,14 @@ const ShopWithoutSidebar: React.FC = () => {
                 <label className="block text-xs font-medium text-gray-500 mb-1">
                   Model
                 </label>
-                <select
+                <SearchableCombobox
+                  options={modelOptions.map((b: any) => ({ value: b.CarBrand_ID, label: b.name }))}
                   value={selectedModel}
-                  onChange={(e) => onChangeModel(e.target.value)}
-                  className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  disabled={modelsLoading || !selectedMake}
-                >
-                  <option value="">
-                    {selectedMake ? 'All models' : 'Select a make first'}
-                  </option>
-                  {modelOptions.map((b: any) => (
-                    <option key={b.CarBrand_ID} value={b.CarBrand_ID}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={onChangeModel}
+                  placeholderLabel={selectedMake ? 'All models' : 'Select a make first'}
+                  isLoading={modelsLoading}
+                  disabled={!selectedMake}
+                />
               </div>
             </div>
           </div>
@@ -474,19 +457,19 @@ const ShopWithoutSidebar: React.FC = () => {
 
                 {/* Mobile category selector (visible on small screens) */}
                 <div className="lg:hidden">
-                  <select
+                  <SearchableCombobox
+                    options={[
+                      { value: '', label: 'All categories' },
+                      ...orderedCategories.map((cat) => ({
+                        value: cat.Category_ID,
+                        label: cat.isParent ? cat.name : `  ${cat.name}`,
+                      })),
+                    ]}
                     value={selectedCategory}
-                    onChange={(e) => { setSelectedCategory(e.target.value); setPage(1); }}
-                    className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm bg-white"
-                  >
-                    <option value="">All categories</option>
-                    {orderedCategories.map((cat) => (
-                      <option key={cat.Category_ID} value={cat.Category_ID}>
-                        {cat.isParent ? cat.name : `  ${cat.name}`}
-                        {cat.count != null ? ` (${cat.count})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => { setSelectedCategory(val); setPage(1); }}
+                    placeholderLabel="All categories"
+                    isLoading={categoriesLoading}
+                  />
                 </div>
               </div>}
 
@@ -591,6 +574,7 @@ const ShopWithoutSidebar: React.FC = () => {
           </div>
         </div>
       </section>
+
     </>
   );
 };
