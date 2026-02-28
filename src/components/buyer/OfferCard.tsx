@@ -136,7 +136,7 @@ const OfferCard: React.FC<OfferCardProps> = ({
               
             "
           >
-            Add to Cart
+            Request Part
           </button>
         )}
       </div>

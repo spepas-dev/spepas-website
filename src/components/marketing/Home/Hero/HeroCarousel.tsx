@@ -120,7 +120,7 @@ const HeroCarousel: React.FC = () => {
                   className="shine-text font-semibold text-3xl sm:text-5xl text-blue opacity-0"
                   style={{ animation: 'fadeIn 1s ease-in-out forwards' }}
                 >
-                  Welcome to SpePas
+                  Find the Right Part, Fast
                 </h1>
               </div>
 
@@ -128,8 +128,8 @@ const HeroCarousel: React.FC = () => {
                 className="text-base text-gray-600 opacity-0"
                 style={{ animation: 'fadeIn 1s ease-in-out 0.5s forwards' }}
               >
-                SpePas is the marketplace for unique and reliable auto parts. From trusted workshops to bespoke restorations,
-                we bring transparency, trust, and a human touch to every transaction.
+                Search thousands of new and used auto parts from verified sellers across Ghana.
+                Find what you need, request what you can't, and get it delivered.
               </p>
 
               <div className="flex justify-center mt-10">
@@ -152,7 +152,7 @@ const HeroCarousel: React.FC = () => {
                       'fadeIn 1s ease-in-out 1s forwards, bounceSlow 2s ease-in-out 2s infinite',
                   }}
                 >
-                  Shop Now
+                  Browse Parts
                 </a>
               </div>
             </div>

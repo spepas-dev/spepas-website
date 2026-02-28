@@ -8,30 +8,30 @@ const AboutUs: React.FC = () => {
       {/* Intro Section */}
       <section className="max-w-[1170px] mx-auto px-6 py-12 text-center">
         <h1 className="text-4xl sm:text-5xl font-bold text-blue mb-6">
-          Join the SpePas Revolution
+          About SpePas
         </h1>
         <p className="max-w-2xl mx-auto text-lg text-gray-700 mb-4">
-          SpePas is the marketplace for unique and reliable auto parts—powered by people, not robots. From trusted workshops to 
-          bespoke restorations, we bring transparency, trust, and a human touch to every transaction.
+          SpePas is Ghana's online marketplace for new and used auto parts. We connect buyers, sellers, and mechanics —
+          making it easy to find the right part and get it delivered.
         </p>
         <p className="max-w-2xl mx-auto text-lg text-gray-700">
-          In an age of automation, our mission is to connect passionate drivers and expert suppliers across Ghana and West Africa, 
-          building a community where innovation thrives and craftsmanship shines.
+          Our mission is to make finding and selling auto parts simple, trusted, and accessible —
+          starting in Ghana, expanding across West Africa.
         </p>
 
         {/* Stats */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8">
           <div>
             <h3 className="text-3xl font-semibold text-blue">10K+</h3>
-            <p className="text-sm text-gray-600">Auto parts listed</p>
+            <p className="text-sm text-gray-600">Auto parts (target)</p>
           </div>
           <div>
             <h3 className="text-3xl font-semibold text-blue">500+</h3>
-            <p className="text-sm text-gray-600">Active sellers</p>
+            <p className="text-sm text-gray-600">Sellers (target)</p>
           </div>
           <div>
             <h3 className="text-3xl font-semibold text-blue">20K+</h3>
-            <p className="text-sm text-gray-600">Happy buyers</p>
+            <p className="text-sm text-gray-600">Buyers (target)</p>
           </div>
         </div>
       </section>
@@ -59,13 +59,13 @@ const AboutUs: React.FC = () => {
           </p>
         </div>
 
-        {/* Investor Opportunities */}
+        {/* Why SpePas */}
         <div className="bg-white p-6 shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300">
-          <h2 className="text-xl font-semibold text-blue mb-3">Investor Opportunities</h2>
+          <h2 className="text-xl font-semibold text-blue mb-3">Why SpePas</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            For investors, SpePas presents a unique opportunity to be part of the transformation of the auto parts industry in Ghana and West
-            Africa. By getting in early, investors can support an innovative platform poised for growth in an underserved market, with strong
-            industry partnerships and a scalable business model driving long-term success.
+            Ghana's auto parts market has long relied on word-of-mouth and in-person searches. SpePas brings this market online —
+            giving buyers access to a wider selection, giving sellers a larger audience, and giving mechanics a faster way to source
+            parts for their clients.
           </p>
         </div>
       </section>
@@ -74,7 +74,7 @@ const AboutUs: React.FC = () => {
       <section className="max-w-[1170px] mx-auto px-6">
         <h2 className="text-3xl font-bold text-blue mb-4">Our Team</h2>
         <p className="text-lg text-gray-700 mb-8">
-          The people who work at SpePas share our vision and values. We’re driven by craftsmanship, community, and a bit of fun.
+          Our team is passionate about making auto parts accessible across Ghana.
         </p>
 
         {/* Leadership */}

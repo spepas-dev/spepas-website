@@ -40,7 +40,7 @@ const Hero: React.FC = () => {
         {/* Featured Products */}
         <div className="pt-8 pl-4 sm:pl-8 xl:pl-8 pr-2">
           <h2 className="text-dark text-xl font-semibold mb-4">
-            Featured Products
+            Featured Parts
           </h2>
 
           <div className="relative">
@@ -61,13 +61,8 @@ const Hero: React.FC = () => {
                           <a href="#">{`Item ${n}`}</a>
                         </h2>
                         <p className="font-medium text-gray-500 text-sm mb-1.5">
-                          offer
+                          Contact for price
                         </p>
-                        <span className="flex items-center gap-3">
-                          <span className="font-medium text-xl text-red-500">
-                            GH₵ {n * 100}
-                          </span>
-                        </span>
                       </div>
                       <img
                         src={`/images/products/part ${n}.jpg`}

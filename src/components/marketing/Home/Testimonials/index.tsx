@@ -48,7 +48,7 @@ const Testimonials: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4">
         {/* header */}
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-semibold">User Feedbacks</h2>
+          <h2 className="text-2xl font-semibold">What Our Users Say</h2>
           <div className="flex gap-4">
             <button
               onClick={prev}

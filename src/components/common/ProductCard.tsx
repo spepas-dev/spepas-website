@@ -35,7 +35,7 @@ export const ProductCard = ({ name, description, price, image, discount }: Produ
             )}
           </div>
           <button className="bg-secondary text-secondary-foreground px-3 py-1 rounded-[--radius] text-sm hover:bg-secondary-dark transition-colors">
-            Add to Cart
+            Request Part
           </button>
         </div>
       </div>

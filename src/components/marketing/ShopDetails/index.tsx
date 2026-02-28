@@ -73,7 +73,7 @@ const ShopDetails: React.FC = () => {
   if (!item) {
     return (
       <div className="w-full max-w-lg mx-auto py-20 text-center px-4">
-        <p className="text-xl text-gray-700 mb-4">Product not found.</p>
+        <p className="text-xl text-gray-700 mb-4">Part not found.</p>
         <button
           className="px-4 py-2 bg-[var(--color-primary-500)] text-white rounded hover:bg-[var(--color-primary-600)] transition"
           onClick={() => navigate(-1)}
@@ -112,7 +112,7 @@ const ShopDetails: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
 
           <span className="inline-block text-lg text-gray-500 italic">
-            Price on request
+            Contact Seller for Price
           </span>
 
           {(make || model || variant || year) && (
@@ -141,7 +141,7 @@ const ShopDetails: React.FC = () => {
           )}
 
           <button className="w-full sm:w-auto block bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition">
-            Add to Cart
+            Request This Part
           </button>
         </div>
       </div>

@@ -19,7 +19,7 @@ const Footer = () => {
                     />
                   </svg>
                 </span>
-                Address
+                Accra, Ghana
               </li>
 
               <li>
@@ -42,7 +42,7 @@ const Footer = () => {
                       fill="#4A36EC"
                     />
                   </svg>
-                  (+233) 123-456-7899
+                  +233 XX XXX XXXX
                 </a>
               </li>
 
@@ -56,7 +56,7 @@ const Footer = () => {
                       fill="#4A36EC"
                     />
                   </svg>
-                  mail
+                  support@spepas.com
                 </a>
               </li>
             </ul>
@@ -162,7 +162,7 @@ const Footer = () => {
           </div> */}
 
           <div className="w-full sm:w-auto">
-            <h2 className="mb-7.5 text-custom-1 font-medium text-dark">Quick Link</h2>
+            <h2 className="mb-7.5 text-custom-1 font-medium text-dark">Quick Links</h2>
 
             <ul className="flex flex-col gap-3">
               <li>
@@ -182,7 +182,7 @@ const Footer = () => {
               </li>
               <li>
                 <a className="ease-out duration-200 hover:text-blue" href="/95668339501103956045/faqs">
-                  FAQ’s
+                  FAQs
                 </a>
               </li>
               <li>
@@ -194,7 +194,7 @@ const Footer = () => {
           </div>
 
           <div className="w-full sm:w-auto">
-            <h2 className="mb-7.5 text-custom-1 font-medium text-dark lg:text-right">Download App</h2>
+            <h2 className="mb-7.5 text-custom-1 font-medium text-dark lg:text-right">Get the App</h2>
 
             {/* <p className="lg:text-right text-custom-sm mb-4">
               Save $3 With App & New User only
@@ -233,7 +233,7 @@ const Footer = () => {
                   </svg>
 
                   <div>
-                    <span className="block text-custom-xs"> Get in On </span>
+                    <span className="block text-custom-xs">Get it on</span>
                     <p className="font-medium">Google Play</p>
                   </div>
                 </a>

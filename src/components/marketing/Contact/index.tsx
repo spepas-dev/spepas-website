@@ -62,7 +62,7 @@ const Contact = () => {
                         fill="#4A36EC"
                       />
                     </svg>
-                    Email: spepas@spepas.com
+                    Email: support@spepas.com
                   </p>
 
                   <p className="flex items-center gap-4">
@@ -84,7 +84,7 @@ const Contact = () => {
                         fill="#4A36EC"
                       />
                     </svg>
-                    Phone: 1234 567890
+                    Phone: +233 XX XXX XXXX
                   </p>
 
                   <p className="flex gap-4">
@@ -103,7 +103,7 @@ const Contact = () => {
                         fill="#4A36EC"
                       />
                     </svg>
-                    Address: We Are All Over
+                    Accra, Ghana
                   </p>
                 </div>
               </div>
@@ -122,7 +122,7 @@ const Contact = () => {
                         type="text"
                         name="firstName"
                         id="firstName"
-                        placeholder="John"
+                        placeholder="Kwame"
                         // onChange={handleChange}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
@@ -135,7 +135,7 @@ const Contact = () => {
                         type="text"
                         name="lastName"
                         id="lastName"
-                        placeholder="Deo"
+                        placeholder="Mensah"
                         // onChange={handleChange}
                         className="rounded-md border border-gray-3 bg-gray-1 placeholder:text-dark-5 w-full py-2.5 px-5 outline-none duration-200 focus:border-transparent focus:shadow-input focus:ring-2 focus:ring-blue/20"
                       />
