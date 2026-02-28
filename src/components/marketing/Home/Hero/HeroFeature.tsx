@@ -12,7 +12,7 @@ const featureData = [
   {
     img: '/images/icons/icon-03.svg',
     title: '100% Secure Payments',
-    description: 'Gurantee secure payments'
+    description: 'Guarantee secure payments'
   },
   {
     img: '/images/icons/icon-04.svg',

@@ -2,7 +2,7 @@
 import Services from '../extras/Services';
 // import Values from '../extras/Values';
 // import BestSeller from './BestSeller';
-import AdvertSlider from './AdvertSlider';
+// import AdvertSlider from './AdvertSlider';
 import Hero from './Hero';
 import Testimonials from './Testimonials';
 
@@ -10,7 +10,7 @@ const MarketingLanding = () => {
   return (
     <main>
       <Hero />
-      <AdvertSlider />
+      {/* <AdvertSlider /> */}
       {/* <Values /> */}
       <Services />
       {/* <Categories /> */}

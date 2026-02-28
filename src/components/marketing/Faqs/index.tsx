@@ -219,15 +219,6 @@ const Faq: React.FC = () => (
           </p>
         </header>
 
-        {/* Illustration */}
-        <div className="rounded-lg overflow-hidden">
-          <img
-            src="/images/images/faq.png"
-            alt="FAQ"
-            className="w-full h-auto object-cover"
-          />
-        </div>
-
         {/* FAQ Sections */}
         {faqSections.map((sec, idx) => (
           <article

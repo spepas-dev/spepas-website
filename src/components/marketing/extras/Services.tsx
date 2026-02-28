@@ -11,7 +11,7 @@ export default function Services() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Text Content */}
-            <div className="text-gray-600 space-y-4 text-base sm:text-lg md:text-xl text-center md:text-justify">
+            <div className="text-gray-600 space-y-4 text-base sm:text-lg md:text-xl text-center md:text-left">
             <p>
               SpePas connects car owners, mechanics, and parts sellers on one platform. Search for the part you need, or list your inventory to reach buyers across Ghana.
             </p>
