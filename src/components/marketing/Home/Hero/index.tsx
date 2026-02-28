@@ -25,7 +25,7 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section className="w-full overflow-hidden pb-4 lg:pb-8.5 xl:pb-12 pt-4.5 sm:pt-6 lg:pt-9 xl:pt-16.5">
+    <section className="w-full overflow-hidden pb-4 lg:pb-6 xl:pb-8 pt-4.5 sm:pt-6 lg:pt-9 xl:pt-16.5">
       <div className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0">
         {/* Carousel */}
         <div className="relative z-10 rounded-[10px] bg-white overflow-hidden">
@@ -46,52 +46,17 @@ const Hero: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15 border-rounded-[20px] mt-6 sm:mt-8 lg:mt-12 xl:mt-16.5 shadow-md overflow-hidden">
+      <div className="max-w-[1170px] w-full mx-auto bg-[#F6F7FB] pb-8 lg:pb-12.5 xl:pb-15 border-rounded-[20px] mt-6 sm:mt-8 lg:mt-10 shadow-md overflow-hidden">
         {/* Featured Products */}
-        <div className="pt-8 pl-4 sm:pl-8 xl:pl-8 pr-2">
-          <h2 className="text-dark text-xl font-semibold mb-4">
+        <div className="pt-8 px-4 sm:px-8 xl:px-8">
+          <h2 className="text-dark text-2xl font-semibold mb-4">
             Featured Parts
           </h2>
 
-          <div className="relative">
-            <div
-              ref={scrollRef}
-              className="overflow-x-auto scrollbar-hide"
-              style={{ scrollbarWidth: 'none' }}
-            >
-              <div className="flex gap-5">
-                {featuredParts.map((part) => (
-                  <div
-                    key={part.name}
-                    className="min-w-[250px] rounded-[10px] bg-white p-4 sm:p-7.5 flex-shrink-0"
-                  >
-                    <div className="flex items-center gap-14">
-                      <div>
-                        <h2 className="max-w-[153px] font-semibold text-dark text-xl mb-1.5">
-                          <a href="#">{part.name}</a>
-                        </h2>
-                        <p className="font-medium text-gray-400 text-xs mb-1.5">
-                          {part.category}
-                        </p>
-                        <p className="font-medium text-gray-500 text-sm">
-                          Contact for price
-                        </p>
-                      </div>
-                      <img
-                        src={part.img}
-                        alt={part.name}
-                        width={123}
-                        height={161}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+          <div className="flex items-center gap-2">
             <button
               onClick={handleScrollLeft}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 p-2 rounded-full shadow-md hover:bg-gray-100"
+              className="hidden sm:flex flex-shrink-0 p-2 rounded-full bg-white shadow-md hover:bg-gray-50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -103,9 +68,37 @@ const Hero: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
+
+            <div
+              ref={scrollRef}
+              className="overflow-x-auto flex-1 scrollbar-hide"
+              style={{ scrollbarWidth: 'none' }}
+            >
+              <div className="flex gap-5">
+                {featuredParts.map((part) => (
+                  <div
+                    key={part.name}
+                    className="min-w-[180px] rounded-[10px] bg-white p-4 flex-shrink-0 text-center"
+                  >
+                    <img
+                      src={part.img}
+                      alt={part.name}
+                      className="w-24 h-24 object-contain mx-auto mb-3"
+                    />
+                    <h3 className="font-semibold text-dark text-sm mb-1">
+                      <a href="#">{part.name}</a>
+                    </h3>
+                    <p className="font-medium text-gray-400 text-xs mb-1">
+                      {part.category}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={handleScrollRight}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 p-2 rounded-full shadow-md hover:bg-gray-100"
+              className="hidden sm:flex flex-shrink-0 p-2 rounded-full bg-white shadow-md hover:bg-gray-50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

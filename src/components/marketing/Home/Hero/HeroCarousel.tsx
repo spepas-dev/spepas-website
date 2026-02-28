@@ -120,7 +120,7 @@ const HeroCarousel: React.FC = () => {
                   className="shine-text font-semibold text-3xl sm:text-5xl text-blue opacity-0"
                   style={{ animation: 'fadeIn 1s ease-in-out forwards' }}
                 >
-                  Find the Right Part, Fast
+                  Your Auto Parts Marketplace
                 </h1>
               </div>
 
@@ -128,8 +128,8 @@ const HeroCarousel: React.FC = () => {
                 className="text-base text-gray-600 opacity-0"
                 style={{ animation: 'fadeIn 1s ease-in-out 0.5s forwards' }}
               >
-                Search thousands of new and used auto parts from verified sellers across Ghana.
-                Find what you need, request what you can't, and get it delivered.
+                Search thousands of new and used parts from verified sellers across Ghana.
+                Find what you need, request what you can't — delivered to your door.
               </p>
 
               <div className="flex justify-center mt-10">

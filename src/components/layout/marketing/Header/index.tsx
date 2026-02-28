@@ -268,10 +268,7 @@ const Header = () => {
                         fill="#4A36EC"
                       />
                     </svg>
-                    <div>
-                      <span className="block text-2xs text-dark-4 uppercase">account</span>
-                      <p className="font-medium text-custom-sm text-dark">Sign In</p>
-                    </div>
+                    <span className="font-medium text-custom-sm text-dark">Sign In</span>
                   </Link>
                 </div>
               )}

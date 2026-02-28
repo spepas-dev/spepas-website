@@ -2,16 +2,16 @@ import React from 'react';
 
 export default function Services() {
   return (
-    <section className="max-w-[1170px] w-full mx-auto px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 xl:px-0 bg-gray-50 shadow-xl rounded-xl mt-12">
+    <section className="max-w-[1170px] w-full mx-auto px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 xl:px-0 bg-gray-50 shadow-xl rounded-xl mt-8 lg:mt-10">
       <div className="mx-auto">
         {/* Our Services Section */}
         <div className="mb-12 px-10">
-          <h2 className="text-[#4a36ec] text-2xl sm:text-3xl md:text-4xl font-semibold mb-6 text-center md:text-left">
+          <h2 className="text-[#4a36ec] text-2xl sm:text-3xl font-semibold mb-6 text-center md:text-left">
             How SpePas Works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Text Content */}
-            <div className="text-gray-600 space-y-4 text-base sm:text-lg md:text-xl text-center md:text-left">
+            <div className="text-gray-600 space-y-4 text-base text-center md:text-left">
             <p>
               SpePas connects car owners, mechanics, and parts sellers on one platform. Search for the part you need, or list your inventory to reach buyers across Ghana.
             </p>

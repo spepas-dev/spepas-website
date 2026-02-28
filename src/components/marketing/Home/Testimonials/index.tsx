@@ -44,43 +44,47 @@ const Testimonials: React.FC = () => {
   const translateX = -(index * (100 / visible))
 
   return (
-    <section className="overflow-hidden pb-16 pt-20">
-      <div className="max-w-4xl mx-auto px-4">
+    <section className="overflow-hidden pb-16 pt-12">
+      <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
         {/* header */}
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-semibold">What Our Users Say</h2>
-          <div className="flex gap-4">
-            <button
-              onClick={prev}
-              className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-            >
-              ‹
-            </button>
-            <button
-              onClick={next}
-              className="p-2 bg-gray-200 rounded-full hover:bg-gray-300 transition"
-            >
-              ›
-            </button>
-          </div>
-        </div>
+        <h2 className="text-2xl font-semibold mb-6">What Our Users Say</h2>
 
-        {/* carousel track */}
-        <div className="relative overflow-hidden">
-          <div
-            className="flex transition-transform duration-500"
-            style={{ transform: `translateX(${translateX}%)` }}
+        {/* carousel with flanking arrows */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={prev}
+            className="hidden sm:flex flex-shrink-0 p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition"
           >
-            {testimonialsData.map((t, i) => (
-              <div
-                key={i}
-                className="px-2"
-                style={{ minWidth: `${100 / visible}%` }}
-              >
-                <SingleItem testimonial={t} />
-              </div>
-            ))}
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <div className="relative overflow-hidden flex-1 py-2">
+            <div
+              className="flex items-stretch transition-transform duration-500"
+              style={{ transform: `translateX(${translateX}%)` }}
+            >
+              {testimonialsData.map((t, i) => (
+                <div
+                  key={i}
+                  className="px-2"
+                  style={{ minWidth: `${100 / visible}%` }}
+                >
+                  <SingleItem testimonial={t} />
+                </div>
+              ))}
+            </div>
           </div>
+
+          <button
+            onClick={next}
+            className="hidden sm:flex flex-shrink-0 p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       </div>
     </section>

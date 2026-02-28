@@ -2,7 +2,7 @@ import { Testimonial } from "./testimonialsData";
 
 const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
   return (
-    <div className="shadow-testimonial bg-white rounded-[10px] py-7.5 px-4 sm:px-8.5 m-1">
+    <div className="shadow-testimonial bg-white rounded-[10px] py-7.5 px-4 sm:px-8.5 m-1 h-full flex flex-col">
       <div className="flex items-center gap-1 mb-5">
         <img src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15} />
         <img src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15} />
@@ -11,9 +11,9 @@ const SingleItem = ({ testimonial }: { testimonial: Testimonial }) => {
         <img src="/images/icons/icon-star.svg" alt="star icon" width={15} height={15} />
       </div>
 
-      <p className="text-dark mb-6">{testimonial.review}</p>
+      <p className="text-dark mb-6 flex-1">{testimonial.review}</p>
 
-      <a href="#" className="flex items-center gap-4">
+      <a href="#" className="flex items-center gap-4 mt-auto">
         <div className="w-12.5 h-12.5 rounded-full overflow-hidden">
           <img src={testimonial.authorImg} alt="author" className="w-12.5 h-12.5 rounded-full overflow-hidden" width={50} height={50} />
         </div>
