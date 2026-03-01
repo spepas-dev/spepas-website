@@ -7,7 +7,7 @@ import type { ServerResponse } from 'http';
 import Database from 'better-sqlite3';
 import { resolve } from 'path';
 
-const MIN_YEAR = 2010;
+const MIN_YEAR = 0; // no year filter — show all vehicles
 
 // Strips TecDoc chassis codes like "(_E15_)" or "(F30, F80)" from brand names
 const CHASSIS_RE = /\s*\([A-Z0-9,\s/_-]+\)\s*$/;
@@ -47,11 +47,14 @@ interface VehicleModelRow { id: number; type_name: string; construction_start: n
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function localInventoryPlugin(): Plugin {
-  const dbPath = resolve(process.cwd(), 'local-data/inventory.db');
+  const mode = process.env.VITE_LOCAL_DATA_MODE || 'simplified';
+  const dbFilename = mode === 'detailed' ? 'inventory-detailed.db' : 'inventory-simplified.db';
+  const dbPath = resolve(process.cwd(), `local-data/${dbFilename}`);
   let db: Database.Database | null = null;
 
   function getDb(): Database.Database {
     if (!db) {
+      console.log(`📦 Local inventory: using ${dbFilename} (mode: ${mode})`);
       db = new Database(dbPath, { readonly: true });
     }
     return db;

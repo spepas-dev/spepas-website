@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 // scripts/import-local-inventory.mjs
-// Reads TecDoc vehicle/category CSVs + simplified parts CSVs → writes SQLite DB
+// Reads TecDoc vehicle/category CSVs + parts CSVs → writes SQLite DB
 //
 // Usage:
-//   node scripts/import-local-inventory.mjs
-//   node scripts/import-local-inventory.mjs --vehicles=500   (quick smoke test)
+//   node scripts/import-local-inventory.mjs                          (simplified, default)
+//   node scripts/import-local-inventory.mjs --mode=detailed          (detailed / complete data)
+//   node scripts/import-local-inventory.mjs --vehicles=500           (quick smoke test)
+//   node scripts/import-local-inventory.mjs --mode=detailed --vehicles=500
 
 import Database from 'better-sqlite3';
 import { createReadStream, mkdirSync } from 'fs';
@@ -15,19 +17,31 @@ import { randomUUID } from 'crypto';
 
 // ── Config ───────────────────────────────────────────────────────────────────
 
+const MODE = (() => {
+  const flag = process.argv.find(a => a.startsWith('--mode='));
+  return flag ? flag.split('=')[1] : 'simplified';
+})();
+
+if (!['simplified', 'detailed'].includes(MODE)) {
+  console.error(`Unknown mode "${MODE}". Use --mode=simplified or --mode=detailed`);
+  process.exit(1);
+}
+
 const SRC_ROOT =
   process.env.LOCAL_INVENTORY_SRC ??
   '/Users/gaiacarini/Library/CloudStorage/OneDrive-Spepas/SPEPAS GLOBAL/SPEPAS PRODUCT/Scraping Results/rapidapi';
 
+const DB_FILENAME = MODE === 'detailed' ? 'inventory-detailed.db' : 'inventory-simplified.db';
+
 const DB_PATH =
-  process.env.LOCAL_INVENTORY_DB ?? resolve(process.cwd(), 'local-data/inventory.db');
+  process.env.LOCAL_INVENTORY_DB ?? resolve(process.cwd(), `local-data/${DB_FILENAME}`);
 
 const MAX_VEHICLES = (() => {
   const flag = process.argv.find(a => a.startsWith('--vehicles='));
   return flag ? parseInt(flag.split('=')[1]) : Infinity;
 })();
 
-const MIN_YEAR = 2010;
+const MIN_YEAR = 0; // no year filter — import all vehicles
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -121,11 +135,14 @@ function createSchema(db) {
     );
 
     CREATE TABLE IF NOT EXISTS parts (
-      id           INTEGER PRIMARY KEY AUTOINCREMENT,
-      product_name TEXT NOT NULL,
-      image_url    TEXT,
-      category_id  INTEGER REFERENCES categories(id),
-      uuid         TEXT NOT NULL UNIQUE
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_name   TEXT NOT NULL,
+      image_url      TEXT,
+      category_id    INTEGER REFERENCES categories(id),
+      uuid           TEXT NOT NULL UNIQUE,
+      article_no     TEXT,
+      supplier_name  TEXT,
+      supplier_id    TEXT
     );
 
     CREATE TABLE IF NOT EXISTS part_vehicles (
@@ -154,6 +171,7 @@ function createIndexes(db) {
 async function main() {
   mkdirSync(resolve(DB_PATH, '..'), { recursive: true });
 
+  log(`Mode:   ${MODE}`);
   log(`Source: ${SRC_ROOT}`);
   log(`Output: ${DB_PATH}`);
   if (MAX_VEHICLES < Infinity) log(`Limiting to ${MAX_VEHICLES} vehicles`);
@@ -315,69 +333,134 @@ async function main() {
   const allCats = db.prepare('SELECT id, uuid FROM categories').all();
   const catUuidToId = new Map(allCats.map(c => [c.uuid, c.id]));
 
-  // ── 5. Simplified Parts ───────────────────────────────────────────────────
-  log('Importing simplified parts…');
-  const partFiles = await globFiles(`${SRC_ROOT}/simplified/*.csv`);
-  if (partFiles.length === 0) {
-    log('  WARNING: No files found in simplified/ — skipping parts import');
-    log(`  Expected: ${SRC_ROOT}/simplified/*.csv`);
-  }
+  // ── 5. Parts ─────────────────────────────────────────────────────────────
+  log(`Importing parts (mode: ${MODE})…`);
 
-  const insertPart = db.prepare(
-    `INSERT OR IGNORE INTO parts (product_name, image_url, category_id, uuid) VALUES (?, ?, ?, ?)`
-  );
   const insertPartVehicle = db.prepare(
     `INSERT OR IGNORE INTO part_vehicles (part_id, vehicle_id) VALUES (?, ?)`
   );
 
-  // product concept → DB id map (productId from CSV → parts.id)
-  const productUuidToId = new Map();
   let partRows = 0;
   let pairsInserted = 0;
 
-  for (const file of partFiles) {
-    log(`  Processing ${file.split('/').pop()}…`);
-    const rows = await readCsv(file);
+  if (MODE === 'simplified') {
+    // ── 5a. Simplified: one row per product concept ─────────────────────────
+    const partFiles = await globFiles(`${SRC_ROOT}/simplified/*.csv`);
+    if (partFiles.length === 0) {
+      log('  WARNING: No files found in simplified/ — skipping parts import');
+      log(`  Expected: ${SRC_ROOT}/simplified/*.csv`);
+    }
 
-    const run = db.transaction(() => {
-      for (const row of rows) {
-        const vehicleUuid = String(row.vehicleId || '');
-        const productUuid = String(row.productId || '');
-        const productName = (row.articleProductName || '').trim();
-        const catUuid = String(row.categoryId || '');
+    const insertPart = db.prepare(
+      `INSERT OR IGNORE INTO parts (product_name, image_url, category_id, uuid) VALUES (?, ?, ?, ?)`
+    );
 
-        if (!vehicleUuid || !productUuid || !productName) continue;
+    // product concept → DB id map (productId from CSV → parts.id)
+    const productUuidToId = new Map();
 
-        const vehicleId = modelUuidToId.get(vehicleUuid) ?? null;
-        if (!vehicleId) continue; // vehicle not imported (pre-2010 or missing)
+    for (const file of partFiles) {
+      log(`  Processing ${file.split('/').pop()}…`);
+      const rows = await readCsv(file);
 
-        // Get or create part record
-        if (!productUuidToId.has(productUuid)) {
-          const catId = catUuidToId.get(catUuid) ?? null;
-          // Pick first non-empty image URL
-          const imageUrl =
-            [row.image_url_1, row.image_url_2, row.image_url_3, row.image_url_4, row.image_url_5]
-              .find(u => u && u.trim()) ?? null;
+      const run = db.transaction(() => {
+        for (const row of rows) {
+          const vehicleUuid = String(row.vehicleId || '');
+          const productUuid = String(row.productId || '');
+          const productName = (row.articleProductName || '').trim();
+          const catUuid = String(row.categoryId || '');
 
-          insertPart.run(productName, imageUrl, catId, productUuid);
-          const inserted = db.prepare('SELECT id FROM parts WHERE uuid = ?').get(productUuid);
-          if (inserted) {
-            productUuidToId.set(productUuid, inserted.id);
-            partRows++;
+          if (!vehicleUuid || !productUuid || !productName) continue;
+
+          const vehicleId = modelUuidToId.get(vehicleUuid) ?? null;
+          if (!vehicleId) continue;
+
+          if (!productUuidToId.has(productUuid)) {
+            const catId = catUuidToId.get(catUuid) ?? null;
+            const imageUrl =
+              [row.image_url_1, row.image_url_2, row.image_url_3, row.image_url_4, row.image_url_5]
+                .find(u => u && u.trim()) ?? null;
+
+            insertPart.run(productName, imageUrl, catId, productUuid);
+            const inserted = db.prepare('SELECT id FROM parts WHERE uuid = ?').get(productUuid);
+            if (inserted) {
+              productUuidToId.set(productUuid, inserted.id);
+              partRows++;
+            }
           }
+
+          const partId = productUuidToId.get(productUuid);
+          if (!partId) continue;
+
+          insertPartVehicle.run(partId, vehicleId);
+          pairsInserted++;
         }
+      });
+      run();
+    }
 
-        const partId = productUuidToId.get(productUuid);
-        if (!partId) continue;
+    log(`  ${productUuidToId.size} unique parts, ${pairsInserted} part-vehicle pairs`);
 
-        insertPartVehicle.run(partId, vehicleId);
-        pairsInserted++;
-      }
-    });
-    run();
+  } else {
+    // ── 5b. Detailed: one row per article (supplier-specific part) ──────────
+    const partFiles = await globFiles(
+      `${SRC_ROOT}/detailed parts/complete/parts_complete_vehicles_*.csv`
+    );
+    if (partFiles.length === 0) {
+      log('  WARNING: No files found in detailed parts/complete/ — skipping parts import');
+      log(`  Expected: ${SRC_ROOT}/detailed parts/complete/parts_complete_vehicles_*.csv`);
+    }
+
+    const insertPart = db.prepare(
+      `INSERT OR IGNORE INTO parts (product_name, image_url, category_id, uuid, article_no, supplier_name, supplier_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    );
+
+    // articleId → DB id map
+    const articleUuidToId = new Map();
+
+    for (const file of partFiles) {
+      log(`  Processing ${file.split('/').pop()}…`);
+      const rows = await readCsv(file);
+
+      const run = db.transaction(() => {
+        for (const row of rows) {
+          const vehicleUuid = String(row.vehicleId || '');
+          const articleUuid = String(row.articleId || '');
+          const productName = (row.articleProductName || '').trim();
+          const catUuid = String(row.categoryId || '');
+
+          if (!vehicleUuid || !articleUuid || !productName) continue;
+
+          const vehicleId = modelUuidToId.get(vehicleUuid) ?? null;
+          if (!vehicleId) continue;
+
+          if (!articleUuidToId.has(articleUuid)) {
+            const catId = catUuidToId.get(catUuid) ?? null;
+            const imageUrl = (row.s3image || '').trim() || null;
+            const articleNo = (row.articleNo || '').trim() || null;
+            const supplierName = (row.supplierName || '').trim() || null;
+            const supplierId = String(row.supplierId || '') || null;
+
+            insertPart.run(productName, imageUrl, catId, articleUuid, articleNo, supplierName, supplierId);
+            const inserted = db.prepare('SELECT id FROM parts WHERE uuid = ?').get(articleUuid);
+            if (inserted) {
+              articleUuidToId.set(articleUuid, inserted.id);
+              partRows++;
+            }
+          }
+
+          const partId = articleUuidToId.get(articleUuid);
+          if (!partId) continue;
+
+          insertPartVehicle.run(partId, vehicleId);
+          pairsInserted++;
+        }
+      });
+      run();
+    }
+
+    log(`  ${articleUuidToId.size} unique articles, ${pairsInserted} part-vehicle pairs`);
   }
-
-  log(`  ${productUuidToId.size} unique parts, ${pairsInserted} part-vehicle pairs`);
 
   // ── 6. Indexes ────────────────────────────────────────────────────────────
   createIndexes(db);
