@@ -40,3 +40,22 @@ When an authenticated user visits `/` or logs in, they should be redirected to t
 - `src/features/auth/index.ts` — auth context with `useAuth()` hook providing `isAuthenticated`
 
 ---
+
+### 3. `getCarManufacturers` API returns flat list — brand/model pre-fill broken
+**Priority:** Medium
+**Area:** API
+
+**Problem:**
+The `getCarManufacturers()` endpoint returns manufacturers without nested `brands` arrays (each manufacturer's `brands` is `[]`). This means the PostRequestForm cannot auto-select the brand dropdown when pre-filling from the part detail page's navigation state.
+
+When a user clicks "Request This Part" on the detail page, the form correctly receives `partName`, `manufacturerName`, and `brandName` via React Router state. The part name pre-fills correctly, and the manufacturer dropdown selects the right value, but the brand dropdown shows "Select manufacturer first" because `mfr.brands` is empty.
+
+**Expected behavior:**
+The `getCarManufacturers()` response should include nested `brands` (and ideally `models`) so the cascading dropdowns can be pre-filled programmatically.
+
+**Key files:**
+- `src/components/buyer/PostRequestForm.tsx` — pre-fill logic in `useEffect` (lines 55-73)
+- `src/lib/inventoryApis.ts` — `getCarManufacturers()` call
+- `src/components/marketing/ShopDetails/index.tsx` — passes state via `<Link>` (lines 160-166)
+
+---

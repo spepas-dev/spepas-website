@@ -18,6 +18,7 @@ local-data/*.db
 certs
 NUL
 tree
+.playwright-mcp
 
 # Editor directories and files
 .vscode/*
