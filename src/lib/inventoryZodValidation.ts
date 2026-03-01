@@ -25,6 +25,8 @@ const sparePartSchema = z.object({
   seller_ID: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  article_no: z.string().nullable().optional(),
+  supplier_name: z.string().nullable().optional(),
   images: z.array(imageSchema),
 });
 
@@ -36,9 +38,10 @@ const carModelSchema = z.object({
   carBrand_ID: z.string(),
   status: z.number(),
   createdAt: z.string(),
-  // fuelType + bodyType: returned by local mock (TecDoc data); pending INV-1 on real API
+  // fuelType + bodyType + driveType: returned by local mock (TecDoc data); pending INV-1 on real API
   fuelType: z.string().optional(),
   bodyType: z.string().optional(),
+  driveType: z.string().optional(),
   spareParts: z.array(sparePartSchema),
   carBrand: z
     .object({

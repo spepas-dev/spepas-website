@@ -50,6 +50,10 @@ const ShopDetails: React.FC = () => {
   const item = query.data?.item;
   const title = item?.name ?? 'Product';
 
+  // Article / Supplier info
+  const articleNo = item?.article_no;
+  const supplierName = item?.supplier_name;
+
   // Vehicle info — Make & Model only
   const make = item?.carModel?.carBrand?.manufacturer?.name;
   const model = item?.carModel?.carBrand?.name;
@@ -137,6 +141,21 @@ const ShopDetails: React.FC = () => {
               {/* Details */}
               <div className="w-full md:flex-1 space-y-6">
                 <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+
+                {(articleNo || supplierName) && (
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {articleNo && (
+                      <div>
+                        <span className="font-semibold">Article No:</span> {articleNo}
+                      </div>
+                    )}
+                    {supplierName && (
+                      <div>
+                        <span className="font-semibold">Supplier:</span> {supplierName}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <span className="inline-block text-lg text-gray-500 italic">
                   Contact Seller for Price

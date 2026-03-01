@@ -12,6 +12,7 @@ import {
   getCarYears,
   getCarManufacturers,
   getCarBrands,
+  getCarModels,
 } from '@/lib/inventoryApis';
 
 import { ProductVM } from '../Shop/shopTypes';
@@ -42,6 +43,11 @@ const ShopWithoutSidebar: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [selectedMake, setSelectedMake] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<string>(''); // brand = model line
+
+  // Vehicle attribute filters
+  const [selectedFuelType, setSelectedFuelType] = useState<string>('');
+  const [selectedBodyType, setSelectedBodyType] = useState<string>('');
+  const [selectedDriveType, setSelectedDriveType] = useState<string>('');
 
   // Filters
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -83,6 +89,31 @@ const ShopWithoutSidebar: React.FC = () => {
   });
 
   // ══════════════════════════════════════════════════════════════════════════
+  // Query — car model variants (for fuel/body/drive filter values)
+  // ══════════════════════════════════════════════════════════════════════════
+  const { data: variantsData } = useQuery({
+    queryKey: ['car-models-for-filters', selectedModel],
+    queryFn: () => getCarModels({ brandId: selectedModel }),
+    staleTime: 10 * 60_000,
+    enabled: !!selectedModel,
+  });
+
+  const fuelTypeOptions = useMemo(() => {
+    const variants = variantsData?.data ?? [];
+    return [...new Set(variants.map((v: any) => v.fuelType).filter(Boolean))].sort();
+  }, [variantsData]);
+
+  const bodyTypeOptions = useMemo(() => {
+    const variants = variantsData?.data ?? [];
+    return [...new Set(variants.map((v: any) => v.bodyType).filter(Boolean))].sort();
+  }, [variantsData]);
+
+  const driveTypeOptions = useMemo(() => {
+    const variants = variantsData?.data ?? [];
+    return [...new Set(variants.map((v: any) => v.driveType).filter(Boolean))].sort();
+  }, [variantsData]);
+
+  // ══════════════════════════════════════════════════════════════════════════
   // Cascade derived options
   // ══════════════════════════════════════════════════════════════════════════
   const yearOptions = useMemo(() => {
@@ -101,8 +132,13 @@ const ShopWithoutSidebar: React.FC = () => {
   // Queries — categories (scoped to selected brand)
   // ══════════════════════════════════════════════════════════════════════════
   const categoryFilters = useMemo(
-    () => (selectedModel ? { brandId: selectedModel } : undefined),
-    [selectedModel]
+    () => (selectedModel ? {
+      brandId: selectedModel,
+      ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
+      ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
+      ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
+    } : undefined),
+    [selectedModel, selectedFuelType, selectedBodyType, selectedDriveType]
   );
 
   const {
@@ -164,11 +200,14 @@ const ShopWithoutSidebar: React.FC = () => {
     () => ({
       ...(selectedModel ? { brandId: selectedModel } : {}),
       ...(selectedCategory ? { categoryId: selectedCategory } : {}),
+      ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
+      ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
+      ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
     }),
-    [selectedModel, selectedCategory, search, page]
+    [selectedModel, selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, search, page]
   );
 
   const vehicleSelected = !!selectedModel;
@@ -211,6 +250,27 @@ const ShopWithoutSidebar: React.FC = () => {
         onClear: () => { setSelectedCategory(''); setPage(1); },
       });
     }
+    if (selectedFuelType) {
+      chips.push({
+        key: 'fuelType',
+        label: `Fuel: ${selectedFuelType}`,
+        onClear: () => { setSelectedFuelType(''); setPage(1); },
+      });
+    }
+    if (selectedBodyType) {
+      chips.push({
+        key: 'bodyType',
+        label: `Body: ${selectedBodyType}`,
+        onClear: () => { setSelectedBodyType(''); setPage(1); },
+      });
+    }
+    if (selectedDriveType) {
+      chips.push({
+        key: 'driveType',
+        label: `Drive: ${selectedDriveType}`,
+        onClear: () => { setSelectedDriveType(''); setPage(1); },
+      });
+    }
     if (search.trim()) {
       chips.push({
         key: 'search',
@@ -219,10 +279,11 @@ const ShopWithoutSidebar: React.FC = () => {
       });
     }
     return chips;
-  }, [selectedCategory, search, categoriesData]);
+  }, [selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, search, categoriesData]);
 
   const clearAllFilters = () => {
     setSelectedCategory('');
+    resetAttributeFilters();
     setSearch('');
     setPage(1);
   };
@@ -230,22 +291,30 @@ const ShopWithoutSidebar: React.FC = () => {
   // ══════════════════════════════════════════════════════════════════════════
   // Cascade change handlers (reset children)
   // ══════════════════════════════════════════════════════════════════════════
+  const resetAttributeFilters = () => {
+    setSelectedFuelType('');
+    setSelectedBodyType('');
+    setSelectedDriveType('');
+  };
   const onChangeYear = (val: string) => {
     setSelectedYear(val);
     setSelectedMake('');
     setSelectedModel('');
     setSelectedCategory('');
+    resetAttributeFilters();
     setPage(1);
   };
   const onChangeMake = (val: string) => {
     setSelectedMake(val);
     setSelectedModel('');
     setSelectedCategory('');
+    resetAttributeFilters();
     setPage(1);
   };
   const onChangeModel = (val: string) => {
     setSelectedModel(val);
     setSelectedCategory('');
+    resetAttributeFilters();
     setPage(1);
   };
 
@@ -308,6 +377,65 @@ const ShopWithoutSidebar: React.FC = () => {
                 />
               </div>
             </div>
+
+            {/* Vehicle attribute filters — visible after model selection */}
+            {selectedModel && (fuelTypeOptions.length > 0 || bodyTypeOptions.length > 0 || driveTypeOptions.length > 0) && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <h2 className="text-sm font-semibold text-gray-700 mb-3">
+                  Refine by vehicle attributes
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {fuelTypeOptions.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        Fuel Type
+                      </label>
+                      <SearchableCombobox
+                        options={[
+                          { value: '', label: 'All fuel types' },
+                          ...fuelTypeOptions.map((ft: string) => ({ value: ft, label: ft })),
+                        ]}
+                        value={selectedFuelType}
+                        onChange={(val) => { setSelectedFuelType(val); setPage(1); }}
+                        placeholderLabel="All fuel types"
+                      />
+                    </div>
+                  )}
+                  {bodyTypeOptions.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        Body Type
+                      </label>
+                      <SearchableCombobox
+                        options={[
+                          { value: '', label: 'All body types' },
+                          ...bodyTypeOptions.map((bt: string) => ({ value: bt, label: bt })),
+                        ]}
+                        value={selectedBodyType}
+                        onChange={(val) => { setSelectedBodyType(val); setPage(1); }}
+                        placeholderLabel="All body types"
+                      />
+                    </div>
+                  )}
+                  {driveTypeOptions.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        Drive Type
+                      </label>
+                      <SearchableCombobox
+                        options={[
+                          { value: '', label: 'All drive types' },
+                          ...driveTypeOptions.map((dt: string) => ({ value: dt, label: dt })),
+                        ]}
+                        value={selectedDriveType}
+                        onChange={(val) => { setSelectedDriveType(val); setPage(1); }}
+                        placeholderLabel="All drive types"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Main layout: sidebar + content ────────────────────── */}

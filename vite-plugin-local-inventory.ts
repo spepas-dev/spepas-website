@@ -38,11 +38,11 @@ function sendJson(res: ServerResponse, data: unknown, status = 200) {
 
 interface ManufacturerRow { id: number; name: string; uuid: string }
 interface BrandRow { id: number; name: string; uuid: string; manufacturer_id: number; mfr_uuid: string; mfr_name: string }
-interface ModelRow { id: number; type_name: string; construction_start: number; construction_end: number; fuel_type: string; body_type: string; power_ps: number; uuid: string; brand_uuid: string }
+interface ModelRow { id: number; type_name: string; construction_start: number; construction_end: number; fuel_type: string; body_type: string; drive_type: string; power_ps: number; uuid: string; brand_uuid: string }
 interface CategoryRow { id: number; name: string; parent_id: number | null; uuid: string; count?: number }
-interface PartRow { id: number; product_name: string; image_url: string | null; uuid: string; category_id: number; cat_uuid: string | null }
+interface PartRow { id: number; product_name: string; image_url: string | null; uuid: string; category_id: number; cat_uuid: string | null; article_no: string | null; supplier_name: string | null }
 interface CountRow { n: number }
-interface VehicleModelRow { id: number; type_name: string; construction_start: number; uuid: string; fuel_type: string; body_type: string; brand_id: number; brand_name: string; brand_uuid: string; mfr_id: number; mfr_name: string; mfr_uuid: string }
+interface VehicleModelRow { id: number; type_name: string; construction_start: number; uuid: string; fuel_type: string; body_type: string; drive_type: string; brand_id: number; brand_name: string; brand_uuid: string; mfr_id: number; mfr_name: string; mfr_uuid: string }
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -206,7 +206,7 @@ export function localInventoryPlugin(): Plugin {
             const rows = d
               .prepare(
                 `SELECT cm.id, cm.type_name, cm.construction_start, cm.construction_end,
-                        cm.fuel_type, cm.body_type, cm.power_ps, cm.uuid, cb.uuid AS brand_uuid
+                        cm.fuel_type, cm.body_type, cm.drive_type, cm.power_ps, cm.uuid, cb.uuid AS brand_uuid
                  FROM car_models cm
                  JOIN car_brands cb ON cb.id = cm.car_brand_id
                  WHERE ${whereParts.join(' AND ')}
@@ -224,6 +224,7 @@ export function localInventoryPlugin(): Plugin {
               createdAt: '',
               fuelType: m.fuel_type ?? '',
               bodyType: m.body_type ?? '',
+              driveType: m.drive_type ?? '',
               spareParts: [],
             }));
             return sendJson(res, { status: 1, message: 'OK', data });
@@ -234,6 +235,7 @@ export function localInventoryPlugin(): Plugin {
             const brandId = url.searchParams.get('brandId');
             const fuelType = url.searchParams.get('fuelType');
             const bodyType = url.searchParams.get('bodyType');
+            const driveType = url.searchParams.get('driveType');
 
             let rows: CategoryRow[];
 
@@ -243,6 +245,7 @@ export function localInventoryPlugin(): Plugin {
               let modelFilter = `cb.uuid ${condition}`;
               if (fuelType) { modelFilter += ' AND cm.fuel_type = ?'; modelParams.push(fuelType); }
               if (bodyType) { modelFilter += ' AND cm.body_type = ?'; modelParams.push(bodyType); }
+              if (driveType) { modelFilter += ' AND cm.drive_type = ?'; modelParams.push(driveType); }
 
               rows = d
                 .prepare(
@@ -286,6 +289,7 @@ export function localInventoryPlugin(): Plugin {
             const categoryId = url.searchParams.get('categoryId');
             const fuelType = url.searchParams.get('fuelType');
             const bodyType = url.searchParams.get('bodyType');
+            const driveType = url.searchParams.get('driveType');
             const search = url.searchParams.get('search');
             const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '48'), 200);
             const offset = parseInt(url.searchParams.get('offset') ?? '0');
@@ -299,6 +303,7 @@ export function localInventoryPlugin(): Plugin {
               const subParams: (string | number)[] = [...uuidParams];
               if (fuelType) { subFilter += ' AND cm.fuel_type = ?'; subParams.push(fuelType); }
               if (bodyType) { subFilter += ' AND cm.body_type = ?'; subParams.push(bodyType); }
+              if (driveType) { subFilter += ' AND cm.drive_type = ?'; subParams.push(driveType); }
               whereParts.push(
                 `EXISTS (SELECT 1 FROM part_vehicles pv
                          JOIN car_models cm ON cm.id = pv.vehicle_id
@@ -316,8 +321,9 @@ export function localInventoryPlugin(): Plugin {
             }
 
             if (search) {
-              whereParts.push('LOWER(p.product_name) LIKE ?');
-              params.push(`%${search.toLowerCase()}%`);
+              whereParts.push('(LOWER(p.product_name) LIKE ? OR LOWER(COALESCE(p.article_no,\'\')) LIKE ?)');
+              const searchParam = `%${search.toLowerCase()}%`;
+              params.push(searchParam, searchParam);
             }
 
             const where = whereParts.length > 0 ? `WHERE ${whereParts.join(' AND ')}` : '';
@@ -330,7 +336,7 @@ export function localInventoryPlugin(): Plugin {
             const rows = d
               .prepare(
                 `SELECT DISTINCT p.id, p.product_name, p.image_url, p.uuid, p.category_id,
-                        c.uuid AS cat_uuid
+                        c.uuid AS cat_uuid, p.article_no, p.supplier_name
                  FROM parts p
                  LEFT JOIN categories c ON c.id = p.category_id
                  ${where}
@@ -352,7 +358,7 @@ export function localInventoryPlugin(): Plugin {
             const part = d
               .prepare(
                 `SELECT p.id, p.product_name, p.image_url, p.uuid, p.category_id,
-                        c.uuid AS cat_uuid,
+                        c.uuid AS cat_uuid, p.article_no, p.supplier_name,
                         (SELECT pv.vehicle_id FROM part_vehicles pv WHERE pv.part_id = p.id LIMIT 1) AS vehicle_id
                  FROM parts p
                  LEFT JOIN categories c ON c.id = p.category_id
@@ -369,7 +375,7 @@ export function localInventoryPlugin(): Plugin {
               const vm = d
                 .prepare(
                   `SELECT cm.id, cm.type_name, cm.construction_start, cm.uuid,
-                          cm.fuel_type, cm.body_type,
+                          cm.fuel_type, cm.body_type, cm.drive_type,
                           cb.id AS brand_id, cb.name AS brand_name, cb.uuid AS brand_uuid,
                           m.id AS mfr_id, m.name AS mfr_name, m.uuid AS mfr_uuid
                    FROM car_models cm
@@ -442,6 +448,8 @@ function buildPart(p: PartRow & { vehicle_id?: number | null }) {
     seller_ID: null,
     createdAt: '',
     updatedAt: '',
+    article_no: p.article_no ?? null,
+    supplier_name: p.supplier_name ?? null,
     images: p.image_url
       ? [{ id: 0, image_ID: p.uuid, SparePart_ID: p.uuid, createdAt: '', status: 1, image_url: p.image_url, image_ob: null }]
       : [],

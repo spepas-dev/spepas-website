@@ -121,6 +121,7 @@ function createSchema(db) {
       construction_end   INTEGER,
       fuel_type          TEXT,
       body_type          TEXT,
+      drive_type         TEXT,
       power_ps           INTEGER,
       car_brand_id       INTEGER NOT NULL REFERENCES car_brands(id),
       uuid               TEXT NOT NULL UNIQUE
@@ -251,8 +252,8 @@ async function main() {
   const vehicleFiles = await globFiles(`${SRC_ROOT}/vehicles*.csv`);
   const insertModel = db.prepare(
     `INSERT OR IGNORE INTO car_models
-       (type_name, construction_start, construction_end, fuel_type, body_type, power_ps, car_brand_id, uuid)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+       (type_name, construction_start, construction_end, fuel_type, body_type, drive_type, power_ps, car_brand_id, uuid)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   let vehicleCount = 0;
   let skipped = 0;
@@ -275,8 +276,9 @@ async function main() {
         const yearEnd = parseInt(yearEndRaw) || null;
         const fuelType = (row.typ_motor || row.fuelType || row.fuel_type || '').trim();
         const bodyType = (row.typ_karosserieform || row.bodyType || row.body_type || '').trim();
+        const driveType = (row.typ_antriebsart || row.driveType || row.drive_type || '').trim();
         const powerPs = parseInt(row.typ_kw_von || row.powerPs) || 0;
-        insertModel.run(typeName, yearStart, yearEnd, fuelType, bodyType, powerPs, brandId, uuid);
+        insertModel.run(typeName, yearStart, yearEnd, fuelType, bodyType, driveType, powerPs, brandId, uuid);
         vehicleCount++;
       }
     });

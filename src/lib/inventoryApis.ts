@@ -16,6 +16,7 @@ export interface SparePartsFilter {
   categoryId?: string;
   fuelType?: string;
   bodyType?: string;
+  driveType?: string;
   search?: string;
   limit?: number;
   offset?: number;
@@ -25,6 +26,7 @@ export interface CategoryFilter {
   brandId?: string;
   fuelType?: string;
   bodyType?: string;
+  driveType?: string;
 }
 
 function cacheBusterParams() {
@@ -53,13 +55,11 @@ export const getCarBrands = async (filters?: { year?: string; manufacturerId?: s
   return carBrandsResponseSchema.parse(data);
 };
 
-// GET: list all car models
-export const getCarModels = async () => {
-  const { data } = await apiClient.get(
-    '/inventry/car-models-all',
-    cacheBusterParams()
-  );
-  // console.log('Response from car-models-all:', data);
+// GET: list all car models (optionally scoped by brandId)
+export const getCarModels = async (filters?: { brandId?: string }) => {
+  const { data } = await apiClient.get('/inventry/car-models-all', {
+    params: { ts: Date.now(), ...filters },
+  });
   return carModelsResponseSchema.parse(data);
 };
 
