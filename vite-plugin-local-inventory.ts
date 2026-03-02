@@ -47,14 +47,12 @@ interface VehicleModelRow { id: number; type_name: string; construction_start: n
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function localInventoryPlugin(): Plugin {
-  const mode = process.env.VITE_LOCAL_DATA_MODE || 'simplified';
-  const dbFilename = mode === 'detailed' ? 'inventory-detailed.db' : 'inventory-simplified.db';
-  const dbPath = resolve(process.cwd(), `local-data/${dbFilename}`);
+  const dbPath = resolve(process.cwd(), 'local-data/inventory.db');
   let db: Database.Database | null = null;
 
   function getDb(): Database.Database {
     if (!db) {
-      console.log(`📦 Local inventory: using ${dbFilename} (mode: ${mode})`);
+      console.log(`📦 Local inventory: using ${dbPath}`);
       db = new Database(dbPath, { readonly: true });
     }
     return db;

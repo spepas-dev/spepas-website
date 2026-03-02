@@ -12,9 +12,7 @@
     "prettier:fix": "prettier --write 'src/**/*.{ts,tsx,js,jsx,json}'",
     "preview": "vite preview",
     "local-data:import": "node scripts/import-local-inventory.mjs",
-    "local-data:import:detailed": "node scripts/import-local-inventory.mjs --mode=detailed",
-    "local-data:import:quick": "node scripts/import-local-inventory.mjs --vehicles=500",
-    "local-data:import:detailed:quick": "node scripts/import-local-inventory.mjs --mode=detailed --vehicles=500"
+    "local-data:import:quick": "node scripts/import-local-inventory.mjs --vehicles=500"
   },
   "dependencies": {
     "@elastic/apm-rum": "^5.17.0",
