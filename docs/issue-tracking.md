@@ -140,7 +140,7 @@ The `search` param **does work** (e.g. `?search=V30-86` returns 9 results).
 | Engine type | *(N/A)* | `typeEngineName` | New field, not in local mock |
 | External ID | *(N/A)* | `externalID` | New field, not in local mock |
 
-Frontend Zod schema expects `article_no`/`supplier_name`. Either normalize API field names or update frontend to handle both.
+**Workaround applied:** Frontend now reads both `article_no` and `articleNo` (`sp.article_no ?? sp.articleNo`).
 
 ---
 
@@ -190,6 +190,6 @@ For `car-manufacturers-all` (712 records), makes after letter ~C are missing fro
 | INV-11 | `category-all` returns empty data | High | No category sidebar |
 | INV-6 | `car-models-all` missing fuelType/bodyType/driveType | Medium | No vehicle attribute filters |
 | INV-12 | All endpoints default to limit=15 | Medium | Only first ~100 makes visible |
-| INV-9 | Field naming mismatch (articleNo vs article_no) | Low | Article number not displayed |
+| INV-9 | Field naming mismatch (articleNo vs article_no) | Low | Workaround applied (read both fields) |
 | INV-10 | Total count in meta vs root | Low | Pagination count inaccurate |
 | INV-4 | `car-years-all` doesn't exist | Low | Year filter unavailable (graceful fallback) |
