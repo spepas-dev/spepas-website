@@ -51,6 +51,7 @@ const ShopWithoutSidebar: React.FC = () => {
   const selectedFuelType = sp('fuel');
   const selectedBodyType = sp('body');
   const selectedDriveType = sp('drive');
+  const selectedEngine = sp('engine');
   const selectedCategory = sp('cat');
   const search = sp('q');
   const page = Math.max(1, parseInt(sp('page') || '1', 10));
@@ -81,6 +82,7 @@ const ShopWithoutSidebar: React.FC = () => {
   const setSelectedFuelType = (v: string) => updateParams({ fuel: v });
   const setSelectedBodyType = (v: string) => updateParams({ body: v });
   const setSelectedDriveType = (v: string) => updateParams({ drive: v });
+  const setSelectedEngine = (v: string) => updateParams({ engine: v });
   const setSelectedCategory = (v: string) => updateParams({ cat: v });
   const setSearch = (v: string) => updateParams({ q: v });
   const setPage = (v: number) => updateParams({ page: v <= 1 ? '' : String(v) });
@@ -172,6 +174,11 @@ const ShopWithoutSidebar: React.FC = () => {
     return [...new Set(variants.map((v: any) => v.driveType).filter(Boolean))].sort();
   }, [variantsData]);
 
+  const engineOptions = useMemo(() => {
+    const variants = variantsData?.data ?? [];
+    return [...new Set(variants.map((v: any) => v.name).filter(Boolean))].sort();
+  }, [variantsData]);
+
   // ══════════════════════════════════════════════════════════════════════════
   // Cascade derived options
   // ══════════════════════════════════════════════════════════════════════════
@@ -196,8 +203,9 @@ const ShopWithoutSidebar: React.FC = () => {
       ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
       ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
       ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
+      ...(selectedEngine ? { engineType: selectedEngine } : {}),
     } : undefined),
-    [selectedModel, selectedFuelType, selectedBodyType, selectedDriveType]
+    [selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine]
   );
 
   const {
@@ -277,11 +285,12 @@ const ShopWithoutSidebar: React.FC = () => {
       ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
       ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
       ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
+      ...(selectedEngine ? { engineType: selectedEngine } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
       limit: PAGE_SIZE,
       offset: (page - 1) * PAGE_SIZE,
     }),
-    [selectedModel, selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, search, page]
+    [selectedModel, selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, search, page]
   );
 
   const vehicleSelected = !!selectedModel;
@@ -346,6 +355,13 @@ const ShopWithoutSidebar: React.FC = () => {
         onClear: () => updateParams({ drive: '', page: '' }),
       });
     }
+    if (selectedEngine) {
+      chips.push({
+        key: 'engine',
+        label: `Engine: ${selectedEngine}`,
+        onClear: () => updateParams({ engine: '', page: '' }),
+      });
+    }
     if (search.trim()) {
       chips.push({
         key: 'search',
@@ -354,23 +370,23 @@ const ShopWithoutSidebar: React.FC = () => {
       });
     }
     return chips;
-  }, [selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, search, categoriesData]);
+  }, [selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, search, categoriesData]);
 
   const clearAllFilters = () => {
-    updateParams({ cat: '', fuel: '', body: '', drive: '', q: '', page: '' });
+    updateParams({ cat: '', fuel: '', body: '', drive: '', engine: '', q: '', page: '' });
   };
 
   // ══════════════════════════════════════════════════════════════════════════
   // Cascade change handlers (reset children)
   // ══════════════════════════════════════════════════════════════════════════
   const onChangeYear = (val: string) => {
-    updateParams({ year: val, make: '', model: '', cat: '', fuel: '', body: '', drive: '', page: '', q: '' });
+    updateParams({ year: val, make: '', model: '', cat: '', fuel: '', body: '', drive: '', engine: '', page: '', q: '' });
   };
   const onChangeMake = (val: string) => {
-    updateParams({ make: val, model: '', cat: '', fuel: '', body: '', drive: '', page: '', q: '' });
+    updateParams({ make: val, model: '', cat: '', fuel: '', body: '', drive: '', engine: '', page: '', q: '' });
   };
   const onChangeModel = (val: string) => {
-    updateParams({ model: val, cat: '', fuel: '', body: '', drive: '', page: '' });
+    updateParams({ model: val, cat: '', fuel: '', body: '', drive: '', engine: '', page: '' });
   };
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -436,12 +452,12 @@ const ShopWithoutSidebar: React.FC = () => {
             </div>
 
             {/* Vehicle attribute filters — visible after model selection */}
-            {selectedModel && (fuelTypeOptions.length > 0 || bodyTypeOptions.length > 0 || driveTypeOptions.length > 0) && (
+            {selectedModel && (fuelTypeOptions.length > 0 || bodyTypeOptions.length > 0 || driveTypeOptions.length > 0 || engineOptions.length > 0) && (
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">
                   Refine by vehicle attributes
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {fuelTypeOptions.length > 0 && (
                     <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">
@@ -487,6 +503,22 @@ const ShopWithoutSidebar: React.FC = () => {
                         value={selectedDriveType}
                         onChange={(val) => updateParams({ drive: val, page: '' })}
                         placeholderLabel="All drive types"
+                      />
+                    </div>
+                  )}
+                  {engineOptions.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">
+                        Engine
+                      </label>
+                      <SearchableCombobox
+                        options={[
+                          { value: '', label: 'All engines' },
+                          ...engineOptions.map((e: string) => ({ value: e, label: e })),
+                        ]}
+                        value={selectedEngine}
+                        onChange={(val) => updateParams({ engine: val, page: '' })}
+                        placeholderLabel="All engines"
                       />
                     </div>
                   )}

@@ -17,6 +17,7 @@ export interface SparePartsFilter {
   fuelType?: string;
   bodyType?: string;
   driveType?: string;
+  engineType?: string;
   search?: string;
   limit?: number;
   offset?: number;
@@ -27,6 +28,7 @@ export interface CategoryFilter {
   fuelType?: string;
   bodyType?: string;
   driveType?: string;
+  engineType?: string;
 }
 
 function cacheBusterParams() {

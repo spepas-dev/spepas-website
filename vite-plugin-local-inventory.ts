@@ -234,6 +234,7 @@ export function localInventoryPlugin(): Plugin {
             const fuelType = url.searchParams.get('fuelType');
             const bodyType = url.searchParams.get('bodyType');
             const driveType = url.searchParams.get('driveType');
+            const engineType = url.searchParams.get('engineType');
 
             let rows: CategoryRow[];
 
@@ -244,6 +245,7 @@ export function localInventoryPlugin(): Plugin {
               if (fuelType) { modelFilter += ' AND cm.fuel_type = ?'; modelParams.push(fuelType); }
               if (bodyType) { modelFilter += ' AND cm.body_type = ?'; modelParams.push(bodyType); }
               if (driveType) { modelFilter += ' AND cm.drive_type = ?'; modelParams.push(driveType); }
+              if (engineType) { modelFilter += ' AND cm.type_name = ?'; modelParams.push(engineType); }
 
               rows = d
                 .prepare(
@@ -288,6 +290,7 @@ export function localInventoryPlugin(): Plugin {
             const fuelType = url.searchParams.get('fuelType');
             const bodyType = url.searchParams.get('bodyType');
             const driveType = url.searchParams.get('driveType');
+            const engineType = url.searchParams.get('engineType');
             const search = url.searchParams.get('search');
             const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '48'), 200);
             const offset = parseInt(url.searchParams.get('offset') ?? '0');
@@ -302,6 +305,7 @@ export function localInventoryPlugin(): Plugin {
               if (fuelType) { subFilter += ' AND cm.fuel_type = ?'; subParams.push(fuelType); }
               if (bodyType) { subFilter += ' AND cm.body_type = ?'; subParams.push(bodyType); }
               if (driveType) { subFilter += ' AND cm.drive_type = ?'; subParams.push(driveType); }
+              if (engineType) { subFilter += ' AND cm.type_name = ?'; subParams.push(engineType); }
               whereParts.push(
                 `EXISTS (SELECT 1 FROM part_vehicles pv
                          JOIN car_models cm ON cm.id = pv.vehicle_id
