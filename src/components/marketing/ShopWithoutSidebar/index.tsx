@@ -11,7 +11,6 @@ import {
   getSparePartCategories,
   getCarYears,
   getCarManufacturers,
-  getCarBrands,
   getCarModels,
 } from '@/lib/inventoryApis';
 
@@ -57,11 +56,15 @@ const ShopWithoutSidebar: React.FC = () => {
   // ══════════════════════════════════════════════════════════════════════════
   // Queries — vehicle cascade
   // ══════════════════════════════════════════════════════════════════════════
-  const { data: yearsData, isLoading: yearsLoading } = useQuery({
+  // Years endpoint is local-only — gracefully degrade when it 404s on the live API
+  const { data: yearsData, isLoading: yearsLoading, isError: yearsError } = useQuery({
     queryKey: ['car-years'],
     queryFn: getCarYears,
     staleTime: 10 * 60_000,
+    retry: false,
   });
+
+  const hasYears = !yearsError && (yearsData?.data?.length ?? 0) > 0;
 
   const mfrFilters = useMemo(
     () => (selectedYear ? { year: selectedYear } : undefined),
@@ -71,22 +74,20 @@ const ShopWithoutSidebar: React.FC = () => {
     queryKey: ['car-manufacturers', mfrFilters],
     queryFn: () => getCarManufacturers(mfrFilters),
     staleTime: 10 * 60_000,
-    enabled: !!selectedYear,
+    // When years are available, wait for selection; otherwise load immediately
+    enabled: hasYears ? !!selectedYear : !yearsLoading,
   });
 
-  const brandFilters = useMemo(
-    () => ({
-      ...(selectedYear ? { year: selectedYear } : {}),
-      ...(selectedMake ? { manufacturerId: selectedMake } : {}),
-    }),
-    [selectedYear, selectedMake]
-  );
-  const { data: brandsData, isLoading: modelsLoading } = useQuery({
-    queryKey: ['car-brands', brandFilters],
-    queryFn: () => getCarBrands(brandFilters),
-    staleTime: 10 * 60_000,
-    enabled: !!selectedMake,
-  });
+  // Derive brands directly from the selected manufacturer's nested `brands` array.
+  // The live API's car-brands-all?manufacturerId= filter doesn't work correctly,
+  // but manufacturers already include their brands inline.
+  const { brandsForMake, modelsLoading } = useMemo(() => {
+    if (!selectedMake || !manufacturersData?.data) {
+      return { brandsForMake: [], modelsLoading: false };
+    }
+    const mfr = manufacturersData.data.find((m: any) => m.Manufacturer_ID === selectedMake);
+    return { brandsForMake: mfr?.brands ?? [], modelsLoading: false };
+  }, [selectedMake, manufacturersData]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Query — car model variants (for fuel/body/drive filter values)
@@ -125,8 +126,8 @@ const ShopWithoutSidebar: React.FC = () => {
   }, [manufacturersData]);
 
   const modelOptions = useMemo(() => {
-    return brandsData?.data ?? [];
-  }, [brandsData]);
+    return brandsForMake;
+  }, [brandsForMake]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Queries — categories (scoped to selected brand)
@@ -332,20 +333,22 @@ const ShopWithoutSidebar: React.FC = () => {
             <h2 className="text-sm font-semibold text-gray-700 mb-3">
               Select your vehicle
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {/* Year */}
-              <div>
-                <label className="block text-xs font-medium text-gray-500 mb-1">
-                  Year
-                </label>
-                <SearchableCombobox
-                  options={yearOptions.map((y) => ({ value: y, label: y }))}
-                  value={selectedYear}
-                  onChange={onChangeYear}
-                  placeholderLabel="All years"
-                  isLoading={yearsLoading}
-                />
-              </div>
+            <div className={`grid grid-cols-1 gap-3 ${hasYears ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+              {/* Year — only shown when the years endpoint is available (local DB) */}
+              {hasYears && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                    Year
+                  </label>
+                  <SearchableCombobox
+                    options={yearOptions.map((y) => ({ value: y, label: y }))}
+                    value={selectedYear}
+                    onChange={onChangeYear}
+                    placeholderLabel="All years"
+                    isLoading={yearsLoading}
+                  />
+                </div>
+              )}
 
               {/* Make */}
               <div>
@@ -356,9 +359,9 @@ const ShopWithoutSidebar: React.FC = () => {
                   options={makeOptions.map((m: any) => ({ value: m.Manufacturer_ID, label: m.name }))}
                   value={selectedMake}
                   onChange={onChangeMake}
-                  placeholderLabel={selectedYear ? 'All makes' : 'Select a year first'}
+                  placeholderLabel={hasYears && !selectedYear ? 'Select a year first' : 'All makes'}
                   isLoading={makesLoading}
-                  disabled={!selectedYear}
+                  disabled={hasYears && !selectedYear}
                 />
               </div>
 
@@ -622,7 +625,7 @@ const ShopWithoutSidebar: React.FC = () => {
                 <div className="text-center py-16 text-gray-500">
                   <p className="text-lg font-medium mb-1">Select your vehicle to get started</p>
                   <p className="text-sm">
-                    Choose a year, make, and model above to browse available parts.
+                    Choose a {hasYears ? 'year, make, and model' : 'make and model'} above to browse available parts.
                   </p>
                 </div>
               )}

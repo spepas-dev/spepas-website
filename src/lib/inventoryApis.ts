@@ -40,25 +40,28 @@ export const getCarYears = async () => {
 };
 
 // GET: list car manufacturers (optionally scoped by year)
+// Live API paginates at 15 by default; request 100 to get all common makes in one call
 export const getCarManufacturers = async (filters?: { year?: string }) => {
   const { data } = await apiClient.get('/inventry/car-manufacturers-all', {
-    params: { ts: Date.now(), ...filters },
+    params: { ts: Date.now(), limit: 100, ...filters },
   });
   return carManufacturersResponseSchema.parse(data);
 };
 
 // GET: list car brands (optionally scoped by year + manufacturer)
+// Live API paginates at 15 by default; request 100 to cover most brand lists
 export const getCarBrands = async (filters?: { year?: string; manufacturerId?: string }) => {
   const { data } = await apiClient.get('/inventry/car-brands-all', {
-    params: { ts: Date.now(), ...filters },
+    params: { ts: Date.now(), limit: 100, ...filters },
   });
   return carBrandsResponseSchema.parse(data);
 };
 
 // GET: list all car models (optionally scoped by brandId)
+// Live API paginates at 15 by default; request 100 to cover most model lists
 export const getCarModels = async (filters?: { brandId?: string }) => {
   const { data } = await apiClient.get('/inventry/car-models-all', {
-    params: { ts: Date.now(), ...filters },
+    params: { ts: Date.now(), limit: 100, ...filters },
   });
   return carModelsResponseSchema.parse(data);
 };

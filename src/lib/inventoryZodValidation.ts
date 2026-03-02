@@ -36,13 +36,14 @@ const carModelSchema = z.object({
   name: z.string(),
   yearOfMake: z.number(),
   carBrand_ID: z.string(),
+  externalID: z.number().nullable().optional(),
   status: z.number(),
   createdAt: z.string(),
   // fuelType + bodyType + driveType: returned by local mock (TecDoc data); pending INV-1 on real API
   fuelType: z.string().optional(),
   bodyType: z.string().optional(),
   driveType: z.string().optional(),
-  spareParts: z.array(sparePartSchema),
+  spareParts: z.array(sparePartSchema).optional().default([]),
   carBrand: z
     .object({
       id: z.number(),
@@ -50,6 +51,7 @@ const carModelSchema = z.object({
       name: z.string(),
       status: z.number(),
       manufacturer_ID: z.string(),
+      externalID: z.number().nullable().optional(),
       createdAt: z.string(),
       type: z.string(),
       manufacturer: z.object({
@@ -57,6 +59,7 @@ const carModelSchema = z.object({
         Manufacturer_ID: z.string(),
         name: z.string(),
         country: z.string(),
+        externalID: z.number().nullable().optional(),
         status: z.number(),
         createdAt: z.string(),
       }),
@@ -71,15 +74,17 @@ const carBrandSchema = z.object({
   name: z.string(),
   status: z.number(),
   manufacturer_ID: z.string(),
+  externalID: z.number().nullable().optional(),
   createdAt: z.string(),
   type: z.string(),
-  models: z.array(carModelSchema),
+  models: z.array(carModelSchema).optional().default([]),
   manufacturer: z
     .object({
       id: z.number(),
       Manufacturer_ID: z.string(),
       name: z.string(),
       country: z.string(),
+      externalID: z.number().nullable().optional(),
       status: z.number(),
       createdAt: z.string(),
     })
@@ -91,27 +96,39 @@ const manufacturerSchema = z.object({
   Manufacturer_ID: z.string(),
   name: z.string(),
   country: z.string(),
+  externalID: z.number().nullable().optional(),
   status: z.number(),
   createdAt: z.string(),
-  brands: z.array(carBrandSchema),
+  brands: z.array(carBrandSchema).optional().default([]),
 });
+
+// Pagination metadata returned by the live API (absent in local mock)
+const paginationMeta = z.object({
+  total: z.number(),
+  page: z.number(),
+  limit: z.number(),
+  totalPages: z.number(),
+}).optional();
 
 export const carManufacturersResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(manufacturerSchema),
+  meta: paginationMeta,
 });
 
 export const carBrandsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(carBrandSchema),
+  meta: paginationMeta,
 });
 
 export const carModelsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
   data: z.array(carModelSchema),
+  meta: paginationMeta,
 });
 
 export const sparePartsResponseSchema = z.object({
