@@ -172,12 +172,18 @@ See section 5 for the full schema.
 ### 3.5 USSD Service
 **Repo:** `spussd` | **Port:** 9012 | **Stack:** Node.js + Express + Prisma
 
-Implements a **state-machine USSD session flow** accessible both from SMS gateways and directly over HTTP. Mirrors most web app flows as sequential menu steps.
+Implements a **state-machine USSD session flow** accessible both from SMS gateways and directly over HTTP. USSD shortcode: `*887*9#`.
 
 **CORS allow-list includes `mocker.spepas.com`** — the USSD mocker UI calls this service directly.
 
-**Flow groups (base `/spussd/api/v1/`):**
-- `POST /base/router` — main entry point / session dispatcher
+**Channel rules:** Requests are created by phone (call-in to agent) or on the website — not via USSD. USSD is used to accept bids, make payments, and track orders.
+
+**Role-specific endpoints (base `/spussd/api/v1/`):**
+- `POST /base` — Buyer entry (My requests, Cart → Check Out, Contact us)
+- `POST /base/seller` — Seller entry (Open Requests → All/By part/By brand, My bids)
+- `POST /base/rider` — Rider entry (New pickups, In progress, Completed, Wallet → Withdraw)
+
+**Flow groups:**
 - Buyer flows: `/request/*`, `/bidding/*`, `/cart/*`
 - Seller flows: `/seller/request/*`, `/seller/bid/*`
 - Rider flows: `/rider/pickup/*`, `/rider/delivery/*`, `/rider/completed/*`, `/rider/wallet/*`
@@ -421,7 +427,7 @@ Base path: `/95668339501103956045` (unique namespace, separates app from landing
 |---|---|
 | **BUYER** | Posts spare-part requests, reviews bids, places orders |
 | **SELLER** | Bids on buyer requests, manages inventory |
-| **GOPA** | Group Purchasing Agent — assigns requests to sellers, manages fulfillment |
+| **GOPA** | Group Purchasing Agent — onboards sellers, forwards requests to sellers, tracks forwarded orders |
 | **MEPA** | Market Entry Point Aggregator — secondary marketplace actor |
 | **RIDER** | Delivery personnel — GPS-guided pickup and drop-off with QR scanning |
 | **ADMIN** | Platform administration |
@@ -485,13 +491,13 @@ flowchart TD
     B(["BUYER"]) -->|"1 · Post request
     car model + part + location"| REQ["OrderRequest created"]
     REQ -->|"assigned by"| GOPA(["GOPA"])
-    GOPA -->|"2 · Assign to sellers"| S(["SELLER"])
+    GOPA -->|"2 · Forward to sellers"| S(["SELLER"])
     S -->|"3 · Submit bid
     price + delivery date"| BID["Bidding record"]
     BID -->|"4 · Buyer reviews & adds to cart"| CART["Cart"]
     CART -->|"5 · Checkout"| INV["Invoice created
     PENDING"]
-    GOPA -->|"accepts invoice"| INV
+    GOPA -.->|"tracks order status"| INV
     INV -->|"6 · Seller confirms"| READY["READY_TO_BE_PICKED"]
     READY -->|"7 · Rider accepts"| PICKUP["Rider picks up
     QR scan at seller"]
@@ -502,8 +508,8 @@ flowchart TD
 
     R(["RIDER"]) -->|"navigates via Google Maps"| PICKUP
 
-    USSD(["SMS / USSD user"]) -.->|"same flows via
-    numbered menus"| REQ
+    USSD(["SMS / USSD user"]) -.->|"accept bids, pay,
+    track via *887*9#"| BID
 
     style B fill:#edebfd,stroke:#4A36EC
     style S fill:#e6f6f4,stroke:#00a991
@@ -527,10 +533,10 @@ flowchart TD
 4. Manage bid history
 
 ### GOPA
-1. View unassigned buyer requests
-2. Assign requests to matching sellers
-3. Accept/manage invoices on behalf of group
-4. View assignment history
+1. Onboard new sellers into network
+2. View unassigned buyer requests
+3. Forward requests to specific sellers
+4. Track forwarded order statuses
 
 ### Rider
 1. View available pickups (invoice items ready for pickup)
@@ -541,7 +547,7 @@ flowchart TD
 6. Wallet credited on completion
 
 ### USSD (low-connectivity)
-Same flows as above, navigated as sequential numbered menus sent via SMS. Session state passed per-request. Accessible from any mobile phone, no data/app required.
+Shortcode `*887*9#`. Accessible from any mobile phone, no data/app required. Navigated as sequential numbered menus. **Requests are created by phone call-in or website only** — USSD is used to accept bids, pay, and track orders. Mockers at `mocker.spepas.com` (buyer `/`, seller `/seller`, rider `/rider`).
 
 ---
 
