@@ -5,6 +5,7 @@ export type ProductVM = {
   linkId: string;
   title: string;
   image: string; // main image url or placeholder
+  articleNo?: string;
 };
 
 /** Pick the first non-empty image url from an images array, or fall back to placeholder */

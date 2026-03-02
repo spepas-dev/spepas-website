@@ -50,13 +50,16 @@ const ShopDetails: React.FC = () => {
   const item = query.data?.item;
   const title = item?.name ?? 'Product';
 
-  // Article / Supplier info
+  // Article info
   const articleNo = item?.article_no;
-  const supplierName = item?.supplier_name;
 
-  // Vehicle info — Make & Model only
+  // Vehicle info
   const make = item?.carModel?.carBrand?.manufacturer?.name;
   const model = item?.carModel?.carBrand?.name;
+  const year = item?.carModel?.yearOfMake;
+  const fuelType = item?.carModel?.fuelType;
+  const bodyType = item?.carModel?.bodyType;
+  const driveType = item?.carModel?.driveType;
 
   // Loading skeleton
   if (query.isLoading) {
@@ -114,16 +117,16 @@ const ShopDetails: React.FC = () => {
 
       <section className="py-8 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Back to Shop */}
-          <Link
-            to="../shop"
+          {/* Back to Shop — uses browser history so URL query-params (filters) are preserved */}
+          <button
+            onClick={() => navigate(-1)}
             className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-[var(--color-primary-600)] mb-6 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
             Back to Shop
-          </Link>
+          </button>
 
           {/* Detail card */}
           <div className="bg-white rounded-xl shadow-sm p-6">
@@ -142,26 +145,13 @@ const ShopDetails: React.FC = () => {
               <div className="w-full md:flex-1 space-y-6">
                 <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
 
-                {(articleNo || supplierName) && (
-                  <div className="text-sm text-gray-600 space-y-1">
-                    {articleNo && (
-                      <div>
-                        <span className="font-semibold">Article No:</span> {articleNo}
-                      </div>
-                    )}
-                    {supplierName && (
-                      <div>
-                        <span className="font-semibold">Supplier:</span> {supplierName}
-                      </div>
-                    )}
+                {articleNo && (
+                  <div className="text-sm text-gray-500">
+                    Art. {articleNo}
                   </div>
                 )}
 
-                <span className="inline-block text-lg text-gray-500 italic">
-                  Contact Seller for Price
-                </span>
-
-                {(make || model) && (
+                {(make || model || year || fuelType || bodyType || driveType) && (
                   <div className="text-sm text-gray-600 space-y-1">
                     {make && (
                       <div>
@@ -171,6 +161,26 @@ const ShopDetails: React.FC = () => {
                     {model && (
                       <div>
                         <span className="font-semibold">Model:</span> {model}
+                      </div>
+                    )}
+                    {year && (
+                      <div>
+                        <span className="font-semibold">Year:</span> {year}
+                      </div>
+                    )}
+                    {fuelType && (
+                      <div>
+                        <span className="font-semibold">Fuel Type:</span> {fuelType}
+                      </div>
+                    )}
+                    {bodyType && (
+                      <div>
+                        <span className="font-semibold">Body Type:</span> {bodyType}
+                      </div>
+                    )}
+                    {driveType && (
+                      <div>
+                        <span className="font-semibold">Drive Type:</span> {driveType}
                       </div>
                     )}
                   </div>

@@ -32,7 +32,9 @@ const SingleListItem: React.FC<SingleListItemProps> = ({ item }) => {
               {item.title}
             </Link>
           </h3>
-          <span className="text-sm text-gray-500 italic">Price on request</span>
+          {item.articleNo && (
+            <span className="text-sm text-gray-400">Art. {item.articleNo}</span>
+          )}
         </div>
       </div>
     </div>

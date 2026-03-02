@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 
 import Breadcrumb from '../Common/Breadcrumb';
@@ -11,6 +12,7 @@ import {
   getSparePartCategories,
   getCarYears,
   getCarManufacturers,
+  getCarBrands,
   getCarModels,
 } from '@/lib/inventoryApis';
 
@@ -35,23 +37,53 @@ function pageNumbers(current: number, total: number): (number | '...')[] {
 
 // ── Component ──────────────────────────────────────────────────────────────
 const ShopWithoutSidebar: React.FC = () => {
-  // View
+  // ── URL-backed state (persists across refresh & back-navigation) ─────────
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const sp = useCallback(
+    (key: string) => searchParams.get(key) ?? '',
+    [searchParams]
+  );
+
+  const selectedYear = sp('year');
+  const selectedMake = sp('make');
+  const selectedModel = sp('model');
+  const selectedFuelType = sp('fuel');
+  const selectedBodyType = sp('body');
+  const selectedDriveType = sp('drive');
+  const selectedCategory = sp('cat');
+  const search = sp('q');
+  const page = Math.max(1, parseInt(sp('page') || '1', 10));
+
+  // View mode — keep in local state (not worth persisting in URL)
   const [view, setView] = useState<ViewMode>('grid');
 
-  // Vehicle selector
-  const [selectedYear, setSelectedYear] = useState<string>('');
-  const [selectedMake, setSelectedMake] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState<string>(''); // brand = model line
+  /** Update one or more URL params. Empty strings are removed from the URL. */
+  const updateParams = useCallback(
+    (updates: Record<string, string | number>) => {
+      setSearchParams((prev) => {
+        const next = new URLSearchParams(prev);
+        for (const [key, val] of Object.entries(updates)) {
+          const str = String(val);
+          if (str && str !== '0') next.set(key, str);
+          else next.delete(key);
+        }
+        return next;
+      }, { replace: true });
+    },
+    [setSearchParams]
+  );
 
-  // Vehicle attribute filters
-  const [selectedFuelType, setSelectedFuelType] = useState<string>('');
-  const [selectedBodyType, setSelectedBodyType] = useState<string>('');
-  const [selectedDriveType, setSelectedDriveType] = useState<string>('');
-
-  // Filters
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [search, setSearch] = useState<string>('');
-  const [page, setPage] = useState<number>(1);
+  // Convenience setters that mirror the old setState API
+  const setSelectedYear = (v: string) => updateParams({ year: v });
+  const setSelectedMake = (v: string) => updateParams({ make: v });
+  const setSelectedModel = (v: string) => updateParams({ model: v });
+  const setSelectedFuelType = (v: string) => updateParams({ fuel: v });
+  const setSelectedBodyType = (v: string) => updateParams({ body: v });
+  const setSelectedDriveType = (v: string) => updateParams({ drive: v });
+  const setSelectedCategory = (v: string) => updateParams({ cat: v });
+  const setSearch = (v: string) => updateParams({ q: v });
+  const setPage = (v: number) => updateParams({ page: v <= 1 ? '' : String(v) });
 
   // ══════════════════════════════════════════════════════════════════════════
   // Queries — vehicle cascade
@@ -78,16 +110,42 @@ const ShopWithoutSidebar: React.FC = () => {
     enabled: hasYears ? !!selectedYear : !yearsLoading,
   });
 
-  // Derive brands directly from the selected manufacturer's nested `brands` array.
-  // The live API's car-brands-all?manufacturerId= filter doesn't work correctly,
-  // but manufacturers already include their brands inline.
+  // Fetch brands for the selected manufacturer via the dedicated endpoint.
+  // Falls back to the manufacturer's inline `brands` array if the endpoint
+  // returns unfiltered data (live API workaround — see INV-5).
+  const brandFilters = useMemo(
+    () => (selectedMake ? { manufacturerId: selectedMake } : undefined),
+    [selectedMake]
+  );
+  const { data: brandsData, isLoading: brandsLoading } = useQuery({
+    queryKey: ['car-brands', brandFilters],
+    queryFn: () => getCarBrands(brandFilters),
+    staleTime: 10 * 60_000,
+    enabled: !!selectedMake,
+  });
+
   const { brandsForMake, modelsLoading } = useMemo(() => {
-    if (!selectedMake || !manufacturersData?.data) {
-      return { brandsForMake: [], modelsLoading: false };
+    if (!selectedMake) return { brandsForMake: [], modelsLoading: false };
+
+    const fromEndpoint = brandsData?.data ?? [];
+    if (fromEndpoint.length > 0) {
+      // Check if the endpoint actually filtered by manufacturer.
+      // The live API's car-brands-all ignores manufacturerId (INV-5) and returns
+      // ALL brands. Detect this by checking if the count seems unreasonably large
+      // compared to a single manufacturer, and fall back to inline brands.
+      const mfr = manufacturersData?.data?.find((m: any) => m.Manufacturer_ID === selectedMake);
+      const inlineBrands = mfr?.brands ?? [];
+      const totalMfrs = manufacturersData?.data?.length ?? 0;
+      if (inlineBrands.length > 0 && fromEndpoint.length > totalMfrs * 2) {
+        // Endpoint returned unfiltered data — use inline brands instead
+        return { brandsForMake: inlineBrands, modelsLoading: false };
+      }
+      return { brandsForMake: fromEndpoint, modelsLoading: false };
     }
-    const mfr = manufacturersData.data.find((m: any) => m.Manufacturer_ID === selectedMake);
+    // Endpoint returned nothing — try inline brands as fallback
+    const mfr = manufacturersData?.data?.find((m: any) => m.Manufacturer_ID === selectedMake);
     return { brandsForMake: mfr?.brands ?? [], modelsLoading: false };
-  }, [selectedMake, manufacturersData]);
+  }, [selectedMake, brandsData, manufacturersData]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Query — car model variants (for fuel/body/drive filter values)
@@ -168,31 +226,46 @@ const ShopWithoutSidebar: React.FC = () => {
     return groups;
   }, [categoriesData]);
 
-  // Top-level parents first, then their children
+  // Build ordered category tree: top-level items first, then children nested under parents.
+  // Categories whose parent_ID doesn't match any returned category are promoted to top-level.
   const orderedCategories = useMemo(() => {
-    const topLevel = categoryGroups.get(null) ?? [];
+    const allCats = categoriesData?.data ?? [];
+    const byId = new Map(allCats.map(c => [c.Category_ID, c]));
+
+    const topLevel: typeof allCats = [];
+    const childrenOf = new Map<string, typeof allCats>();
+
+    for (const cat of allCats) {
+      if (!cat.parent_ID || !byId.has(cat.parent_ID)) {
+        // No parent, or parent not in the result set → treat as top-level
+        topLevel.push(cat);
+      } else {
+        const arr = childrenOf.get(cat.parent_ID) ?? [];
+        arr.push(cat);
+        childrenOf.set(cat.parent_ID, arr);
+      }
+    }
+
+    // Sort top-level alphabetically
+    topLevel.sort((a, b) => a.name.localeCompare(b.name));
+
     const result: Array<{
       Category_ID: string;
       name: string;
       count?: number;
       isParent: boolean;
+      depth: number;
     }> = [];
     for (const parent of topLevel) {
-      result.push({ ...parent, isParent: true });
-      const children = categoryGroups.get(parent.Category_ID) ?? [];
+      const children = childrenOf.get(parent.Category_ID) ?? [];
+      result.push({ ...parent, isParent: children.length > 0, depth: 0 });
+      children.sort((a, b) => a.name.localeCompare(b.name));
       for (const child of children) {
-        result.push({ ...child, isParent: false });
-      }
-    }
-    // Also include categories with no parent grouping (flat list from real API)
-    if (topLevel.length === 0) {
-      const list = categoriesData?.data ?? [];
-      for (const cat of list) {
-        result.push({ ...cat, isParent: false });
+        result.push({ ...child, isParent: false, depth: 1 });
       }
     }
     return result;
-  }, [categoryGroups, categoriesData]);
+  }, [categoriesData]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Query — parts (server-side filtered + paginated)
@@ -234,6 +307,7 @@ const ShopWithoutSidebar: React.FC = () => {
       image:
         sp.images?.find((i: any) => !!i?.image_url)?.image_url ??
         '/images/placeholder.jpg',
+      articleNo: sp.article_no ?? sp.articleNo ?? undefined,
     }));
   }, [partsData]);
 
@@ -248,75 +322,55 @@ const ShopWithoutSidebar: React.FC = () => {
       chips.push({
         key: 'category',
         label: catName,
-        onClear: () => { setSelectedCategory(''); setPage(1); },
+        onClear: () => updateParams({ cat: '', page: '' }),
       });
     }
     if (selectedFuelType) {
       chips.push({
         key: 'fuelType',
         label: `Fuel: ${selectedFuelType}`,
-        onClear: () => { setSelectedFuelType(''); setPage(1); },
+        onClear: () => updateParams({ fuel: '', page: '' }),
       });
     }
     if (selectedBodyType) {
       chips.push({
         key: 'bodyType',
         label: `Body: ${selectedBodyType}`,
-        onClear: () => { setSelectedBodyType(''); setPage(1); },
+        onClear: () => updateParams({ body: '', page: '' }),
       });
     }
     if (selectedDriveType) {
       chips.push({
         key: 'driveType',
         label: `Drive: ${selectedDriveType}`,
-        onClear: () => { setSelectedDriveType(''); setPage(1); },
+        onClear: () => updateParams({ drive: '', page: '' }),
       });
     }
     if (search.trim()) {
       chips.push({
         key: 'search',
         label: `"${search.trim()}"`,
-        onClear: () => { setSearch(''); setPage(1); },
+        onClear: () => updateParams({ q: '', page: '' }),
       });
     }
     return chips;
   }, [selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, search, categoriesData]);
 
   const clearAllFilters = () => {
-    setSelectedCategory('');
-    resetAttributeFilters();
-    setSearch('');
-    setPage(1);
+    updateParams({ cat: '', fuel: '', body: '', drive: '', q: '', page: '' });
   };
 
   // ══════════════════════════════════════════════════════════════════════════
   // Cascade change handlers (reset children)
   // ══════════════════════════════════════════════════════════════════════════
-  const resetAttributeFilters = () => {
-    setSelectedFuelType('');
-    setSelectedBodyType('');
-    setSelectedDriveType('');
-  };
   const onChangeYear = (val: string) => {
-    setSelectedYear(val);
-    setSelectedMake('');
-    setSelectedModel('');
-    setSelectedCategory('');
-    resetAttributeFilters();
-    setPage(1);
+    updateParams({ year: val, make: '', model: '', cat: '', fuel: '', body: '', drive: '', page: '', q: '' });
   };
   const onChangeMake = (val: string) => {
-    setSelectedMake(val);
-    setSelectedModel('');
-    setSelectedCategory('');
-    resetAttributeFilters();
-    setPage(1);
+    updateParams({ make: val, model: '', cat: '', fuel: '', body: '', drive: '', page: '', q: '' });
   };
   const onChangeModel = (val: string) => {
-    setSelectedModel(val);
-    setSelectedCategory('');
-    resetAttributeFilters();
-    setPage(1);
+    updateParams({ model: val, cat: '', fuel: '', body: '', drive: '', page: '' });
   };
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -399,7 +453,7 @@ const ShopWithoutSidebar: React.FC = () => {
                           ...fuelTypeOptions.map((ft: string) => ({ value: ft, label: ft })),
                         ]}
                         value={selectedFuelType}
-                        onChange={(val) => { setSelectedFuelType(val); setPage(1); }}
+                        onChange={(val) => updateParams({ fuel: val, page: '' })}
                         placeholderLabel="All fuel types"
                       />
                     </div>
@@ -415,7 +469,7 @@ const ShopWithoutSidebar: React.FC = () => {
                           ...bodyTypeOptions.map((bt: string) => ({ value: bt, label: bt })),
                         ]}
                         value={selectedBodyType}
-                        onChange={(val) => { setSelectedBodyType(val); setPage(1); }}
+                        onChange={(val) => updateParams({ body: val, page: '' })}
                         placeholderLabel="All body types"
                       />
                     </div>
@@ -431,7 +485,7 @@ const ShopWithoutSidebar: React.FC = () => {
                           ...driveTypeOptions.map((dt: string) => ({ value: dt, label: dt })),
                         ]}
                         value={selectedDriveType}
-                        onChange={(val) => { setSelectedDriveType(val); setPage(1); }}
+                        onChange={(val) => updateParams({ drive: val, page: '' })}
                         placeholderLabel="All drive types"
                       />
                     </div>
@@ -452,16 +506,16 @@ const ShopWithoutSidebar: React.FC = () => {
 
                 {/* All parts button */}
                 <button
-                  onClick={() => { setSelectedCategory(''); setPage(1); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm mb-1 transition-colors ${
+                  onClick={() => updateParams({ cat: '', page: '' })}
+                  className={`w-full flex items-baseline justify-between gap-2 px-3 py-2 rounded-lg text-sm mb-1 transition-colors ${
                     !selectedCategory
                       ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
                       : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  All parts
+                  <span className="text-left">All parts</span>
                   {total > 0 && !selectedCategory && (
-                    <span className="float-right text-xs text-gray-400">
+                    <span className="shrink-0 text-xs text-gray-400">
                       {total}
                     </span>
                   )}
@@ -478,18 +532,20 @@ const ShopWithoutSidebar: React.FC = () => {
                 {!categoriesLoading && orderedCategories.map((cat) => (
                   <button
                     key={cat.Category_ID}
-                    onClick={() => { setSelectedCategory(cat.Category_ID); setPage(1); }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      cat.isParent ? 'font-medium mt-2' : 'pl-6'
+                    onClick={() => updateParams({ cat: cat.Category_ID, page: '' })}
+                    className={`w-full flex items-baseline justify-between gap-2 py-2 rounded-lg text-sm transition-colors ${
+                      cat.depth > 0 ? 'pl-6 pr-3' : 'px-3'
+                    } ${
+                      cat.isParent ? 'font-medium mt-2' : ''
                     } ${
                       selectedCategory === cat.Category_ID
                         ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    {cat.name}
+                    <span className="text-left truncate" title={cat.name}>{cat.name}</span>
                     {cat.count != null && cat.count > 0 && (
-                      <span className="float-right text-xs text-gray-400">
+                      <span className="shrink-0 text-xs text-gray-400">
                         {cat.count}
                       </span>
                     )}
@@ -509,7 +565,7 @@ const ShopWithoutSidebar: React.FC = () => {
                     <div className="relative">
                       <input
                         value={search}
-                        onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+                        onChange={(e) => updateParams({ q: e.target.value, page: '' })}
                         placeholder="Search parts…"
                         className="h-10 w-56 sm:w-64 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
                       />
@@ -593,11 +649,11 @@ const ShopWithoutSidebar: React.FC = () => {
                       { value: '', label: 'All categories' },
                       ...orderedCategories.map((cat) => ({
                         value: cat.Category_ID,
-                        label: cat.isParent ? cat.name : `  ${cat.name}`,
+                        label: cat.depth > 0 ? `  ${cat.name}` : cat.name,
                       })),
                     ]}
                     value={selectedCategory}
-                    onChange={(val) => { setSelectedCategory(val); setPage(1); }}
+                    onChange={(val) => updateParams({ cat: val, page: '' })}
                     placeholderLabel="All categories"
                     isLoading={categoriesLoading}
                   />
