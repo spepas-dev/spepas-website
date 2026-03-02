@@ -263,17 +263,46 @@ const ShopWithoutSidebar: React.FC = () => {
       count?: number;
       isParent: boolean;
       depth: number;
+      parentCategoryId?: string;
     }> = [];
     for (const parent of topLevel) {
       const children = childrenOf.get(parent.Category_ID) ?? [];
       result.push({ ...parent, isParent: children.length > 0, depth: 0 });
       children.sort((a, b) => a.name.localeCompare(b.name));
       for (const child of children) {
-        result.push({ ...child, isParent: false, depth: 1 });
+        result.push({ ...child, isParent: false, depth: 1, parentCategoryId: parent.Category_ID });
       }
     }
     return result;
   }, [categoriesData]);
+
+  // Expand/collapse state for parent categories in the sidebar
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+
+  const toggleCategory = useCallback((catId: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(catId)) next.delete(catId);
+      else next.add(catId);
+      return next;
+    });
+  }, []);
+
+  // Auto-expand the parent of the currently selected category
+  const expandedWithActive = useMemo(() => {
+    const set = new Set(expandedCategories);
+    if (selectedCategory) {
+      const selected = orderedCategories.find(c => c.Category_ID === selectedCategory);
+      if (selected?.parentCategoryId) {
+        set.add(selected.parentCategoryId);
+      }
+      // If the selected category is itself a parent, expand it
+      if (selected?.isParent) {
+        set.add(selected.Category_ID);
+      }
+    }
+    return set;
+  }, [expandedCategories, selectedCategory, orderedCategories]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Query — parts (server-side filtered + paginated)
@@ -561,28 +590,75 @@ const ShopWithoutSidebar: React.FC = () => {
                   </div>
                 )}
 
-                {!categoriesLoading && orderedCategories.map((cat) => (
-                  <button
-                    key={cat.Category_ID}
-                    onClick={() => updateParams({ cat: cat.Category_ID, page: '' })}
-                    className={`w-full flex items-baseline justify-between gap-2 py-2 rounded-lg text-sm transition-colors ${
-                      cat.depth > 0 ? 'pl-6 pr-3' : 'px-3'
-                    } ${
-                      cat.isParent ? 'font-medium mt-2' : ''
-                    } ${
-                      selectedCategory === cat.Category_ID
-                        ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="text-left truncate" title={cat.name}>{cat.name}</span>
-                    {cat.count != null && cat.count > 0 && (
-                      <span className="shrink-0 text-xs text-gray-400">
-                        {cat.count}
-                      </span>
-                    )}
-                  </button>
-                ))}
+                {!categoriesLoading && orderedCategories.map((cat) => {
+                  // Hide children unless their parent is expanded
+                  if (cat.depth > 0 && cat.parentCategoryId && !expandedWithActive.has(cat.parentCategoryId)) {
+                    return null;
+                  }
+
+                  const isActive = selectedCategory === cat.Category_ID;
+
+                  if (cat.isParent) {
+                    const isExpanded = expandedWithActive.has(cat.Category_ID);
+                    return (
+                      <div key={cat.Category_ID} className="mt-1">
+                        <div
+                          className={`w-full flex items-center gap-1 py-2 px-3 rounded-lg text-sm transition-colors ${
+                            isActive
+                              ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          <button
+                            onClick={() => toggleCategory(cat.Category_ID)}
+                            className="shrink-0 p-0.5 -ml-1 rounded hover:bg-gray-200 transition-colors"
+                            aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                          >
+                            <svg
+                              className={`w-3.5 h-3.5 text-gray-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                              fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => updateParams({ cat: cat.Category_ID, page: '' })}
+                            className="flex-1 flex items-baseline justify-between gap-2 text-left font-medium truncate"
+                            title={cat.name}
+                          >
+                            <span className="truncate">{cat.name}</span>
+                            {cat.count != null && cat.count > 0 && (
+                              <span className="shrink-0 text-xs text-gray-400 font-normal">
+                                {cat.count}
+                              </span>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={cat.Category_ID}
+                      onClick={() => updateParams({ cat: cat.Category_ID, page: '' })}
+                      className={`w-full flex items-baseline justify-between gap-2 py-1.5 rounded-lg text-sm transition-colors ${
+                        cat.depth > 0 ? 'pl-7 pr-3' : 'px-3'
+                      } ${
+                        isActive
+                          ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
+                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                      }`}
+                    >
+                      <span className="text-left truncate" title={cat.name}>{cat.name}</span>
+                      {cat.count != null && cat.count > 0 && (
+                        <span className="shrink-0 text-xs text-gray-400">
+                          {cat.count}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </aside>
 
