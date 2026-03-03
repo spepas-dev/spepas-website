@@ -17,7 +17,7 @@ local-data/*.db-shm
 local-data/*.db-wal
 .github
 .claude/*
-!.claude/commands/
+!.claude/skills/
 certs
 NUL
 tree
