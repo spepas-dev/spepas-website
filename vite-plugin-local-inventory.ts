@@ -290,6 +290,22 @@ export function localInventoryPlugin(): Plugin {
                      ORDER BY name`
                   )
                   .all(...Array.from(allAncestorIds)) as CategoryRow[];
+
+                // Compute aggregate counts for parent categories (sum of descendants)
+                const countById = new Map(childRows.map(c => [c.id, c.count]));
+                for (const anc of ancestorRows) {
+                  // Sum counts of all childRows whose ancestor chain includes this category
+                  let total = countById.get(anc.id) ?? 0;
+                  for (const child of childRows) {
+                    let pid = child.parent_id;
+                    while (pid != null) {
+                      if (pid === anc.id) { total += child.count; break; }
+                      pid = parentOf.get(pid) ?? null;
+                    }
+                  }
+                  anc.count = total;
+                }
+
                 rows = [...ancestorRows, ...childRows];
               } else {
                 rows = childRows;
@@ -352,7 +368,22 @@ export function localInventoryPlugin(): Plugin {
               const cat = d
                 .prepare('SELECT id FROM categories WHERE uuid = ?')
                 .get(categoryId) as { id: number } | undefined;
-              if (cat) { whereParts.push('p.category_id = ?'); params.push(cat.id); }
+              if (cat) {
+                // Include parts from this category and all descendant categories
+                const descendantIds = [cat.id];
+                let frontier = [cat.id];
+                while (frontier.length > 0) {
+                  const placeholders = frontier.map(() => '?').join(',');
+                  const children = d
+                    .prepare(`SELECT id FROM categories WHERE parent_id IN (${placeholders})`)
+                    .all(...frontier) as { id: number }[];
+                  frontier = children.map(c => c.id);
+                  descendantIds.push(...frontier);
+                }
+                const ph = descendantIds.map(() => '?').join(',');
+                whereParts.push(`p.category_id IN (${ph})`);
+                params.push(...descendantIds);
+              }
             }
 
             if (search) {
