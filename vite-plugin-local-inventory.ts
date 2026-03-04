@@ -247,7 +247,8 @@ export function localInventoryPlugin(): Plugin {
               if (driveType) { modelFilter += ' AND cm.drive_type = ?'; modelParams.push(driveType); }
               if (engineType) { modelFilter += ' AND cm.type_name = ?'; modelParams.push(engineType); }
 
-              rows = d
+              // Get child categories that have matching parts
+              const childRows = d
                 .prepare(
                   `SELECT c.id, c.name, c.parent_id, c.uuid,
                           COUNT(DISTINCT p.id) AS count
@@ -261,6 +262,38 @@ export function localInventoryPlugin(): Plugin {
                    ORDER BY c.name`
                 )
                 .all(...modelParams) as CategoryRow[];
+
+              // Only include categories that have parts — but group under parents
+              // Walk up ancestor chain so children appear nested under their parent
+              const includedIds = new Set(childRows.map(c => c.id));
+              const allAncestorIds = new Set<number>();
+              const allCatParents = d
+                .prepare(`SELECT id, parent_id FROM categories`)
+                .all() as { id: number; parent_id: number | null }[];
+              const parentOf = new Map(allCatParents.map(c => [c.id, c.parent_id]));
+
+              for (const c of childRows) {
+                let pid = c.parent_id;
+                while (pid != null && !includedIds.has(pid) && !allAncestorIds.has(pid)) {
+                  allAncestorIds.add(pid);
+                  pid = parentOf.get(pid) ?? null;
+                }
+              }
+
+              if (allAncestorIds.size > 0) {
+                const placeholders = Array.from(allAncestorIds).map(() => '?').join(',');
+                const ancestorRows = d
+                  .prepare(
+                    `SELECT id, name, parent_id, uuid, 0 AS count
+                     FROM categories
+                     WHERE id IN (${placeholders})
+                     ORDER BY name`
+                  )
+                  .all(...Array.from(allAncestorIds)) as CategoryRow[];
+                rows = [...ancestorRows, ...childRows];
+              } else {
+                rows = childRows;
+              }
             } else {
               rows = d
                 .prepare(`SELECT id, name, parent_id, uuid FROM categories ORDER BY name`)
@@ -396,6 +429,9 @@ export function localInventoryPlugin(): Plugin {
                   carBrand_ID: vm.brand_uuid,
                   status: 1,
                   createdAt: '',
+                  fuelType: vm.fuel_type ?? '',
+                  bodyType: vm.body_type ?? '',
+                  driveType: vm.drive_type ?? '',
                   carBrand: {
                     id: vm.brand_id,
                     CarBrand_ID: vm.brand_uuid,

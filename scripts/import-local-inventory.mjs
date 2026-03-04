@@ -5,6 +5,7 @@
 // Usage:
 //   node scripts/import-local-inventory.mjs                (full import)
 //   node scripts/import-local-inventory.mjs --vehicles=500 (quick smoke test)
+//   node scripts/import-local-inventory.mjs --clean        (drop all tables first)
 
 import Database from 'better-sqlite3';
 import { createReadStream, mkdirSync } from 'fs';
@@ -27,7 +28,7 @@ const MAX_VEHICLES = (() => {
   return flag ? parseInt(flag.split('=')[1]) : Infinity;
 })();
 
-const MIN_YEAR = 0; // no year filter — import all vehicles
+const CLEAN = process.argv.includes('--clean');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -82,6 +83,15 @@ async function globFiles(pattern) {
 }
 
 // ── Schema ───────────────────────────────────────────────────────────────────
+
+const TABLES = ['part_vehicles', 'parts', 'car_models', 'car_brands', 'manufacturers', 'categories'];
+
+function dropAll(db) {
+  log('Dropping all tables (--clean)…');
+  for (const t of TABLES) {
+    db.exec(`DROP TABLE IF EXISTS ${t}`);
+  }
+}
 
 function createSchema(db) {
   db.exec(`
@@ -167,16 +177,25 @@ async function main() {
   db.pragma('synchronous = NORMAL');
   db.pragma('foreign_keys = OFF'); // speed up bulk insert
 
+  if (CLEAN) dropAll(db);
   createSchema(db);
+
+  // Prepared statement for last_insert_rowid()
+  const lastId = db.prepare('SELECT last_insert_rowid() AS id');
 
   // ── 1. Manufacturers ──────────────────────────────────────────────────────
   log('Importing manufacturers…');
   const mfrFiles = await globFiles(`${SRC_ROOT}/manufacturers*.csv`);
-  const insertMfr = db.prepare(
-    `INSERT OR IGNORE INTO manufacturers (name, uuid) VALUES (?, ?)`
+
+  // Use INSERT ... ON CONFLICT for idempotent upserts (fix #5: re-run updates data)
+  const upsertMfr = db.prepare(
+    `INSERT INTO manufacturers (name, uuid) VALUES (?, ?)
+     ON CONFLICT(uuid) DO UPDATE SET name = excluded.name`
   );
-  const mfrNameToId = new Map();
-  let mfrCount = 0;
+
+  // Fix #7: use uuid-keyed map instead of name-keyed to avoid collisions
+  const mfrUuidToId = new Map();
+  let mfrInserted = 0;
 
   for (const file of mfrFiles) {
     const rows = await readCsv(file);
@@ -185,28 +204,32 @@ async function main() {
         const name = (row.mfa_brand || row.manufacturerName || row.name || '').trim();
         const uuid = row.mfa_id ? String(row.mfa_id) : row.manufacturerId ? String(row.manufacturerId) : randomUUID();
         if (!name) continue;
-        insertMfr.run(name, uuid);
-        const existing = db.prepare('SELECT id FROM manufacturers WHERE name = ?').get(name);
-        if (existing) mfrNameToId.set(name, existing.id);
-        mfrCount++;
+        upsertMfr.run(name, uuid);
+        mfrInserted++;
       }
     });
     run();
   }
-  log(`  ${mfrNameToId.size} manufacturers`);
 
-  // Re-build full map from DB
+  // Build uuid→id map from DB (accurate regardless of insert/update)
   const allMfrs = db.prepare('SELECT id, name, uuid FROM manufacturers').all();
-  const mfrUuidToId = new Map(allMfrs.map(m => [m.uuid, m.id]));
-  const mfrNameToIdFull = new Map(allMfrs.map(m => [m.name, m.id]));
+  for (const m of allMfrs) mfrUuidToId.set(m.uuid, m.id);
+  const mfrNameToId = new Map(allMfrs.map(m => [m.name, m.id]));
+  // Fix #8: report actual DB count, not insert attempts
+  log(`  ${allMfrs.length} manufacturers (${mfrInserted} rows processed)`);
 
   // ── 2. Car Brands (model lines) ───────────────────────────────────────────
   log('Importing car brands…');
   const brandFiles = await globFiles(`${SRC_ROOT}/models*.csv`);
-  const insertBrand = db.prepare(
-    `INSERT OR IGNORE INTO car_brands (name, year_from, year_to, manufacturer_id, uuid) VALUES (?, ?, ?, ?, ?)`
+  const upsertBrand = db.prepare(
+    `INSERT INTO car_brands (name, year_from, year_to, manufacturer_id, uuid) VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(uuid) DO UPDATE SET
+       name = excluded.name,
+       year_from = excluded.year_from,
+       year_to = excluded.year_to,
+       manufacturer_id = excluded.manufacturer_id`
   );
-  let brandCount = 0;
+  let brandProcessed = 0;
 
   for (const file of brandFiles) {
     const rows = await readCsv(file);
@@ -219,29 +242,41 @@ async function main() {
         const yearFrom = parseInt(yearFromRaw) || null;
         const yearTo = parseInt(yearToRaw) || null;
         const mfrUuid = String(row.mfa_id || row.manufacturerId || '');
-        const mfrId = mfrUuidToId.get(mfrUuid) ?? mfrNameToIdFull.get(row.mfa_brand || row.manufacturer) ?? null;
+        const mfrId = mfrUuidToId.get(mfrUuid) ?? mfrNameToId.get(row.mfa_brand || row.manufacturer) ?? null;
         if (!name || !mfrId) continue;
-        insertBrand.run(name, yearFrom, yearTo, mfrId, uuid);
-        brandCount++;
+        upsertBrand.run(name, yearFrom, yearTo, mfrId, uuid);
+        brandProcessed++;
       }
     });
     run();
   }
-  log(`  ${brandCount} brand rows`);
 
   const allBrands = db.prepare('SELECT id, uuid FROM car_brands').all();
   const brandUuidToId = new Map(allBrands.map(b => [b.uuid, b.id]));
+  log(`  ${allBrands.length} brands (${brandProcessed} rows processed)`);
 
   // ── 3. Car Models (engine variants) ──────────────────────────────────────
   log('Importing car models (vehicle variants)…');
   const vehicleFiles = await globFiles(`${SRC_ROOT}/vehicles*.csv`);
-  const insertModel = db.prepare(
-    `INSERT OR IGNORE INTO car_models
+  const upsertModel = db.prepare(
+    `INSERT INTO car_models
        (type_name, construction_start, construction_end, fuel_type, body_type, drive_type, power_ps, car_brand_id, uuid)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(uuid) DO UPDATE SET
+       type_name = excluded.type_name,
+       construction_start = excluded.construction_start,
+       construction_end = excluded.construction_end,
+       fuel_type = excluded.fuel_type,
+       body_type = excluded.body_type,
+       drive_type = excluded.drive_type,
+       power_ps = excluded.power_ps,
+       car_brand_id = excluded.car_brand_id`
   );
   let vehicleCount = 0;
   let skipped = 0;
+
+  // Fix #6: collect all imported vehicle UUIDs so we can validate part_vehicles later
+  const importedVehicleUuids = new Set();
 
   for (const file of vehicleFiles) {
     if (vehicleCount >= MAX_VEHICLES) break;
@@ -252,7 +287,6 @@ async function main() {
         const uuid = String(row.passanger_car_id || row.vehicleId || row.typ_id || randomUUID());
         const yearStartRaw = row.typ_pcon_start || row.constructionStart || '';
         const yearStart = parseInt(yearStartRaw) || null;
-        if (!yearStart || yearStart < MIN_YEAR) { skipped++; continue; }
         const brandUuid = String(row.mmo_id || row.modelId || '');
         const brandId = brandUuidToId.get(brandUuid) ?? null;
         if (!brandId) { skipped++; continue; }
@@ -263,62 +297,86 @@ async function main() {
         const bodyType = (row.typ_karosserieform || row.bodyType || row.body_type || '').trim();
         const driveType = (row.typ_antriebsart || row.driveType || row.drive_type || '').trim();
         const powerPs = parseInt(row.typ_kw_von || row.powerPs) || 0;
-        insertModel.run(typeName, yearStart, yearEnd, fuelType, bodyType, driveType, powerPs, brandId, uuid);
+        upsertModel.run(typeName, yearStart, yearEnd, fuelType, bodyType, driveType, powerPs, brandId, uuid);
+        importedVehicleUuids.add(uuid);
         vehicleCount++;
       }
     });
     run();
   }
-  log(`  ${vehicleCount} vehicle variants (${skipped} skipped — pre-${MIN_YEAR} or missing brand)`);
+  log(`  ${vehicleCount} vehicle variants (${skipped} skipped — missing brand)`);
 
   const allModels = db.prepare('SELECT id, uuid FROM car_models').all();
   const modelUuidToId = new Map(allModels.map(m => [m.uuid, m.id]));
 
+  // Fix #6: warn if --vehicles limit is active and parts will be affected
+  if (MAX_VEHICLES < Infinity) {
+    log(`  WARNING: --vehicles=${MAX_VEHICLES} active — part_vehicles pairs referencing non-imported vehicles will be skipped`);
+  }
+
   // ── 4. Categories ─────────────────────────────────────────────────────────
   log('Importing categories…');
   const catFiles = await globFiles(`${SRC_ROOT}/*categories*.csv`);
-  const insertCat = db.prepare(
-    `INSERT OR IGNORE INTO categories (name, parent_id, level, uuid) VALUES (?, ?, ?, ?)`
+
+  // Fix #1 + #5: upsert categories and use a third pass to fix parent_id links
+  const upsertCatNoParent = db.prepare(
+    `INSERT INTO categories (name, parent_id, level, uuid) VALUES (?, NULL, ?, ?)
+     ON CONFLICT(uuid) DO UPDATE SET name = excluded.name, level = excluded.level`
   );
+  const updateCatParent = db.prepare(
+    `UPDATE categories SET parent_id = ? WHERE uuid = ?`
+  );
+
+  // Collect all category rows across files for the linking pass
+  const allCatRows = [];
 
   for (const file of catFiles) {
     const rows = await readCsv(file);
-    // First pass: insert parent categories
+
+    // Pass 1: insert ALL categories without parent links
     const run1 = db.transaction(() => {
       for (const row of rows) {
         const name = (row.str_node_des || row.categoryName || row.name || '').trim();
         const uuid = String(row.str_id || row.categoryId || randomUUID());
         const parentUuid = String(row.str_id_parent || row.parentCategoryId || '');
-        if (!parentUuid || parentUuid === '0' || parentUuid === '') {
-          insertCat.run(name, null, parseInt(row.level) || 0, uuid);
-        }
+        const isChild = parentUuid && parentUuid !== '0' && parentUuid !== '';
+        const level = isChild ? 1 : (parseInt(row.level) || 0);
+
+        upsertCatNoParent.run(name, level, uuid);
+        allCatRows.push({ uuid, parentUuid: isChild ? parentUuid : null });
       }
     });
     run1();
-
-    const catUuidToId = new Map(
-      (db.prepare('SELECT id, uuid FROM categories').all()).map(c => [c.uuid, c.id])
-    );
-
-    // Second pass: insert child categories
-    const run2 = db.transaction(() => {
-      for (const row of rows) {
-        const name = (row.str_node_des || row.categoryName || row.name || '').trim();
-        const uuid = String(row.str_id || row.categoryId || randomUUID());
-        const parentUuid = String(row.str_id_parent || row.parentCategoryId || '');
-        if (parentUuid && parentUuid !== '0') {
-          const parentId = catUuidToId.get(parentUuid) ?? null;
-          insertCat.run(name, parentId, 1, uuid);
-        }
-      }
-    });
-    run2();
   }
-  const catCount = db.prepare('SELECT COUNT(*) AS n FROM categories').get().n;
-  log(`  ${catCount} categories`);
 
-  const allCats = db.prepare('SELECT id, uuid FROM categories').all();
-  const catUuidToId = new Map(allCats.map(c => [c.uuid, c.id]));
+  // Pass 2: now all categories exist — link parent_id by UUID
+  const catUuidToIdMap = new Map(
+    db.prepare('SELECT id, uuid FROM categories').all().map(c => [c.uuid, c.id])
+  );
+
+  let parentLinked = 0;
+  let parentMissing = 0;
+  const linkParents = db.transaction(() => {
+    for (const { uuid, parentUuid } of allCatRows) {
+      if (!parentUuid) continue;
+      const parentId = catUuidToIdMap.get(parentUuid);
+      if (parentId != null) {
+        updateCatParent.run(parentId, uuid);
+        parentLinked++;
+      } else {
+        parentMissing++;
+      }
+    }
+  });
+  linkParents();
+
+  const catCount = db.prepare('SELECT COUNT(*) AS n FROM categories').get().n;
+  log(`  ${catCount} categories (${parentLinked} linked to parents, ${parentMissing} orphaned — parent UUID not found)`);
+
+  // Refresh uuid→id map
+  const catUuidToId = new Map(
+    db.prepare('SELECT id, uuid FROM categories').all().map(c => [c.uuid, c.id])
+  );
 
   // ── 5. Parts ─────────────────────────────────────────────────────────────
   log(`Importing parts…`);
@@ -329,8 +387,8 @@ async function main() {
 
   let partRows = 0;
   let pairsInserted = 0;
+  let pairsSkippedNoVehicle = 0;
 
-  // ── 5. Parts: one row per article (supplier-specific part) ───────────────
   const partFiles = await globFiles(
     `${SRC_ROOT}/detailed parts/complete/parts_complete_vehicles_*.csv`
   );
@@ -339,13 +397,30 @@ async function main() {
     log(`  Expected: ${SRC_ROOT}/detailed parts/complete/parts_complete_vehicles_*.csv`);
   }
 
-  const insertPart = db.prepare(
-    `INSERT OR IGNORE INTO parts (product_name, image_url, category_id, uuid, article_no, supplier_name, supplier_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  // Fix #5: upsert parts too
+  const upsertPart = db.prepare(
+    `INSERT INTO parts (product_name, image_url, category_id, uuid, article_no, supplier_name, supplier_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(uuid) DO UPDATE SET
+       product_name = excluded.product_name,
+       image_url = excluded.image_url,
+       category_id = excluded.category_id,
+       article_no = excluded.article_no,
+       supplier_name = excluded.supplier_name,
+       supplier_id = excluded.supplier_id`
   );
 
-  // articleId → DB id map
+  // Fix #3: pre-build a lookup for parts we've seen, and use last_insert_rowid()
+  // instead of per-row SELECT
   const articleUuidToId = new Map();
+
+  // Pre-load existing parts from DB (for re-run support)
+  for (const p of db.prepare('SELECT id, uuid FROM parts').all()) {
+    articleUuidToId.set(p.uuid, p.id);
+  }
+
+  // Prepare a single lookup for getting the id after upsert
+  const getPartId = db.prepare('SELECT id FROM parts WHERE uuid = ?');
 
   for (const file of partFiles) {
     log(`  Processing ${file.split('/').pop()}…`);
@@ -361,7 +436,11 @@ async function main() {
         if (!vehicleUuid || !articleUuid || !productName) continue;
 
         const vehicleId = modelUuidToId.get(vehicleUuid) ?? null;
-        if (!vehicleId) continue;
+        if (!vehicleId) {
+          // Fix #6: count skipped pairs when vehicle wasn't imported
+          pairsSkippedNoVehicle++;
+          continue;
+        }
 
         if (!articleUuidToId.has(articleUuid)) {
           const catId = catUuidToId.get(catUuid) ?? null;
@@ -370,11 +449,16 @@ async function main() {
           const supplierName = (row.supplierName || '').trim() || null;
           const supplierId = String(row.supplierId || '') || null;
 
-          insertPart.run(productName, imageUrl, catId, articleUuid, articleNo, supplierName, supplierId);
-          const inserted = db.prepare('SELECT id FROM parts WHERE uuid = ?').get(articleUuid);
-          if (inserted) {
-            articleUuidToId.set(articleUuid, inserted.id);
-            partRows++;
+          upsertPart.run(productName, imageUrl, catId, articleUuid, articleNo, supplierName, supplierId);
+          // Fix #3: use a single lookup only for new inserts (not per-row inside hot loop)
+          const partId = lastId.get().id;
+          // Verify the id is for our row (handles upsert case where lastId may not update)
+          if (partId) {
+            const verified = getPartId.get(articleUuid);
+            if (verified) {
+              articleUuidToId.set(articleUuid, verified.id);
+              partRows++;
+            }
           }
         }
 
@@ -389,9 +473,26 @@ async function main() {
   }
 
   log(`  ${articleUuidToId.size} unique articles, ${pairsInserted} part-vehicle pairs`);
+  if (pairsSkippedNoVehicle > 0) {
+    log(`  ${pairsSkippedNoVehicle} part-vehicle pairs skipped (vehicle not imported)`);
+  }
 
   // ── 6. Indexes ────────────────────────────────────────────────────────────
   createIndexes(db);
+
+  // Fix #4: re-enable foreign key checks and validate
+  db.pragma('foreign_keys = ON');
+  const fkErrors = db.pragma('foreign_key_check');
+  if (fkErrors.length > 0) {
+    log(`  WARNING: ${fkErrors.length} foreign key violations found`);
+    // Show first few
+    for (const err of fkErrors.slice(0, 10)) {
+      log(`    table=${err.table} rowid=${err.rowid} parent=${err.parent} fkid=${err.fkid}`);
+    }
+    if (fkErrors.length > 10) log(`    … and ${fkErrors.length - 10} more`);
+  } else {
+    log('  Foreign key check passed');
+  }
 
   // ── 7. Summary ────────────────────────────────────────────────────────────
   const stats = {

@@ -22,6 +22,8 @@ interface SearchableComboboxProps {
   disabled?: boolean;
   isLoading?: boolean;
   id?: string;
+  /** Compact mode — chip-height input for inline filter rows */
+  compact?: boolean;
 }
 
 export default function SearchableCombobox({
@@ -32,6 +34,7 @@ export default function SearchableCombobox({
   disabled = false,
   isLoading = false,
   id,
+  compact = false,
 }: SearchableComboboxProps) {
   const [query, setQuery] = useState('');
 
@@ -52,14 +55,16 @@ export default function SearchableCombobox({
       disabled={disabled || isLoading}
       immediate
     >
-      <div className="relative w-full">
+      <div className={cn('relative', compact ? 'w-44' : 'w-full')}>
         {/* Input acts as both the trigger and search field */}
         <ComboboxInput
           id={id}
           autoComplete="off"
           className={cn(
-            'w-full h-10 rounded-lg border border-gray-200 bg-white pl-3 pr-10 text-sm',
-            'focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]',
+            'w-full rounded-lg border bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]',
+            compact
+              ? 'h-[26px] rounded-full border-gray-200 bg-gray-100 pl-2.5 pr-7 text-xs font-medium text-gray-600 placeholder:text-gray-400'
+              : 'h-10 border-gray-200 pl-3 pr-10 text-sm',
             (disabled || isLoading) && 'opacity-50 cursor-not-allowed',
           )}
           displayValue={(val: string) =>
@@ -70,11 +75,14 @@ export default function SearchableCombobox({
         />
 
         {/* Chevron / loader button on the right */}
-        <ComboboxButton className="absolute inset-y-0 right-0 flex items-center pr-3">
+        <ComboboxButton className={cn(
+          'absolute inset-y-0 right-0 flex items-center',
+          compact ? 'pr-1.5' : 'pr-3',
+        )}>
           {isLoading ? (
-            <Loader2 className="h-4 w-4 text-gray-400 animate-spin" />
+            <Loader2 className={cn('text-gray-400 animate-spin', compact ? 'h-3 w-3' : 'h-4 w-4')} />
           ) : (
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <ChevronDown className={cn('text-gray-400', compact ? 'h-3 w-3' : 'h-4 w-4')} />
           )}
         </ComboboxButton>
 
@@ -82,29 +90,32 @@ export default function SearchableCombobox({
         <ComboboxOptions
           transition
           className={cn(
-            'absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg',
+            'absolute z-50 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg',
             'transition duration-150 ease-out data-[closed]:opacity-0 data-[closed]:scale-95',
+            compact ? 'w-64 right-0' : 'w-full',
           )}
         >
           {filtered.length === 0 && (
-            <p className="px-3 py-2 text-sm text-gray-500">No results</p>
+            <p className={cn('px-3 text-gray-500', compact ? 'py-1.5 text-xs' : 'py-2 text-sm')}>No results</p>
           )}
           {filtered.map((opt) => (
             <ComboboxOption
               key={opt.value}
               value={opt.value}
               className={cn(
-                'flex items-center gap-2 cursor-pointer px-3 py-2.5 text-sm text-gray-700',
+                'flex items-center gap-2 cursor-pointer text-gray-700',
                 'data-[focus]:bg-[var(--color-primary-50)]',
                 'data-[selected]:font-medium',
+                compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2.5 text-sm',
               )}
             >
               {({ selected }) => (
                 <>
                   <Check
                     className={cn(
-                      'h-4 w-4 shrink-0 text-[var(--color-primary-500)]',
+                      'shrink-0 text-[var(--color-primary-500)]',
                       selected ? 'opacity-100' : 'opacity-0',
+                      compact ? 'h-3 w-3' : 'h-4 w-4',
                     )}
                   />
                   <span className="truncate">{opt.label}</span>
