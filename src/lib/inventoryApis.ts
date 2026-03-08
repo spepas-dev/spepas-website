@@ -42,30 +42,47 @@ export const getCarYears = async () => {
 };
 
 // GET: list car manufacturers (optionally scoped by year)
-// Live API paginates at 15 by default; request 100 to get all common makes in one call
+// Live API caps at 100 per page (712 total) — fetch all pages and merge
 export const getCarManufacturers = async (filters?: { year?: string }) => {
-  const { data } = await apiClient.get('/inventry/car-manufacturers-all', {
-    params: { ts: Date.now(), limit: 100, ...filters },
-  });
-  return carManufacturersResponseSchema.parse(data);
+  return fetchAllPages('/inventry/car-manufacturers-all', { limit: 100, ...filters }, carManufacturersResponseSchema);
 };
 
+// Generic helper: fetch all pages from a paginated endpoint and merge data arrays
+async function fetchAllPages<T>(
+  url: string,
+  params: Record<string, unknown>,
+  schema: { parse: (d: unknown) => T & { data?: unknown[]; meta?: { totalPages?: number } } },
+): Promise<T> {
+  const { data: first } = await apiClient.get(url, { params });
+  const parsed = schema.parse(first);
+  const totalPages = parsed.meta?.totalPages ?? 1;
+  if (totalPages > 1 && parsed.data) {
+    const pageNums = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+    const results = await Promise.allSettled(
+      pageNums.map((page) => apiClient.get(url, { params: { ...params, page } }))
+    );
+    for (const result of results) {
+      if (result.status === 'fulfilled') {
+        const page = schema.parse(result.value.data);
+        if (page.data?.length) {
+          (parsed.data as unknown[]).push(...page.data);
+        }
+      }
+    }
+  }
+  return parsed;
+}
+
 // GET: list car brands (optionally scoped by year + manufacturer)
-// Live API paginates at 15 by default; request 100 to cover most brand lists
+// Live API paginates at 100 max — fetch all pages
 export const getCarBrands = async (filters?: { year?: string; manufacturerId?: string }) => {
-  const { data } = await apiClient.get('/inventry/car-brands-all', {
-    params: { ts: Date.now(), limit: 100, ...filters },
-  });
-  return carBrandsResponseSchema.parse(data);
+  return fetchAllPages('/inventry/car-brands-all', { limit: 100, ...filters }, carBrandsResponseSchema);
 };
 
 // GET: list all car models (optionally scoped by brandId)
-// Live API paginates at 15 by default; request 100 to cover most model lists
+// Live API paginates at 100 max — fetch all pages
 export const getCarModels = async (filters?: { brandId?: string }) => {
-  const { data } = await apiClient.get('/inventry/car-models-all', {
-    params: { ts: Date.now(), limit: 100, ...filters },
-  });
-  return carModelsResponseSchema.parse(data);
+  return fetchAllPages('/inventry/car-models-all', { limit: 100, ...filters }, carModelsResponseSchema);
 };
 
 // GET: list all spare parts (filters forwarded as query params — see INV-3)

@@ -29,17 +29,23 @@ apiClient.interceptors.response.use(
     const status = error?.response?.status;
 
     if (status === 401) {
-      // clear local auth state everywhere (context + localStorage)
-      clearAuthEverywhere();
+      // Skip auth redirect for public inventory/catalog endpoints
+      const reqUrl = error?.config?.url ?? '';
+      const isPublicEndpoint = reqUrl.startsWith('/inventry/');
 
-      // always push user to signin when unauthenticated
-      try {
-        const path = window.location.pathname;
-        if (path !== SIGNIN_PATH) {
-          window.location.replace(SIGNIN_PATH);
+      if (!isPublicEndpoint) {
+        // clear local auth state everywhere (context + localStorage)
+        clearAuthEverywhere();
+
+        // always push user to signin when unauthenticated
+        try {
+          const path = window.location.pathname;
+          if (path !== SIGNIN_PATH) {
+            window.location.replace(SIGNIN_PATH);
+          }
+        } catch {
+          // ignore any window errors (SSR etc.)
         }
-      } catch {
-        // ignore any window errors (SSR etc.)
       }
     }
 
