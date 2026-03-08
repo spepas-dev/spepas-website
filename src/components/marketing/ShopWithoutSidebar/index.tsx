@@ -320,7 +320,7 @@ const ShopWithoutSidebar: React.FC = () => {
       ...(selectedEngine ? { engineType: selectedEngine } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
       limit: PAGE_SIZE,
-      offset: (page - 1) * PAGE_SIZE,
+      page,
     }),
     [selectedModel, selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, search, page]
   );
@@ -338,8 +338,8 @@ const ShopWithoutSidebar: React.FC = () => {
     enabled: vehicleSelected,
   });
 
-  const total = partsData?.total ?? partsData?.data?.length ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const total = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
+  const totalPages = partsData?.meta?.totalPages ?? Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   // Build a category uuid→name lookup for enriching items
   const catNameById = useMemo(() => {

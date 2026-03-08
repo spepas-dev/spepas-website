@@ -21,11 +21,15 @@ const sparePartSchema = z.object({
   status: z.number(),
   discount_ID: z.string().nullable(),
   category_ID: z.string().nullable(),
-  carModel_ID: z.string(),
+  carModel_ID: z.string().nullable().optional(),
   seller_ID: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  externalID: z.number().nullable().optional(),
+  // article number: live API returns articleNo (camelCase) + article_no alias; local mock returns article_no
+  articleNo: z.string().nullable().optional(),
   article_no: z.string().nullable().optional(),
+  typeEngineName: z.string().nullable().optional(),
   supplier_name: z.string().nullable().optional(),
   images: z.array(imageSchema),
 });
@@ -39,10 +43,14 @@ const carModelSchema = z.object({
   externalID: z.number().nullable().optional(),
   status: z.number(),
   createdAt: z.string(),
-  // fuelType + bodyType + driveType: returned by local mock (TecDoc data); pending INV-1 on real API
+  // singular strings: local mock format
   fuelType: z.string().optional(),
   bodyType: z.string().optional(),
   driveType: z.string().optional(),
+  // arrays: live API format (INV-6 — schema migration added fuelTypes/bodyTypes/driveTypes)
+  fuelTypes: z.array(z.string()).optional(),
+  bodyTypes: z.array(z.string()).optional(),
+  driveTypes: z.array(z.string()).optional(),
   spareParts: z.array(sparePartSchema).optional().default([]),
   carBrand: z
     .object({
@@ -134,8 +142,9 @@ export const carModelsResponseSchema = z.object({
 export const sparePartsResponseSchema = z.object({
   status: z.number(),
   message: z.string(),
-  total: z.number().optional(),
+  total: z.number().optional(), // local mock compat — live API uses meta.total
   data: z.array(sparePartSchema),
+  meta: paginationMeta,
 });
 
 /**
@@ -153,6 +162,12 @@ export const sparePartDetailResponseSchema = z.object({
       carBrand_ID: z.string(),
       status: z.number(),
       createdAt: z.string(),
+      fuelType: z.string().optional(),
+      bodyType: z.string().optional(),
+      driveType: z.string().optional(),
+      fuelTypes: z.array(z.string()).optional(),
+      bodyTypes: z.array(z.string()).optional(),
+      driveTypes: z.array(z.string()).optional(),
       carBrand: z.object({
         id: z.number(),
         CarBrand_ID: z.string(),

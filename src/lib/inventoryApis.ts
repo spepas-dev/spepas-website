@@ -20,7 +20,7 @@ export interface SparePartsFilter {
   engineType?: string;
   search?: string;
   limit?: number;
-  offset?: number;
+  page?: number;
 }
 
 export interface CategoryFilter {

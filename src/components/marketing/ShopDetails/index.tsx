@@ -48,7 +48,7 @@ const ShopDetails: React.FC = () => {
   const title = item?.name ?? 'Part';
 
   // Part info
-  const articleNo = item?.article_no;
+  const articleNo = item?.article_no ?? item?.articleNo;
   const supplierName = item?.supplier_name ?? item?.supplierName;
 
   // Vehicle info
@@ -56,9 +56,10 @@ const ShopDetails: React.FC = () => {
   const model = item?.carModel?.carBrand?.name;
   const engineVariant = item?.carModel?.name;
   const year = item?.carModel?.yearOfMake;
-  const fuelType = item?.carModel?.fuelType;
-  const bodyType = item?.carModel?.bodyType;
-  const driveType = item?.carModel?.driveType;
+  // live API returns arrays (INV-6); local mock returns singular strings
+  const fuelType = item?.carModel?.fuelTypes?.[0] ?? item?.carModel?.fuelType;
+  const bodyType = item?.carModel?.bodyTypes?.[0] ?? item?.carModel?.bodyType;
+  const driveType = item?.carModel?.driveTypes?.[0] ?? item?.carModel?.driveType;
 
   const hasVehicle = manufacturer || model || year || fuelType || bodyType || driveType;
 
