@@ -16,3 +16,4 @@
 - Brand colors defined as `--color-primary-*`, `--color-secondary-*` etc. in `@theme`
 - Brand font: Plus Jakarta Sans (see `docs/branding-guidelines.md`)
 - Local inventory DB schema: `local-data/SCHEMA.md`
+- Playwright screenshots/outputs go in the `.playwright-mcp/` folder

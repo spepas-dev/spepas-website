@@ -1,16 +1,15 @@
 #!/usr/bin/env node
 // scripts/import-local-inventory.mjs
-// Reads TecDoc vehicle/category CSVs + parts CSVs → writes SQLite DB
+// Reads TecDoc CSVs → filters per IMPORT-RULES.md → writes SQLite DB + cleaned CSVs
 //
 // Usage:
-//   node scripts/import-local-inventory.mjs                (full import)
-//   node scripts/import-local-inventory.mjs --vehicles=500 (quick smoke test)
-//   node scripts/import-local-inventory.mjs --clean        (drop all tables first)
+//   node scripts/import-local-inventory.mjs
+//   node scripts/import-local-inventory.mjs --skip-cleaned   (skip writing cleaned CSVs)
 
 import Database from 'better-sqlite3';
-import { createReadStream, mkdirSync } from 'fs';
+import { createReadStream, createWriteStream, mkdirSync } from 'fs';
 import { createInterface } from 'readline';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { glob } from 'fs/promises';
 import { randomUUID } from 'crypto';
 
@@ -23,35 +22,19 @@ const SRC_ROOT =
 const DB_PATH =
   process.env.LOCAL_INVENTORY_DB ?? resolve(process.cwd(), 'local-data/inventory.db');
 
-const MAX_VEHICLES = (() => {
-  const flag = process.argv.find(a => a.startsWith('--vehicles='));
-  return flag ? parseInt(flag.split('=')[1]) : Infinity;
-})();
+const CLEANED_ROOT =
+  process.env.LOCAL_INVENTORY_CLEANED ?? join(SRC_ROOT, 'cleaned');
 
-const CLEAN = process.argv.includes('--clean');
+const SKIP_CLEANED = process.argv.includes('--skip-cleaned');
+
+// Import rules (see local-data/IMPORT-RULES.md)
+const KEPT_MANUFACTURER_IDS = new Set([16, 45, 183, 184, 842, 74, 3522, 80, 111, 121]);
+const MODEL_YEAR_CUTOFF = 2010; // remove models discontinued before this year
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function log(msg) {
   process.stdout.write(`[import] ${msg}\n`);
-}
-
-async function readCsv(filepath) {
-  const rows = [];
-  let headers = null;
-  const rl = createInterface({ input: createReadStream(filepath), crlfDelay: Infinity });
-  for await (const line of rl) {
-    if (!headers) {
-      headers = line.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
-      continue;
-    }
-    if (!line.trim()) continue;
-    const vals = parseCsvLine(line);
-    const obj = {};
-    headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
-    rows.push(obj);
-  }
-  return rows;
 }
 
 function parseCsvLine(line) {
@@ -74,35 +57,86 @@ function parseCsvLine(line) {
   return result;
 }
 
+async function readCsv(filepath) {
+  const rows = [];
+  let headers = null;
+  const rl = createInterface({ input: createReadStream(filepath), crlfDelay: Infinity });
+  for await (const line of rl) {
+    if (!headers) {
+      headers = line.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      continue;
+    }
+    if (!line.trim()) continue;
+    const vals = parseCsvLine(line);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+/** Stream-process a large CSV file row by row without loading into memory */
+async function streamCsv(filepath, callback) {
+  let headers = null;
+  let count = 0;
+  const rl = createInterface({ input: createReadStream(filepath), crlfDelay: Infinity });
+  for await (const line of rl) {
+    if (!headers) {
+      headers = line.split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+      continue;
+    }
+    if (!line.trim()) continue;
+    const vals = parseCsvLine(line);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = vals[i] ?? ''; });
+    callback(obj, line);
+    count++;
+  }
+  return count;
+}
+
 async function globFiles(pattern) {
   const results = [];
-  for await (const f of glob(pattern)) {
-    results.push(f);
-  }
+  for await (const f of glob(pattern)) results.push(f);
   return results.sort();
+}
+
+function extractYear(dateStr) {
+  if (!dateStr) return null;
+  const y = parseInt(dateStr);
+  return (y && y > 1900 && y < 2100) ? y : null;
+}
+
+function writeCsvLine(stream, values) {
+  const escaped = values.map(v => {
+    const s = String(v ?? '');
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  });
+  stream.write(escaped.join(',') + '\n');
 }
 
 // ── Schema ───────────────────────────────────────────────────────────────────
 
-const TABLES = ['part_vehicles', 'parts', 'car_models', 'car_brands', 'manufacturers', 'categories'];
-
-function dropAll(db) {
-  log('Dropping all tables (--clean)…');
-  for (const t of TABLES) {
-    db.exec(`DROP TABLE IF EXISTS ${t}`);
-  }
-}
-
 function createSchema(db) {
   db.exec(`
-    CREATE TABLE IF NOT EXISTS manufacturers (
-      id   INTEGER PRIMARY KEY AUTOINCREMENT,
+    DROP TABLE IF EXISTS part_vehicles;
+    DROP TABLE IF EXISTS parts;
+    DROP TABLE IF EXISTS car_models;
+    DROP TABLE IF EXISTS car_brands;
+    DROP TABLE IF EXISTS manufacturers;
+    DROP TABLE IF EXISTS categories;
+
+    CREATE TABLE manufacturers (
+      id   INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
       uuid TEXT NOT NULL UNIQUE
     );
 
-    CREATE TABLE IF NOT EXISTS car_brands (
-      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE car_brands (
+      id              INTEGER PRIMARY KEY,
       name            TEXT NOT NULL,
       year_from       INTEGER,
       year_to         INTEGER,
@@ -110,8 +144,8 @@ function createSchema(db) {
       uuid            TEXT NOT NULL UNIQUE
     );
 
-    CREATE TABLE IF NOT EXISTS car_models (
-      id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE car_models (
+      id                 INTEGER PRIMARY KEY,
       type_name          TEXT NOT NULL,
       construction_start INTEGER,
       construction_end   INTEGER,
@@ -123,16 +157,16 @@ function createSchema(db) {
       uuid               TEXT NOT NULL UNIQUE
     );
 
-    CREATE TABLE IF NOT EXISTS categories (
-      id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE categories (
+      id        INTEGER PRIMARY KEY,
       name      TEXT NOT NULL,
       parent_id INTEGER REFERENCES categories(id),
       level     INTEGER DEFAULT 0,
       uuid      TEXT NOT NULL UNIQUE
     );
 
-    CREATE TABLE IF NOT EXISTS parts (
-      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE parts (
+      id             INTEGER PRIMARY KEY,
       product_name   TEXT NOT NULL,
       image_url      TEXT,
       category_id    INTEGER REFERENCES categories(id),
@@ -142,7 +176,7 @@ function createSchema(db) {
       supplier_id    TEXT
     );
 
-    CREATE TABLE IF NOT EXISTS part_vehicles (
+    CREATE TABLE part_vehicles (
       part_id    INTEGER NOT NULL REFERENCES parts(id),
       vehicle_id INTEGER NOT NULL REFERENCES car_models(id),
       PRIMARY KEY (part_id, vehicle_id)
@@ -168,333 +202,328 @@ function createIndexes(db) {
 async function main() {
   mkdirSync(resolve(DB_PATH, '..'), { recursive: true });
 
-  log(`Source: ${SRC_ROOT}`);
-  log(`Output: ${DB_PATH}`);
-  if (MAX_VEHICLES < Infinity) log(`Limiting to ${MAX_VEHICLES} vehicles`);
+  log(`Source:  ${SRC_ROOT}`);
+  log(`Output:  ${DB_PATH}`);
+  if (!SKIP_CLEANED) {
+    mkdirSync(CLEANED_ROOT, { recursive: true });
+    mkdirSync(join(CLEANED_ROOT, 'detailed parts', 'complete'), { recursive: true });
+    log(`Cleaned: ${CLEANED_ROOT}`);
+  }
 
   const db = new Database(DB_PATH);
   db.pragma('journal_mode = WAL');
   db.pragma('synchronous = NORMAL');
-  db.pragma('foreign_keys = OFF'); // speed up bulk insert
+  db.pragma('foreign_keys = OFF');
 
-  if (CLEAN) dropAll(db);
   createSchema(db);
-
-  // Prepared statement for last_insert_rowid()
-  const lastId = db.prepare('SELECT last_insert_rowid() AS id');
 
   // ── 1. Manufacturers ──────────────────────────────────────────────────────
   log('Importing manufacturers…');
-  const mfrFiles = await globFiles(`${SRC_ROOT}/manufacturers*.csv`);
+  const mfrRows = await readCsv(join(SRC_ROOT, 'manufacturers.csv'));
 
-  // Use INSERT ... ON CONFLICT for idempotent upserts (fix #5: re-run updates data)
-  const upsertMfr = db.prepare(
-    `INSERT INTO manufacturers (name, uuid) VALUES (?, ?)
-     ON CONFLICT(uuid) DO UPDATE SET name = excluded.name`
+  const insertMfr = db.prepare(
+    `INSERT INTO manufacturers (id, name, uuid) VALUES (?, ?, ?)`
   );
 
-  // Fix #7: use uuid-keyed map instead of name-keyed to avoid collisions
-  const mfrUuidToId = new Map();
-  let mfrInserted = 0;
-
-  for (const file of mfrFiles) {
-    const rows = await readCsv(file);
-    const run = db.transaction(() => {
-      for (const row of rows) {
-        const name = (row.mfa_brand || row.manufacturerName || row.name || '').trim();
-        const uuid = row.mfa_id ? String(row.mfa_id) : row.manufacturerId ? String(row.manufacturerId) : randomUUID();
-        if (!name) continue;
-        upsertMfr.run(name, uuid);
-        mfrInserted++;
-      }
-    });
-    run();
+  let cleanedMfrStream = null;
+  if (!SKIP_CLEANED) {
+    cleanedMfrStream = createWriteStream(join(CLEANED_ROOT, 'manufacturers.csv'));
+    cleanedMfrStream.write('manufacturerId,manufacturerName\n');
   }
 
-  // Build uuid→id map from DB (accurate regardless of insert/update)
-  const allMfrs = db.prepare('SELECT id, name, uuid FROM manufacturers').all();
-  for (const m of allMfrs) mfrUuidToId.set(m.uuid, m.id);
-  const mfrNameToId = new Map(allMfrs.map(m => [m.name, m.id]));
-  // Fix #8: report actual DB count, not insert attempts
-  log(`  ${allMfrs.length} manufacturers (${mfrInserted} rows processed)`);
+  let mfrCount = 0;
+  const keptMfrIds = new Set();
+
+  const mfrTx = db.transaction(() => {
+    for (const row of mfrRows) {
+      const id = parseInt(row.manufacturerId);
+      const name = (row.manufacturerName || '').trim();
+      if (!id || !name) continue;
+
+      // Rule 1: keep only manufacturers with parts
+      if (!KEPT_MANUFACTURER_IDS.has(id)) continue;
+
+      insertMfr.run(id, name, randomUUID());
+      keptMfrIds.add(id);
+      mfrCount++;
+
+      if (cleanedMfrStream) writeCsvLine(cleanedMfrStream, [id, name]);
+    }
+  });
+  mfrTx();
+  cleanedMfrStream?.end();
+  log(`  ${mfrCount} manufacturers kept`);
 
   // ── 2. Car Brands (model lines) ───────────────────────────────────────────
   log('Importing car brands…');
-  const brandFiles = await globFiles(`${SRC_ROOT}/models*.csv`);
-  const upsertBrand = db.prepare(
-    `INSERT INTO car_brands (name, year_from, year_to, manufacturer_id, uuid) VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT(uuid) DO UPDATE SET
-       name = excluded.name,
-       year_from = excluded.year_from,
-       year_to = excluded.year_to,
-       manufacturer_id = excluded.manufacturer_id`
-  );
-  let brandProcessed = 0;
+  const brandRows = await readCsv(join(SRC_ROOT, 'models_by_manufacturer.csv'));
 
-  for (const file of brandFiles) {
-    const rows = await readCsv(file);
-    const run = db.transaction(() => {
-      for (const row of rows) {
-        const name = (row.mmo_name || row.modelName || row.name || '').trim();
-        const uuid = row.mmo_id ? String(row.mmo_id) : row.modelId ? String(row.modelId) : randomUUID();
-        const yearFromRaw = row.mmo_pcon_start || row.modelYearFrom || '';
-        const yearToRaw = row.mmo_pcon_end || row.modelYearTo || '';
-        const yearFrom = parseInt(yearFromRaw) || null;
-        const yearTo = parseInt(yearToRaw) || null;
-        const mfrUuid = String(row.mfa_id || row.manufacturerId || '');
-        const mfrId = mfrUuidToId.get(mfrUuid) ?? mfrNameToId.get(row.mfa_brand || row.manufacturer) ?? null;
-        if (!name || !mfrId) continue;
-        upsertBrand.run(name, yearFrom, yearTo, mfrId, uuid);
-        brandProcessed++;
-      }
-    });
-    run();
+  const insertBrand = db.prepare(
+    `INSERT INTO car_brands (id, name, year_from, year_to, manufacturer_id, uuid) VALUES (?, ?, ?, ?, ?, ?)`
+  );
+
+  let cleanedBrandStream = null;
+  if (!SKIP_CLEANED) {
+    cleanedBrandStream = createWriteStream(join(CLEANED_ROOT, 'models_by_manufacturer.csv'));
+    cleanedBrandStream.write('manufacturer,manufacturerId,modelId,modelName,modelYearFrom,modelYearTo\n');
   }
 
-  const allBrands = db.prepare('SELECT id, uuid FROM car_brands').all();
-  const brandUuidToId = new Map(allBrands.map(b => [b.uuid, b.id]));
-  log(`  ${allBrands.length} brands (${brandProcessed} rows processed)`);
+  let brandCount = 0;
+  let brandSkipped = 0;
+  const keptBrandIds = new Set();
 
-  // ── 3. Car Models (engine variants) ──────────────────────────────────────
-  log('Importing car models (vehicle variants)…');
-  const vehicleFiles = await globFiles(`${SRC_ROOT}/vehicles*.csv`);
-  const upsertModel = db.prepare(
-    `INSERT INTO car_models
-       (type_name, construction_start, construction_end, fuel_type, body_type, drive_type, power_ps, car_brand_id, uuid)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(uuid) DO UPDATE SET
-       type_name = excluded.type_name,
-       construction_start = excluded.construction_start,
-       construction_end = excluded.construction_end,
-       fuel_type = excluded.fuel_type,
-       body_type = excluded.body_type,
-       drive_type = excluded.drive_type,
-       power_ps = excluded.power_ps,
-       car_brand_id = excluded.car_brand_id`
-  );
-  let vehicleCount = 0;
-  let skipped = 0;
+  const brandTx = db.transaction(() => {
+    for (const row of brandRows) {
+      const mfrId = parseInt(row.manufacturerId);
+      const modelId = parseInt(row.modelId);
+      const name = (row.modelName || '').trim();
+      const mfrName = (row.manufacturer || '').trim();
+      const yearFromRaw = row.modelYearFrom || '';
+      const yearToRaw = row.modelYearTo || '';
+      const yearFrom = extractYear(yearFromRaw);
+      const yearTo = extractYear(yearToRaw);
 
-  // Fix #6: collect all imported vehicle UUIDs so we can validate part_vehicles later
-  const importedVehicleUuids = new Set();
+      if (!modelId || !name || !mfrId) continue;
 
-  for (const file of vehicleFiles) {
-    if (vehicleCount >= MAX_VEHICLES) break;
-    const rows = await readCsv(file);
-    const run = db.transaction(() => {
-      for (const row of rows) {
-        if (vehicleCount >= MAX_VEHICLES) return;
-        const uuid = String(row.passanger_car_id || row.vehicleId || row.typ_id || randomUUID());
-        const yearStartRaw = row.typ_pcon_start || row.constructionStart || '';
-        const yearStart = parseInt(yearStartRaw) || null;
-        const brandUuid = String(row.mmo_id || row.modelId || '');
-        const brandId = brandUuidToId.get(brandUuid) ?? null;
-        if (!brandId) { skipped++; continue; }
-        const typeName = (row.typ_name || row.typeEngineName || row.type_name || '').trim();
-        const yearEndRaw = row.typ_pcon_end || row.constructionEnd || '';
-        const yearEnd = parseInt(yearEndRaw) || null;
-        const fuelType = (row.typ_motor || row.fuelType || row.fuel_type || '').trim();
-        const bodyType = (row.typ_karosserieform || row.bodyType || row.body_type || '').trim();
-        const driveType = (row.typ_antriebsart || row.driveType || row.drive_type || '').trim();
-        const powerPs = parseInt(row.typ_kw_von || row.powerPs) || 0;
-        upsertModel.run(typeName, yearStart, yearEnd, fuelType, bodyType, driveType, powerPs, brandId, uuid);
-        importedVehicleUuids.add(uuid);
-        vehicleCount++;
-      }
-    });
-    run();
-  }
-  log(`  ${vehicleCount} vehicle variants (${skipped} skipped — missing brand)`);
+      // Filter: manufacturer must be kept
+      if (!keptMfrIds.has(mfrId)) { brandSkipped++; continue; }
 
-  const allModels = db.prepare('SELECT id, uuid FROM car_models').all();
-  const modelUuidToId = new Map(allModels.map(m => [m.uuid, m.id]));
+      // Rule 2: remove models discontinued before 2010
+      // If yearTo exists and is before cutoff, skip. No yearTo = still in production = keep.
+      if (yearTo && yearTo < MODEL_YEAR_CUTOFF) { brandSkipped++; continue; }
 
-  // Fix #6: warn if --vehicles limit is active and parts will be affected
-  if (MAX_VEHICLES < Infinity) {
-    log(`  WARNING: --vehicles=${MAX_VEHICLES} active — part_vehicles pairs referencing non-imported vehicles will be skipped`);
-  }
+      insertBrand.run(modelId, name, yearFrom, yearTo, mfrId, randomUUID());
+      keptBrandIds.add(modelId);
+      brandCount++;
 
-  // ── 4. Categories ─────────────────────────────────────────────────────────
-  log('Importing categories…');
-  const catFiles = await globFiles(`${SRC_ROOT}/*categories*.csv`);
-
-  // Fix #1 + #5: upsert categories and use a third pass to fix parent_id links
-  const upsertCatNoParent = db.prepare(
-    `INSERT INTO categories (name, parent_id, level, uuid) VALUES (?, NULL, ?, ?)
-     ON CONFLICT(uuid) DO UPDATE SET name = excluded.name, level = excluded.level`
-  );
-  const updateCatParent = db.prepare(
-    `UPDATE categories SET parent_id = ? WHERE uuid = ?`
-  );
-
-  // Collect all category rows across files for the linking pass
-  const allCatRows = [];
-
-  for (const file of catFiles) {
-    const rows = await readCsv(file);
-
-    // Pass 1: insert ALL categories without parent links
-    const run1 = db.transaction(() => {
-      for (const row of rows) {
-        const name = (row.str_node_des || row.categoryName || row.name || '').trim();
-        const uuid = String(row.str_id || row.categoryId || randomUUID());
-        const parentUuid = String(row.str_id_parent || row.parentCategoryId || '');
-        const isChild = parentUuid && parentUuid !== '0' && parentUuid !== '';
-        const level = isChild ? 1 : (parseInt(row.level) || 0);
-
-        upsertCatNoParent.run(name, level, uuid);
-        allCatRows.push({ uuid, parentUuid: isChild ? parentUuid : null });
-      }
-    });
-    run1();
-  }
-
-  // Pass 2: now all categories exist — link parent_id by UUID
-  const catUuidToIdMap = new Map(
-    db.prepare('SELECT id, uuid FROM categories').all().map(c => [c.uuid, c.id])
-  );
-
-  let parentLinked = 0;
-  let parentMissing = 0;
-  const linkParents = db.transaction(() => {
-    for (const { uuid, parentUuid } of allCatRows) {
-      if (!parentUuid) continue;
-      const parentId = catUuidToIdMap.get(parentUuid);
-      if (parentId != null) {
-        updateCatParent.run(parentId, uuid);
-        parentLinked++;
-      } else {
-        parentMissing++;
+      if (cleanedBrandStream) {
+        writeCsvLine(cleanedBrandStream, [mfrName, mfrId, modelId, name, yearFromRaw, yearToRaw]);
       }
     }
   });
-  linkParents();
+  brandTx();
+  cleanedBrandStream?.end();
+  log(`  ${brandCount} brands kept, ${brandSkipped} filtered out`);
 
-  const catCount = db.prepare('SELECT COUNT(*) AS n FROM categories').get().n;
-  log(`  ${catCount} categories (${parentLinked} linked to parents, ${parentMissing} orphaned — parent UUID not found)`);
+  // ── 3. Car Models (vehicle variants) ──────────────────────────────────────
+  log('Importing car models (vehicle variants)…');
 
-  // Refresh uuid→id map
-  const catUuidToId = new Map(
-    db.prepare('SELECT id, uuid FROM categories').all().map(c => [c.uuid, c.id])
+  const insertModel = db.prepare(
+    `INSERT INTO car_models
+       (id, type_name, construction_start, construction_end, fuel_type, body_type, drive_type, power_ps, car_brand_id, uuid)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
 
-  // ── 5. Parts ─────────────────────────────────────────────────────────────
-  log(`Importing parts…`);
+  let cleanedVehicleStream = null;
+  if (!SKIP_CLEANED) {
+    cleanedVehicleStream = createWriteStream(join(CLEANED_ROOT, 'vehicles_detailed.csv'));
+    cleanedVehicleStream.write('vehicleId,modelId,modelName,manufacturer,manufacturerId,typeEngineName,constructionStart,constructionEnd,powerKw,powerPs,capacityLt,capacityTech,numberOfCylinders,numberOfValves,bodyType,engineType,fuelType,fuelMixture,driveType,engCodes,abs,asr\n');
+  }
 
+  const vehicleFile = join(SRC_ROOT, 'vehicles_detailed.csv');
+  let vehicleCount = 0;
+  let vehicleSkipped = 0;
+  const keptVehicleIds = new Set();
+
+  const vehicleRows = await readCsv(vehicleFile);
+  const vehicleTx = db.transaction(() => {
+    for (const row of vehicleRows) {
+      const vehicleId = parseInt(row.vehicleId);
+      const brandId = parseInt(row.modelId);
+
+      if (!vehicleId) continue;
+
+      // Rule 3: vehicle must belong to a kept model/brand
+      if (!keptBrandIds.has(brandId)) { vehicleSkipped++; continue; }
+
+      const typeName = (row.typeEngineName || '').trim();
+      const startYear = extractYear(row.constructionStart);
+      const endYear = extractYear(row.constructionEnd);
+      const fuelType = (row.fuelType || '').trim() || null;
+      const bodyType = (row.bodyType || '').trim() || null;
+      const driveType = (row.driveType || '').trim() || null;
+      const powerPs = parseInt(row.powerPs) || null;
+
+      insertModel.run(vehicleId, typeName, startYear, endYear, fuelType, bodyType, driveType, powerPs, brandId, randomUUID());
+      keptVehicleIds.add(vehicleId);
+      vehicleCount++;
+
+      if (cleanedVehicleStream) {
+        writeCsvLine(cleanedVehicleStream, [
+          row.vehicleId, row.modelId, row.modelName, row.manufacturer, row.manufacturerId,
+          row.typeEngineName, row.constructionStart, row.constructionEnd,
+          row.powerKw, row.powerPs, row.capacityLt, row.capacityTech,
+          row.numberOfCylinders, row.numberOfValves, row.bodyType, row.engineType,
+          row.fuelType, row.fuelMixture, row.driveType, row.engCodes, row.abs, row.asr,
+        ]);
+      }
+    }
+  });
+  vehicleTx();
+  cleanedVehicleStream?.end();
+  log(`  ${vehicleCount} vehicles kept, ${vehicleSkipped} filtered out`);
+
+  // ── 4. Categories ─────────────────────────────────────────────────────────
+  // Rule 5: import full tree
+  log('Importing categories…');
+  const catRows = await readCsv(join(SRC_ROOT, 'part_categories.csv'));
+
+  const insertCatNoParent = db.prepare(
+    `INSERT INTO categories (id, name, parent_id, level, uuid) VALUES (?, ?, NULL, ?, ?)`
+  );
+  const updateCatParent = db.prepare(
+    `UPDATE categories SET parent_id = ? WHERE id = ?`
+  );
+
+  // Pass 1: insert all without parent links
+  const catTx1 = db.transaction(() => {
+    for (const row of catRows) {
+      const id = parseInt(row.categoryId);
+      const name = (row.categoryName || '').trim();
+      const level = parseInt(row.level) || 0;
+      if (!id || !name) continue;
+      insertCatNoParent.run(id, name, level, randomUUID());
+    }
+  });
+  catTx1();
+
+  // Pass 2: link parents
+  let parentLinked = 0;
+  const catTx2 = db.transaction(() => {
+    for (const row of catRows) {
+      const id = parseInt(row.categoryId);
+      const parentId = parseInt(row.parentCategoryId);
+      if (!id || !parentId) continue;
+      updateCatParent.run(parentId, id);
+      parentLinked++;
+    }
+  });
+  catTx2();
+
+  const catCount = db.prepare('SELECT COUNT(*) AS n FROM categories').get().n;
+  log(`  ${catCount} categories (${parentLinked} linked to parents)`);
+
+  if (!SKIP_CLEANED) {
+    // Copy categories as-is
+    const catSrc = join(SRC_ROOT, 'part_categories.csv');
+    const catDst = join(CLEANED_ROOT, 'part_categories.csv');
+    const { copyFileSync } = await import('fs');
+    copyFileSync(catSrc, catDst);
+  }
+
+  // ── 5. Parts ──────────────────────────────────────────────────────────────
+  log('Importing parts…');
+
+  const insertPart = db.prepare(
+    `INSERT OR IGNORE INTO parts (id, product_name, image_url, category_id, uuid, article_no, supplier_name, supplier_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  );
   const insertPartVehicle = db.prepare(
     `INSERT OR IGNORE INTO part_vehicles (part_id, vehicle_id) VALUES (?, ?)`
   );
 
-  let partRows = 0;
-  let pairsInserted = 0;
-  let pairsSkippedNoVehicle = 0;
-
   const partFiles = await globFiles(
-    `${SRC_ROOT}/detailed parts/complete/parts_complete_vehicles_*.csv`
+    join(SRC_ROOT, 'detailed parts', 'complete', 'parts_complete_vehicles_*.csv')
   );
+
   if (partFiles.length === 0) {
-    log('  WARNING: No files found in detailed parts/complete/ — skipping parts import');
-    log(`  Expected: ${SRC_ROOT}/detailed parts/complete/parts_complete_vehicles_*.csv`);
+    log('  WARNING: No part files found — skipping parts import');
   }
 
-  // Fix #5: upsert parts too
-  const upsertPart = db.prepare(
-    `INSERT INTO parts (product_name, image_url, category_id, uuid, article_no, supplier_name, supplier_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(uuid) DO UPDATE SET
-       product_name = excluded.product_name,
-       image_url = excluded.image_url,
-       category_id = excluded.category_id,
-       article_no = excluded.article_no,
-       supplier_name = excluded.supplier_name,
-       supplier_id = excluded.supplier_id`
+  let totalPartRows = 0;
+  let partsInserted = 0;
+  let pairsInserted = 0;
+  let pairsSkipped = 0;
+  const seenArticleIds = new Set();
+
+  // Pre-load category IDs for validation
+  const validCatIds = new Set(
+    db.prepare('SELECT id FROM categories').all().map(c => c.id)
   );
-
-  // Fix #3: pre-build a lookup for parts we've seen, and use last_insert_rowid()
-  // instead of per-row SELECT
-  const articleUuidToId = new Map();
-
-  // Pre-load existing parts from DB (for re-run support)
-  for (const p of db.prepare('SELECT id, uuid FROM parts').all()) {
-    articleUuidToId.set(p.uuid, p.id);
-  }
-
-  // Prepare a single lookup for getting the id after upsert
-  const getPartId = db.prepare('SELECT id FROM parts WHERE uuid = ?');
 
   for (const file of partFiles) {
-    log(`  Processing ${file.split('/').pop()}…`);
+    const fname = file.split('/').pop();
+    log(`  Processing ${fname}…`);
+
     const rows = await readCsv(file);
 
-    const run = db.transaction(() => {
+    let cleanedPartStream = null;
+    if (!SKIP_CLEANED) {
+      cleanedPartStream = createWriteStream(join(CLEANED_ROOT, 'detailed parts', 'complete', fname));
+      cleanedPartStream.write('articleId,articleNo,supplierName,supplierId,articleProductName,productId,articleMediaType,articleMediaFileName,s3image,vehicleId,categoryId\n');
+    }
+
+    const partTx = db.transaction(() => {
       for (const row of rows) {
-        const vehicleUuid = String(row.vehicleId || '');
-        const articleUuid = String(row.articleId || '');
+        const vehicleId = parseInt(row.vehicleId);
+        const articleId = parseInt(row.articleId);
         const productName = (row.articleProductName || '').trim();
-        const catUuid = String(row.categoryId || '');
 
-        if (!vehicleUuid || !articleUuid || !productName) continue;
+        if (!vehicleId || !articleId || !productName) continue;
+        totalPartRows++;
 
-        const vehicleId = modelUuidToId.get(vehicleUuid) ?? null;
-        if (!vehicleId) {
-          // Fix #6: count skipped pairs when vehicle wasn't imported
-          pairsSkippedNoVehicle++;
-          continue;
-        }
+        // Rule 4: vehicle must be kept
+        if (!keptVehicleIds.has(vehicleId)) { pairsSkipped++; continue; }
 
-        if (!articleUuidToId.has(articleUuid)) {
-          const catId = catUuidToId.get(catUuid) ?? null;
+        // Insert part if not seen
+        if (!seenArticleIds.has(articleId)) {
+          const catId = parseInt(row.categoryId) || null;
+          const validCatId = (catId && validCatIds.has(catId)) ? catId : null;
           const imageUrl = (row.s3image || '').trim() || null;
           const articleNo = (row.articleNo || '').trim() || null;
           const supplierName = (row.supplierName || '').trim() || null;
-          const supplierId = String(row.supplierId || '') || null;
+          const supplierId = (row.supplierId || '').trim() || null;
 
-          upsertPart.run(productName, imageUrl, catId, articleUuid, articleNo, supplierName, supplierId);
-          // Fix #3: use a single lookup only for new inserts (not per-row inside hot loop)
-          const partId = lastId.get().id;
-          // Verify the id is for our row (handles upsert case where lastId may not update)
-          if (partId) {
-            const verified = getPartId.get(articleUuid);
-            if (verified) {
-              articleUuidToId.set(articleUuid, verified.id);
-              partRows++;
-            }
-          }
+          insertPart.run(articleId, productName, imageUrl, validCatId, randomUUID(), articleNo, supplierName, supplierId);
+          seenArticleIds.add(articleId);
+          partsInserted++;
         }
 
-        const partId = articleUuidToId.get(articleUuid);
-        if (!partId) continue;
-
-        insertPartVehicle.run(partId, vehicleId);
+        // Insert part-vehicle link
+        insertPartVehicle.run(articleId, vehicleId);
         pairsInserted++;
+
+        // Write to cleaned CSV
+        if (cleanedPartStream) {
+          writeCsvLine(cleanedPartStream, [
+            row.articleId, row.articleNo, row.supplierName, row.supplierId,
+            row.articleProductName, row.productId, row.articleMediaType,
+            row.articleMediaFileName, row.s3image, row.vehicleId, row.categoryId,
+          ]);
+        }
       }
     });
-    run();
+    partTx();
+    cleanedPartStream?.end();
   }
 
-  log(`  ${articleUuidToId.size} unique articles, ${pairsInserted} part-vehicle pairs`);
-  if (pairsSkippedNoVehicle > 0) {
-    log(`  ${pairsSkippedNoVehicle} part-vehicle pairs skipped (vehicle not imported)`);
+  log(`  ${partsInserted} unique parts, ${pairsInserted} part-vehicle pairs`);
+  log(`  ${pairsSkipped} rows skipped (vehicle not kept)`);
+
+  // Remove orphan parts (no vehicle links)
+  const orphanResult = db.prepare(
+    `DELETE FROM parts WHERE id NOT IN (SELECT DISTINCT part_id FROM part_vehicles)`
+  ).run();
+  if (orphanResult.changes > 0) {
+    log(`  Removed ${orphanResult.changes} orphan parts (no vehicle links)`);
   }
 
   // ── 6. Indexes ────────────────────────────────────────────────────────────
   createIndexes(db);
 
-  // Fix #4: re-enable foreign key checks and validate
+  // ── 7. FK validation ──────────────────────────────────────────────────────
   db.pragma('foreign_keys = ON');
   const fkErrors = db.pragma('foreign_key_check');
   if (fkErrors.length > 0) {
-    log(`  WARNING: ${fkErrors.length} foreign key violations found`);
-    // Show first few
-    for (const err of fkErrors.slice(0, 10)) {
-      log(`    table=${err.table} rowid=${err.rowid} parent=${err.parent} fkid=${err.fkid}`);
+    log(`  WARNING: ${fkErrors.length} foreign key violations`);
+    for (const err of fkErrors.slice(0, 5)) {
+      log(`    table=${err.table} rowid=${err.rowid} parent=${err.parent}`);
     }
-    if (fkErrors.length > 10) log(`    … and ${fkErrors.length - 10} more`);
   } else {
     log('  Foreign key check passed');
   }
 
-  // ── 7. Summary ────────────────────────────────────────────────────────────
+  // ── 8. Summary ────────────────────────────────────────────────────────────
   const stats = {
     manufacturers: db.prepare('SELECT COUNT(*) AS n FROM manufacturers').get().n,
     brands:        db.prepare('SELECT COUNT(*) AS n FROM car_brands').get().n,
@@ -515,6 +544,7 @@ async function main() {
   log(`  Parts         : ${stats.parts}`);
   log(`  Part-vehicle  : ${stats.pairs}`);
   log(`  DB written to : ${DB_PATH}`);
+  if (!SKIP_CLEANED) log(`  Cleaned CSVs  : ${CLEANED_ROOT}`);
 }
 
 main().catch(err => {

@@ -7,13 +7,13 @@ SQLite database (`inventory.db`) containing the TecDoc-sourced parts catalog.
 ```mermaid
 erDiagram
     manufacturers {
-        INTEGER id PK "AUTOINCREMENT"
+        INTEGER id PK "TecDoc manufacturerId"
         TEXT name "NOT NULL"
         TEXT uuid "UNIQUE"
     }
 
     car_brands {
-        INTEGER id PK "AUTOINCREMENT"
+        INTEGER id PK "TecDoc modelId"
         TEXT name "NOT NULL"
         INTEGER year_from
         INTEGER year_to
@@ -22,7 +22,7 @@ erDiagram
     }
 
     car_models {
-        INTEGER id PK "AUTOINCREMENT"
+        INTEGER id PK "TecDoc vehicleId"
         TEXT type_name "NOT NULL"
         INTEGER construction_start
         INTEGER construction_end
@@ -35,7 +35,7 @@ erDiagram
     }
 
     categories {
-        INTEGER id PK "AUTOINCREMENT"
+        INTEGER id PK "TecDoc categoryId"
         TEXT name "NOT NULL"
         INTEGER parent_id FK "self-ref"
         INTEGER level "0 or 1"
@@ -43,7 +43,7 @@ erDiagram
     }
 
     parts {
-        INTEGER id PK "AUTOINCREMENT"
+        INTEGER id PK "TecDoc articleId"
         TEXT product_name "NOT NULL"
         TEXT image_url
         INTEGER category_id FK
@@ -70,12 +70,12 @@ erDiagram
 
 | Table          | Rows        |
 |----------------|-------------|
-| manufacturers  | ~698        |
-| car_brands     | ~2,022      |
-| car_models     | ~11,178     |
-| categories     | ~1,323      |
-| parts          | ~337,288    |
-| part_vehicles  | ~12,620,921 |
+| manufacturers  | 10          |
+| car_brands     | 1,065       |
+| car_models     | 11,184      |
+| categories     | 1,323       |
+| parts          | 337,293     |
+| part_vehicles  | 12,628,694  |
 
 ## Indexes
 
@@ -91,7 +91,9 @@ erDiagram
 
 ## Notes
 
-- **Source**: TecDoc automotive parts catalog
+- **Primary keys** are TecDoc IDs (not autoincrement) for direct cross-referencing with source CSVs
+- **Import rules**: see `IMPORT-RULES.md` for filtering logic
+- **Source**: TecDoc automotive parts catalog (10 retained manufacturers)
 - **part_vehicles** is the junction table for the many-to-many between parts and car_models (~12.6M associations)
 - **categories** uses a 2-level adjacency list (top-level `level=0`, children `level=1`)
 - All domain tables carry a `uuid` column for external API correlation

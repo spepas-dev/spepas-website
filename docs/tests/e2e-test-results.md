@@ -1,7 +1,7 @@
 # SpePas — E2E Test Results & Environment
 
-> **Last updated:** 2026-03-01
-> **Test plan:** [e2e-test-plan.md](./e2e-test-plan.md)
+> **Last updated:** 2026-03-08
+> **Test plan:** [e2e-test-plan.md](./e2e-test-plan.md) · **Bugs:** [bugs.md](./bugs.md)
 
 ---
 
@@ -73,7 +73,7 @@ RIDER
 
 | # | Task | Result | Notes | Tested By | Date |
 |---|------|--------|-------|-----------|------|
-| 0A | Login & Dashboard | | | | |
+| 0A | Login & Dashboard | PARTIAL PASS | [Details below](#test-0a--login--dashboard) | Claude | 2026-03-08 |
 | 0B | User Management | | | | |
 | 0C | Call-In Order Wizard | | | | |
 | 0D | Order & Bid Monitoring | | | | |
@@ -91,6 +91,40 @@ RIDER
 | 9 | Rider Delivers | | | | |
 | 10 | Rider Wallet (USSD) | | | | |
 | 11 | Wallet Settlement | | | | |
+
+---
+
+## Detailed Results
+
+### Test 0A — Login & Dashboard
+
+**Result: PARTIAL PASS** | Tested: 2026-03-08 | URL: `admin.spepas.com`
+
+**Login:** Signed in with admin test credentials (`adminuser@yahoo.com`). Login succeeded. Redirected to dashboard.
+
+**Dashboard:** Renders correctly — "Welcome Back, Kofi Admin!", 4 KPI cards, Quick Actions section, Recent Activity feed.
+
+| Sidebar Section | Renders? | Data? | Issues |
+|----------------|----------|-------|--------|
+| Access Management > Permissions | Yes | 8 permissions in table | None |
+| User Management > Users | Yes | 6 admin users in table | None |
+| Call In Management > Calls Orders | Yes | 4-step wizard visible | None |
+| Order Management > Requests | Yes | 1 active request ("Caburator Lexus CRV") | `/requests/stats` returns 404 — 24 console errors. Stats endpoint does not exist on the API. |
+| Wallet Management > Wallets | Yes | 4 wallets (2 revenue, 1 credit_suspense GHS 14,169.75, 1 debit_suspense -GHS 14,169.75) | None |
+| Inventory Management > Categories | Yes | 0 categories displayed | API returns 15 categories but table shows "No results" — admin portal data mapping bug (likely expecting different response shape). |
+| Settings > Profile | Yes | Form fields populated | Shows hardcoded dummy data ("John Doe", "john.doe@example.com", "+1 (555) 123-4567") instead of actual user profile ("Kofi Admin"). |
+
+**Pass criteria:** "All pages render. No blank screens or JS errors."
+- All pages render — **PASS**
+- No blank screens — **PASS**
+- No JS errors — **FAIL** (24 errors from `/requests/stats` 404)
+
+**Bugs to report:**
+1. `GET /requests/stats` — endpoint does not exist (404). Order Management page fires this request repeatedly.
+2. Categories table shows 0 results despite API returning 15 categories — admin portal is not mapping the response correctly.
+3. Settings profile form shows hardcoded placeholder values instead of the authenticated user's actual data.
+
+---
 
 ### Phase 1B — Phone/USSD Rejection Scenarios
 
