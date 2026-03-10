@@ -5,6 +5,7 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { getActiveSliders } from '@/lib/advertApis'
 import type { SliderData } from '@/lib/advertZodValidation'
+import SpepasLoader from '@/components/common/SpepasLoader'
 
 const AdvertSlider: React.FC = () => {
   const { data: response, isLoading } = useQuery({
@@ -21,8 +22,9 @@ const AdvertSlider: React.FC = () => {
   return (
     <section className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 mt-8 sm:mt-10 lg:mt-14">
       {isLoading ? (
-        // Skeleton loader
-        <div className="rounded-xl overflow-hidden bg-gray-100 animate-pulse h-[280px] sm:h-[320px] lg:h-[360px]" />
+        <div className="flex items-center justify-center rounded-xl overflow-hidden bg-gray-1 h-[280px] sm:h-[320px] lg:h-[360px]">
+          <SpepasLoader size="lg" label="Loading adverts..." />
+        </div>
       ) : (
         <Swiper
           spaceBetween={0}

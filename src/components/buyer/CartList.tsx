@@ -1,52 +1,49 @@
-// src/components/buyer/CartList.tsx
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
-import { getItemsInCartAll, removeBidFromCartAPI, getUserChargesAPI } from '@/lib/orderBidsApis'
-import CartItem from './CartItem'
-import Lottie from 'lottie-react'
-import loadingAnimation from '@/assets/lottie/loading-cart.json'
-import emptyCartAnimation from '@/assets/lottie/empty-cart.json'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { getItemsInCartAll, removeBidFromCartAPI, getUserChargesAPI } from '@/lib/orderBidsApis';
+import CartItem from './CartItem';
+import SpepasLoader from '@/components/common/SpepasLoader';
+import { ShoppingCart, ArrowRight, PackageOpen } from 'lucide-react';
 
 const CartList: React.FC = () => {
-  const [items, setItems] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     getItemsInCartAll()
-      .then(res => setItems(res.data))
+      .then((res) => setItems(res.data))
       .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [])
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleRemove = (cartId: string) => {
     removeBidFromCartAPI({ cart_ID: cartId })
-      .then(() => setItems(prev => prev.filter(i => i.cart_ID !== cartId)))
-      .catch(console.error)
-  }
+      .then(() => setItems((prev) => prev.filter((i) => i.cart_ID !== cartId)))
+      .catch(console.error);
+  };
 
-  // 1) Prompt via toast, 2) call getUserCharges, 3) navigate to /buyer/checkout
   const handleCheckout = () => {
     toast(
       (t) => (
-        <div className="p-4 bg-white rounded shadow-lg">
-          <p className="mb-2 font-medium">Aggregate cart items?</p>
-          <div className="flex justify-end gap-2">
+        <div className="text-center">
+          <p className="text-sm font-medium text-dark mb-3">Aggregate cart items?</p>
+          <div className="flex justify-center gap-2">
             <button
-              className="px-3 py-1 bg-green-600 text-white rounded"
+              className="px-4 py-1.5 text-sm font-medium bg-blue text-white rounded-lg hover:bg-blue-dark transition-colors"
               onClick={async () => {
-                toast.dismiss(t.id)
-                await confirmAggregate('1')
+                toast.dismiss(t.id);
+                await confirmAggregate('1');
               }}
             >
               Yes
             </button>
             <button
-              className="px-3 py-1 bg-gray-200 rounded"
+              className="px-4 py-1.5 text-sm font-medium bg-gray-1 text-dark border border-gray-3 rounded-lg hover:bg-gray-2 transition-colors"
               onClick={async () => {
-                toast.dismiss(t.id)
-                await confirmAggregate('0')
+                toast.dismiss(t.id);
+                await confirmAggregate('0');
               }}
             >
               No
@@ -56,85 +53,86 @@ const CartList: React.FC = () => {
       ),
       {
         duration: Infinity,
-        // ensure toast appears below header and above everything else
-        style: {
-          marginTop: '4rem', 
-          zIndex: 10000,
-        },
+        style: { marginTop: '4rem', zIndex: 10000 },
       }
-    )
-  }
+    );
+  };
 
   const confirmAggregate = async (agg: '1' | '0') => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const charges = await getUserChargesAPI({ aggeagate: agg })
-      // navigate to the buyer-specific checkout route
-      navigate('/95668339501103956045/buyer/checkout', { state: { charges, aggeagate: agg } })
+      const charges = await getUserChargesAPI({ aggeagate: agg });
+      navigate('/95668339501103956045/buyer/checkout', { state: { charges, aggeagate: agg } });
     } catch (err) {
-      console.error(err)
-      toast.error('Failed to fetch charges.')
+      console.error(err);
+      toast.error('Failed to fetch charges.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const total = items.reduce((sum, i) => sum + (i.bid.totalPrice || 0), 0)
+  const total = items.reduce((sum, i) => sum + (i.bid.totalPrice || 0), 0);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20 px-4">
-        <Lottie
-          animationData={loadingAnimation}
-          loop
-          autoplay
-          className="w-24 h-24 sm:w-32 sm:h-32"
-        />
-      </div>
-    )
+    return <SpepasLoader size="lg" label="Loading cart..." fullSection />;
   }
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 px-4">
-        <Lottie
-          animationData={emptyCartAnimation}
-          loop
-          autoplay
-          className="w-48 h-48 sm:w-64 sm:h-64"
-        />
-        <p className="text-gray-600 text-base sm:text-lg">Your cart is empty.</p>
-        <button
-          onClick={() => navigate('/95668339501103956045/Shop')}
-          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base px-6 py-2 rounded-full shadow transition"
-        >
-          Go to Shop
-        </button>
+      <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="h-20 w-20 rounded-full bg-gray-1 flex items-center justify-center mb-5">
+            <PackageOpen className="h-10 w-10 text-dark-4" />
+          </div>
+          <p className="text-base font-semibold text-dark">Your cart is empty</p>
+          <p className="text-sm text-dark-4 mt-1 mb-6">Browse our shop to find the parts you need</p>
+          <button
+            onClick={() => navigate('/95668339501103956045/shop')}
+            className="inline-flex items-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-6 rounded-xl hover:bg-blue-dark transition-colors duration-200"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            Go to Shop
+          </button>
+        </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <ul className="space-y-6">
-        {items.map(i => (
-          <CartItem key={i.cart_ID} item={i} onRemove={handleRemove} />
-        ))}
-      </ul>
+    <div className="bg-white rounded-2xl border border-gray-3 shadow-1 overflow-hidden">
+      {/* Cart items */}
+      <div className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-dark-4 font-medium">
+            {items.length} item{items.length !== 1 ? 's' : ''} in cart
+          </p>
+        </div>
 
-      <div className="mt-8 flex flex-col sm:flex-row justify-between items-center border-t pt-4">
-        <span className="font-bold text-lg sm:text-xl">
-          Total: GH₵ {total.toFixed(2)}
-        </span>
+        <ul className="space-y-3">
+          {items.map((i) => (
+            <CartItem key={i.cart_ID} item={i} onRemove={handleRemove} />
+          ))}
+        </ul>
+      </div>
+
+      {/* Footer with total + checkout */}
+      <div className="border-t border-gray-3 bg-gray-1 px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Total</p>
+          <p className="text-xl sm:text-2xl font-bold text-dark">
+            GH&#x20B5; {total.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
         <button
           onClick={handleCheckout}
-          className="mt-4 sm:mt-0 bg-green-600 hover:bg-green-700 text-white text-sm sm:text-base px-6 py-2 rounded transition"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue text-white font-medium text-sm py-3 px-8 rounded-xl hover:bg-blue-dark transition-colors duration-200"
         >
-          Checkout
+          Proceed to Checkout
+          <ArrowRight className="h-4 w-4" />
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CartList
+export default CartList;

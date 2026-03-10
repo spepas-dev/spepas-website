@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../Common/Breadcrumb'; // <- same path used elsewhere
 import { useQuery } from '@tanstack/react-query';
 import { getSparePartDetailByCode, getSpareParts } from '@/lib/inventoryApis';
+import SpepasLoader from '@/components/common/SpepasLoader';
 
 type DetailPayload =
   | { source: 'detail' | 'list'; item: any | null }
@@ -51,12 +52,7 @@ const ShopDetails: React.FC = () => {
 
   // Loading shell
   if (query.isLoading) {
-    return (
-      <div className="w-full max-w-lg mx-auto py-20 text-center px-4">
-        <div className="animate-pulse h-8 w-48 bg-gray-200 rounded mx-auto mb-4" />
-        <div className="animate-pulse h-64 bg-gray-200 rounded" />
-      </div>
-    );
+    return <SpepasLoader size="lg" label="Loading product..." fullSection />;
   }
 
   const item = query.data?.item;

@@ -1,6 +1,6 @@
-// src/components/buyer/OfferCard.tsx
 import React from 'react'
 import { toast } from 'react-hot-toast'
+import { Store, ShoppingCart, X, Package } from 'lucide-react'
 
 interface OfferCardProps {
   offer: any
@@ -16,129 +16,78 @@ const OfferCard: React.FC<OfferCardProps> = ({
   onRemove,
 }) => {
   const seller = offer.seller ?? {}
-  const imgUrl = seller.business_reg_url ?? ''
+  const imgUrl = offer.images?.[0]?.image_url ?? seller.business_reg_url ?? ''
   const sellerName = seller.storeName ?? 'Unknown Seller'
-  const price = offer.totalPrice ?? offer.price ?? 0
+  const totalPrice = offer.totalPrice ?? offer.price ?? 0
+  const unitPrice = offer.unitPrice ?? 0
+  const quantity = offer.quantity ?? ''
 
   const handleAdd = () => {
-    const id = toast.loading('Adding to cart…', { position: 'bottom-center' })
+    const id = toast.loading('Adding to cart...', { position: 'bottom-center' })
     onAdd(offer.bidding_ID)
     toast.success('Added to cart!', { id, position: 'bottom-center' })
   }
 
   const handleRemove = () => {
-    const id = toast.loading('Removing from cart…', { position: 'bottom-center' })
+    const id = toast.loading('Removing from cart...', { position: 'bottom-center' })
     onRemove(offer.bidding_ID)
     toast.success('Removed from cart!', { id, position: 'bottom-center' })
   }
 
   return (
-    <div
-      className="
-        bg-white
-        rounded-lg
-        shadow
-        overflow-hidden
-        flex flex-col
-        sm:flex-row
-        items-center
-        p-4
-        mb-4
-      "
-    >
-      {/* Image container: always fixed size so images align */}
-      <div
-        className="
-          w-full h-40
-          sm:w-16 sm:h-16
-          flex-shrink-0
-          rounded-md
-          overflow-hidden
-          bg-gray-100
-          flex items-center justify-center
-          mb-4 sm:mb-0 sm:mr-4
-        "
-      >
+    <div className="bg-white rounded-2xl border border-gray-3 shadow-1 overflow-hidden hover:shadow-2 transition-shadow flex flex-col">
+      {/* Image */}
+      <div className="aspect-[4/3] bg-gray-1 flex items-center justify-center overflow-hidden">
         {imgUrl ? (
-          <img
-            src={imgUrl}
-            alt={sellerName}
-            className="
-              w-full h-full
-              object-cover
-            "
-          />
+          <img src={imgUrl} alt={sellerName} className="w-full h-full object-cover" />
         ) : (
-          /* Simple SVG placeholder when no image URL */
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-8 h-8 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 7a2 2 0 012-2h3l2-2h4l2 2h3a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 12l2 2 4-4"
-            />
-          </svg>
+          <Package className="h-10 w-10 text-dark-5" />
         )}
       </div>
 
-      {/* Seller info */}
-      <div className="flex-grow text-center sm:text-left space-y-1">
-        <p className="text-base sm:text-sm font-semibold text-gray-800">
-          {sellerName}
-        </p>
-        <p className="text-sm sm:text-xs text-gray-600">GH₵ {price}</p>
-      </div>
+      {/* Content */}
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-7 w-7 rounded-lg bg-blue-light-5 flex items-center justify-center flex-shrink-0">
+            <Store className="h-3.5 w-3.5 text-blue" />
+          </div>
+          <p className="text-sm font-semibold text-dark truncate">{sellerName}</p>
+        </div>
 
-      {/* Add/Remove button */}
-      <div className="mt-4 sm:mt-0 sm:ml-4">
-        {inCart ? (
-          <button
-            onClick={handleRemove}
-            className="
-              w-full
-              sm:w-auto
-              bg-red-500 hover:bg-red-600
-              text-white
-              text-sm
-              font-medium
-              py-2 px-4
-              rounded-md
-              transition
-            "
-          >
-            Remove
-          </button>
-        ) : (
-          <button
-            onClick={handleAdd}
-            className="
-              w-full
-              sm:w-auto
-              bg-green-600 hover:bg-green-700
-              text-white
-              text-sm
-              font-medium
-              py-2 px-4
-              rounded-md
-              transition
-              
-            "
-          >
-            Add to Cart
-          </button>
-        )}
+        <div className="space-y-1 flex-1">
+          <p className="text-lg font-bold text-dark">
+            GH&#x20B5; {Number(totalPrice).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+          </p>
+          {unitPrice > 0 && (
+            <p className="text-xs text-dark-4">
+              Unit price: GH&#x20B5; {Number(unitPrice).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+            </p>
+          )}
+          {quantity && (
+            <p className="text-xs text-dark-4">Qty: {quantity}</p>
+          )}
+        </div>
+
+        {/* Action */}
+        <div className="mt-3 pt-3 border-t border-gray-3">
+          {inCart ? (
+            <button
+              onClick={handleRemove}
+              className="w-full inline-flex items-center justify-center gap-2 bg-red-50 text-red-600 font-medium text-sm py-2.5 px-5 rounded-xl border border-red-200 hover:bg-red-100 transition-colors duration-200"
+            >
+              <X className="h-4 w-4" />
+              Remove from Cart
+            </button>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className="w-full inline-flex items-center justify-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Add to Cart
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

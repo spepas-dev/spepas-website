@@ -227,25 +227,36 @@ const Signin: React.FC = () => {
         </div>
       </section>
 
-      {/* Role Selector Popup */}
+      {/* Role Selector Modal */}
       {showRoleSelector && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-white/10"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-dark/40 backdrop-blur-sm"
           onClick={() => setShowRoleSelector(false)}
         >
           <div
-            className="bg-white rounded-lg p-6 w-80 text-center"
+            className="bg-white rounded-2xl shadow-3 p-8 w-full max-w-sm mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold mb-4">Select Account Type</h3>
-            <ul className="space-y-3">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-10 w-10 rounded-xl bg-blue-light-5 flex items-center justify-center">
+                <svg className="h-5 w-5 text-blue" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-dark">Select Profile</h3>
+                <p className="text-xs text-dark-4">Choose which account type to continue as</p>
+              </div>
+            </div>
+
+            <ul className="space-y-2">
               {availableRoles.map((role) => (
                 <li key={role}>
                   <button
                     onClick={() => handleRoleSelect(role)}
-                    className="w-full py-2 px-6 bg-gradient-to-r from-blue to-blue-500 text-white font-medium rounded-2xl shadow-md hover:opacity-90 transition"
+                    className="w-full flex items-center justify-between py-3 px-4 rounded-xl text-sm font-medium bg-gray-1 text-dark-2 border border-gray-3 hover:bg-blue-light-5 hover:text-blue hover:border-blue/20 transition-colors duration-200"
                   >
-                    {role}
+                    <span>{role}</span>
                   </button>
                 </li>
               ))}
