@@ -22,6 +22,8 @@ import { chatRoutes }          from './chat.routes';
 
 import ProtectedLayout         from '@/components/layout/protected/ProtectedLayout'; // *adjusted*
 import MyAccountPage           from '@/pages/marketing/my-account/page';            // *adjusted*
+import InvoiceDetailPage       from '@/pages/invoices/InvoiceDetailPage';
+import InvoiceItemDetailPage   from '@/pages/invoices/InvoiceItemDetailPage';
 
 // Group all protected children here (clean and centralized)
 const protectedChildren = [
@@ -35,11 +37,16 @@ const protectedChildren = [
   ...gopaRoutes,
   ...gopaInvoiceRoutes,
 
-  
+
   { path: 'rider', children: riderRoutes },
 
 
   ...chatRoutes,
+
+  // Shared invoice detail routes (accessible by all roles)
+  { path: 'invoices/:invoice_id', element: <InvoiceDetailPage /> },
+  { path: 'invoices/:invoice_id/items/:item_id', element: <InvoiceItemDetailPage /> },
+  { path: 'buyer/invoices/:invoice_id', element: <InvoiceDetailPage /> },
 ]; // *adjusted*
 
 export const routes = [

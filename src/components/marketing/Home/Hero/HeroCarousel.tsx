@@ -36,7 +36,7 @@ const HeroCarousel: React.FC = () => {
 
           /* === Shine Keyframes ===
              - Total duration: 2s
-             - 0%–60%: keep the “shine” element off to the left
+             - 0%–60%: keep the "shine" element off to the left
              - 65%: slide it fully to the right
              - 100%: keep it off to the right until the 8s cycle repeats
           */
@@ -81,7 +81,7 @@ const HeroCarousel: React.FC = () => {
           /* === Neon-Pulse Button Styles === */
           .neon-pulse {
             position: relative;
-           
+
             border: 2px solid #0000FF;
             box-shadow: 0 0 10px rgba(42, 18, 255, 0.3);
             overflow: visible;
@@ -91,7 +91,7 @@ const HeroCarousel: React.FC = () => {
           .neon-pulse::after {
             content: "";
             position: absolute;
-            inset: -2px; /* expand 4px beyond the button’s bounding box */
+            inset: -2px; /* expand 4px beyond the button's bounding box */
             border: 2px solid rgba(65, 65, 255, 0.33);
             border-radius: inherit;
             animation: pulseOut 3s ease-out infinite;
@@ -99,7 +99,7 @@ const HeroCarousel: React.FC = () => {
           }
 
           /* Stagger the second pulse for continuous effect */
-          
+
         `}
       </style>
 

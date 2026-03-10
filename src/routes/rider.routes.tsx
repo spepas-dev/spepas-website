@@ -11,11 +11,15 @@ import RiderScanPage from '@/pages/rider/scan';
 import RiderProofPage from '@/pages/rider/proof';
 import RiderProofSubmitPage from '@/pages/rider/proof-submit';
 import RiderDeliveredSuccessPage from '@/pages/rider/delivered-success';
+import RiderInvoicesPage from '@/pages/rider/invoices';
 
 export const riderRoutes: RouteObject[] = [
   // Lists
   { path: 'orders', element: <RiderOrdersPage /> },
   { path: 'orders-delivered', element: <RiderOrdersDeliveredPage /> },
+
+  // Invoices
+  { path: 'invoices', element: <RiderInvoicesPage /> },
 
   // Details
   { path: 'orders/:orderId', element: <RiderOrderDetailPage /> },
