@@ -8,41 +8,42 @@ export type Testimonial = {
 const testimonialsData: Testimonial[] = [
   {
     review:
-      'SpePas truly streamlined my search for quality auto parts. I found everything I needed quickly, and the transaction process was smooth and secure. Highly recommended!',
+      'I needed a radiator for my Hyundai Tucson and found it on SpePas within minutes. The seller was verified, the part was genuine, and it arrived the next day. Way easier than driving around Abossey Okai.',
     authorName: 'John Kwabena',
     authorImg: '/images/users/user1.jpg',
-    authorRole: 'Entrepreneur'
+    authorRole: 'Car Owner'
   },
   {
     review:
-      'I have been using SpePas for a few months now, and I am impressed by the wide range of auto parts available. Their platform is user-friendly and efficient.',
+      'As a delivery rider, I can\'t afford downtime. SpePas helped me source brake pads and a chain set fast. The request feature is great — I posted what I needed and got offers within hours.',
     authorName: 'Wilson Addai',
     authorImg: '/images/users/user2.jpg',
-    authorRole: 'Rider'
+    authorRole: 'Delivery Rider'
   },
   {
     review:
-      'The SpePas marketplace is a game-changer. The secure payment methods and prompt delivery make online shopping for auto parts hassle-free.',
+      'I manage a fleet of 12 vehicles and SpePas has become my go-to for sourcing parts. Being able to compare prices from multiple sellers in one place saves me time and money every week.',
     authorName: 'Miracle Addo',
     authorImg: '/images/users/user3.jpg',
-    authorRole: 'Serial Entrepreneur'
+    authorRole: 'Fleet Manager'
   },
   {
     review:
-      'Customer service on SpePas is outstanding! I had a minor issue with my order, and their team resolved it promptly with great professionalism.',
+      'My customers always need parts urgently. With SpePas I can search, order, and have parts delivered to my workshop without leaving the shop. It\'s changed how I run my business.',
     authorName: 'Thomas Osei Quansah',
     authorImg: '/images/users/user4.jpg',
-    authorRole: 'Entrepreneur'
-  },
-  {
-    review: 'I trust SpePas for all my auto parts needs. Their commitment to quality and security is evident in every transaction I make.',
-    authorName: 'Dave Smith',
-    authorImg: '/images/users/user5.jpg',
-    authorRole: 'Entrepreneur'
+    authorRole: 'Workshop Owner'
   },
   {
     review:
-      'I have been a loyal customer of SpePas for over a year now, and their consistent quality and efficient service have kept me coming back.',
+      'I sell used parts from my shop in Kumasi. Listing on SpePas has brought me buyers from Accra, Takoradi, even Tamale. The platform is simple and the payments are secure.',
+    authorName: 'Daniel Mensah',
+    authorImg: '/images/users/user5.jpg',
+    authorRole: 'Parts Seller'
+  },
+  {
+    review:
+      'I\'ve been a mechanic for 15 years and sourcing quality parts has always been the hardest part of the job. SpePas makes it easy to find exactly what I need with photos and seller ratings.',
     authorName: 'Samuel Baffoe',
     authorImg: '/images/users/user6.jpg',
     authorRole: 'Mechanic'

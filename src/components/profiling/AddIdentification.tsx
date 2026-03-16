@@ -93,7 +93,7 @@ const AddIdentification: React.FC = () => {
     <section className="pt-10"></section>
       <Breadcrumb title="Add Identification" pages={['Profiling', 'Add Identification']} />
 
-      <form onSubmit={handleSubmit} className="bg-white rounded shadow p-4 max-w-4xl w-[80%] mx-auto p-4 pt-20">
+      <form onSubmit={handleSubmit} className="bg-white rounded shadow p-4 max-w-4xl w-[80%] mx-auto p-4 pt-28">
         <div className="mb-5">
           <label htmlFor="idType" className="block mb-2.5 font-medium">
             ID Type

@@ -1,3 +1,4 @@
+// src/components/buyer/RequestList.tsx
 import React, { useEffect, useState, useCallback } from 'react'
 import {
   getBuyerActiveRequestsAll,
@@ -6,13 +7,15 @@ import {
 import RequestCard from './RequestCard'
 import RequestWithOffersCard from './RequestWithOffersCard'
 import SpepasLoader from '@/components/common/SpepasLoader'
-import { Search, SlidersHorizontal, AlertCircle, PackageOpen } from 'lucide-react'
 
 interface RequestListProps {
   mode: 'active' | 'history'
 }
 
-const ITEMS_PER_PAGE = 8
+const ITEMS_PER_PAGE = 9
+
+const inputClass =
+  'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30 focus:border-blue transition bg-white'
 
 const RequestList: React.FC<RequestListProps> = ({ mode }) => {
   const [data, setData] = useState<any[]>([])
@@ -27,18 +30,10 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
   const fetchData = useCallback(() => {
     setLoading(true)
     setError(false)
-
     const fn = mode === 'active' ? getBuyerActiveRequestsAll : getBuyerRequestHistoryAll
-
     fn()
-      .then((res) => {
-        setData(res.data)
-        setCurrentPage(1)
-      })
-      .catch((err) => {
-        console.error(err)
-        setError(true)
-      })
+      .then((res) => { setData(res.data); setCurrentPage(1) })
+      .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [mode])
 
@@ -59,113 +54,114 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
   })
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  const paginatedData = filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
 
-  if (loading) {
-    return <SpepasLoader size="lg" label="Loading requests..." fullSection />
-  }
+  if (loading) return <SpepasLoader size="lg" label="Loading requests..." />
 
   if (error) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="h-14 w-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
-            <AlertCircle className="h-6 w-6 text-red-500" />
-          </div>
-          <p className="text-sm font-medium text-dark-2">Something went wrong</p>
-          <p className="text-xs text-dark-4 mt-1 mb-5">Failed to load requests</p>
-          <button
-            onClick={fetchData}
-            className="inline-flex items-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-6 rounded-xl hover:bg-blue-dark transition-colors duration-200"
-          >
-            Try Again
-          </button>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center space-y-4">
+        <div className="w-12 h-12 mx-auto rounded-full bg-red-50 flex items-center justify-center">
+          <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
         </div>
+        <p className="text-sm text-gray-600">Something went wrong loading requests.</p>
+        <button
+          onClick={fetchData}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-2.5 px-5 rounded-xl shadow-sm hover:opacity-90 transition"
+        >
+          Try Again
+        </button>
       </div>
     )
   }
 
   if (!data.length) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="h-14 w-14 rounded-full bg-gray-1 flex items-center justify-center mb-4">
-            <PackageOpen className="h-6 w-6 text-dark-4" />
-          </div>
-          <p className="text-sm font-medium text-dark-2">
-            No {mode === 'active' ? 'active' : 'historical'} requests
-          </p>
-          <p className="text-xs text-dark-4 mt-1">Your requests will appear here</p>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center space-y-3">
+        <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
+          <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+          </svg>
         </div>
+        <p className="text-sm text-gray-500">
+          No {mode === 'active' ? 'active' : 'historical'} requests found.
+        </p>
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-5">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-dark-4 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search requests..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-10 pl-9 pr-3 text-sm bg-white border border-gray-3 rounded-lg focus:outline-none focus:border-blue focus:ring-1 focus:ring-blue/30 transition-colors"
-          />
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search requests..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`${inputClass} pl-10`}
+            />
+          </div>
+          <button
+            onClick={() => setShowFilters(prev => !prev)}
+            className={`inline-flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-xl border transition ${
+              showFilters
+                ? 'bg-blue/10 text-blue border-blue/20'
+                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+            </svg>
+            Filters
+          </button>
         </div>
 
-        <button
-          onClick={() => setShowFilters((prev) => !prev)}
-          className={`inline-flex items-center justify-center gap-2 h-10 px-4 text-sm font-medium rounded-lg border transition-colors ${
-            showFilters
-              ? 'bg-blue text-white border-blue'
-              : 'bg-white text-dark-2 border-gray-3 hover:bg-gray-1'
-          }`}
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </button>
+        {/* Collapsible Date Filters */}
+        {showFilters && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">From</label>
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputClass} />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">To</label>
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputClass} />
+              </div>
+            </div>
+            {(startDate || endDate) && (
+              <button
+                onClick={() => { setStartDate(''); setEndDate('') }}
+                className="mt-3 text-xs text-blue hover:underline"
+              >
+                Clear date filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Filters panel */}
-      {showFilters && (
-        <div className="bg-white rounded-xl border border-gray-3 p-4 mb-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
-            <div>
-              <label className="block text-xs font-medium text-dark-4 mb-1.5">From</label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full h-10 rounded-lg border border-gray-3 bg-gray-1 px-3 text-sm text-dark focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-dark-4 mb-1.5">To</label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full h-10 rounded-lg border border-gray-3 bg-gray-1 px-3 text-sm text-dark focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Results count */}
+      <p className="text-xs text-gray-400">
+        {filteredData.length} {filteredData.length === 1 ? 'request' : 'requests'} found
+      </p>
 
-      {/* No match */}
+      {/* Grid or empty */}
       {filteredData.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
-          <div className="flex flex-col items-center justify-center py-16 px-4">
-            <p className="text-sm text-dark-4">No requests match your criteria.</p>
-          </div>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+          <p className="text-sm text-gray-500">No requests match your criteria.</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {paginatedData.map((req) => (
               <CardComponent key={req.request_ID} req={req} />
             ))}
@@ -173,33 +169,37 @@ const RequestList: React.FC<RequestListProps> = ({ mode }) => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-1.5 mt-8">
+            <div className="flex justify-center items-center gap-1 pt-4">
               <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="h-9 px-3 rounded-lg border border-gray-3 text-dark-3 text-sm hover:bg-gray-1 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
               >
-                Prev
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(num => (
                 <button
                   key={num}
                   onClick={() => setCurrentPage(num)}
-                  className={`h-9 w-9 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-8 h-8 rounded-lg text-sm font-medium transition ${
                     num === currentPage
                       ? 'bg-blue text-white'
-                      : 'bg-white text-dark-3 border border-gray-3 hover:bg-gray-1'
+                      : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
                   {num}
                 </button>
               ))}
               <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="h-9 px-3 rounded-lg border border-gray-3 text-dark-3 text-sm hover:bg-gray-1 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
               >
-                Next
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
               </button>
             </div>
           )}

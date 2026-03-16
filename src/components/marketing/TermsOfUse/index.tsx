@@ -118,8 +118,8 @@ const TermsOfUse: React.FC = () => {
       content: (
         <p>
           Questions? Email us at{' '}
-          <a href="mailto:support@spepas.com" className="text-indigo-600 hover:underline">
-            support@spepas.com
+          <a href="mailto:info@spepas.com" className="text-blue hover:underline">
+            info@spepas.com
           </a>.
         </p>
       )
@@ -134,7 +134,7 @@ const TermsOfUse: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           {/* Header */}
           <header className="text-center space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">
+            <h1 className="text-3xl sm:text-4xl font-semibold text-blue">
               SpePas Terms of Use
             </h1>
             <p className="text-gray-700 sm:text-lg">
@@ -148,10 +148,10 @@ const TermsOfUse: React.FC = () => {
               key={idx}
               className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4"
             >
-              <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">
+              <h2 className="text-xl sm:text-2xl font-semibold text-blue">
                 {sec.title}
               </h2>
-              <div className="prose prose-indigo max-w-none text-gray-700">
+              <div className="prose max-w-none text-gray-700">
                 {sec.content}
               </div>
             </article>

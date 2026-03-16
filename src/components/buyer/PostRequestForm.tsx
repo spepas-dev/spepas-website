@@ -1,198 +1,27 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import React, { useState, useEffect } from 'react'
 import { requestNonInventorySparePartAPI } from '@/lib/orderBidsApis'
-import {
-  getSparePartCategories,
-  getCarManufacturers,
-  getCarBrands,
-  getCarModels,
-} from '@/lib/inventoryApis'
+import { getCarManufacturers, getCarBrands, getCarModels } from '@/lib/inventoryApis'
 import { toast } from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
-import { ClipboardList, Send } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
 
-/* ─── types ─── */
-type SelectedFilter = { id: string; name: string } | null
+interface CarModel { CarModel_ID: string; name: string }
+interface CarBrand { CarBrand_ID: string; name: string; models?: CarModel[] }
+interface Manufacturer { Manufacturer_ID: string; name: string; brands?: CarBrand[] }
 
-/* ─── debounce hook ─── */
-function useDebounce(value: string, ms = 300) {
-  const [debounced, setDebounced] = useState(value)
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), ms)
-    return () => clearTimeout(t)
-  }, [value, ms])
-  return debounced
-}
+const inputClass =
+  'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30 focus:border-blue transition bg-white'
 
-/* ─── icons ─── */
-const SearchIcon: React.FC = () => (
-  <svg
-    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-4 pointer-events-none"
-    fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-)
-
-/* ─── searchable filter field (form-adapted) ─── */
-const SearchableFilter: React.FC<{
-  label: string
-  selected: SelectedFilter
-  onSelect: (f: SelectedFilter) => void
-  queryKey: string
-  queryFn: (params: { search?: string; limit?: number }) => Promise<{ data: any[]; meta?: any }>
-  idKey: string
-  nameKey: string
-  placeholder: string
-  required?: boolean
-  getCount?: (item: any) => number | undefined
-}> = ({ label, selected, onSelect, queryKey, queryFn, idKey, nameKey, placeholder, required, getCount }) => {
-  const [input, setInput] = useState('')
-  const [isFocused, setIsFocused] = useState(false)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const debouncedSearch = useDebounce(input, 300)
-
-  const isSearching = debouncedSearch.trim().length >= 2
-
-  // default results when focused (no search term)
-  const { data: defaultData, isFetching: defaultFetching } = useQuery({
-    queryKey: [queryKey, '__defaults__'],
-    queryFn: () => queryFn({ limit: 15 }),
-    staleTime: 60_000,
-    enabled: isFocused && !isSearching && !selected,
-  })
-
-  // search results when 2+ chars typed
-  const { data: searchData, isFetching: searchFetching } = useQuery({
-    queryKey: [queryKey, debouncedSearch],
-    queryFn: () => queryFn({ search: debouncedSearch.trim(), limit: 20 }),
-    enabled: isSearching,
-    staleTime: 30_000,
-  })
-
-  const results = isSearching ? (searchData?.data ?? []) : (defaultData?.data ?? [])
-  const isFetching = isSearching ? searchFetching : defaultFetching
-  const showDropdown = isFocused && !selected
-
-  // close dropdown on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setIsFocused(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  const handleSelect = (item: any) => {
-    onSelect({ id: item[idKey], name: item[nameKey] })
-    setInput('')
-    setIsFocused(false)
-  }
-
-  const handleClear = () => {
-    onSelect(null)
-    setInput('')
-  }
-
-  return (
-    <div ref={wrapperRef} className="relative">
-      <label className="block mb-2 text-sm font-medium text-dark">
-        {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-
-      {/* selected chip */}
-      {selected ? (
-        <div className="flex items-center gap-2 h-11 px-4 bg-blue/5 border border-blue/20 rounded-lg">
-          <span className="text-sm text-dark truncate flex-1">{selected.name}</span>
-          <button
-            type="button"
-            onClick={handleClear}
-            className="shrink-0 w-5 h-5 rounded-full bg-blue/20 hover:bg-blue/30 flex items-center justify-center transition-colors"
-            aria-label={`Clear ${label}`}
-          >
-            <svg className="w-3 h-3 text-blue" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      ) : (
-        <div className="relative">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            placeholder={placeholder}
-            className="w-full h-11 pl-10 pr-4 text-sm border border-gray-3 rounded-lg bg-gray-1 text-dark placeholder:text-dark-5 focus:outline-none focus:border-blue focus:ring-2 focus:ring-blue/20 transition"
-          />
-          <SearchIcon />
-          {input && (
-            <button
-              type="button"
-              onClick={() => setInput('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-dark-4/20 hover:bg-dark-4/30 flex items-center justify-center transition-colors"
-              aria-label="Clear search"
-            >
-              <svg className="w-3 h-3 text-dark-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* dropdown results */}
-      {showDropdown && (
-        <div className="absolute left-0 right-0 z-30 mt-1 border border-gray-3 rounded-lg bg-white shadow-2 max-h-[220px] overflow-y-auto scrollbar-hide">
-          {isFetching ? (
-            <div className="px-3 py-5 text-center">
-              <img src="/spepasLogo.gif" alt="Loading..." className="h-8 w-8 object-contain mx-auto" />
-              <p className="text-xs text-dark-4 mt-1.5">{isSearching ? 'Searching...' : 'Loading...'}</p>
-            </div>
-          ) : results.length === 0 ? (
-            <p className="text-sm text-dark-4 px-3 py-4 text-center">
-              {isSearching ? `No results for "${debouncedSearch}"` : 'No items available'}
-            </p>
-          ) : (
-            <>
-              {!isSearching && (
-                <p className="text-[10px] text-dark-4 px-3 pt-2.5 pb-1 uppercase tracking-wide font-medium">Popular</p>
-              )}
-              {results.map((item: any) => {
-                const count = getCount?.(item)
-                return (
-                  <button
-                    key={item[idKey]}
-                    type="button"
-                    onClick={() => handleSelect(item)}
-                    className="w-full flex items-center justify-between text-sm px-3 py-2.5 hover:bg-gray-1 transition-colors text-left gap-2"
-                  >
-                    <span className="truncate text-dark">{item[nameKey]}</span>
-                    {count != null && count > 0 && (
-                      <span className="shrink-0 text-[10px] font-medium text-dark-4 bg-gray-2 rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
-                        {count > 999 ? '999+' : count}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ═══ MAIN FORM ═══ */
 const PostRequestForm: React.FC = () => {
-  const [selectedCategory, setSelectedCategory] = useState<SelectedFilter>(null)
-  const [selectedManufacturer, setSelectedManufacturer] = useState<SelectedFilter>(null)
-  const [selectedBrand, setSelectedBrand] = useState<SelectedFilter>(null)
-  const [selectedModel, setSelectedModel] = useState<SelectedFilter>(null)
+  const [manufacturers, setManufacturers] = useState<Manufacturer[]>([])
+  const [brands, setBrands] = useState<CarBrand[]>([])
+  const [models, setModels] = useState<CarModel[]>([])
+
+  const [selectedManufacturer, setSelectedManufacturer] = useState('')
+  const [selectedBrand, setSelectedBrand] = useState('')
+  const [selectedModel, setSelectedModel] = useState('')
+
+  const [loadingBrands, setLoadingBrands] = useState(false)
+  const [loadingModels, setLoadingModels] = useState(false)
 
   const [name, setName] = useState('')
   const [qty, setQty] = useState(1)
@@ -200,219 +29,258 @@ const PostRequestForm: React.FC = () => {
   const [requireImage, setRequireImage] = useState(false)
 
   const navigate = useNavigate()
+  const location = useLocation()
+  const prefill = location.state as {
+    partName?: string
+    manufacturerName?: string
+    brandName?: string
+  } | null
 
   const qtyInvalid = qty <= 0
 
-  /* count extractors from nested API data */
-  const countManufacturer = useCallback((m: any): number | undefined => {
-    const brands = m?.brands
-    if (!Array.isArray(brands)) return undefined
-    return brands.reduce((sum: number, b: any) =>
-      sum + (b?.models?.reduce((s: number, md: any) => s + (md?.spareParts?.length ?? 0), 0) ?? 0), 0)
-  }, [])
+  // Load manufacturers on mount
+  useEffect(() => {
+    getCarManufacturers()
+      .then(res => {
+        const mfrs = res.data as Manufacturer[]
+        setManufacturers(mfrs)
 
-  const countBrand = useCallback((b: any): number | undefined => {
-    const models = b?.models
-    if (!Array.isArray(models)) return undefined
-    return models.reduce((sum: number, m: any) => sum + (m?.spareParts?.length ?? 0), 0)
-  }, [])
+        if (prefill?.partName) setName(prefill.partName)
+        if (prefill?.manufacturerName) {
+          const mfr = mfrs.find(
+            m => m.name.toLowerCase() === prefill.manufacturerName!.toLowerCase()
+          )
+          if (mfr) setSelectedManufacturer(mfr.Manufacturer_ID)
+        }
+      })
+      .catch(console.error)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const countModel = useCallback((m: any): number | undefined => {
-    const parts = m?.spareParts
-    if (!Array.isArray(parts)) return undefined
-    return parts.length
-  }, [])
+  // Fetch brands when manufacturer changes
+  useEffect(() => {
+    if (!selectedManufacturer) { setBrands([]); setModels([]); return }
+
+    // Check if the manufacturer already has nested brands
+    const mfr = manufacturers.find(m => m.Manufacturer_ID === selectedManufacturer)
+    if (mfr?.brands?.length) {
+      setBrands(mfr.brands)
+      // Handle prefill
+      if (prefill?.brandName) {
+        const brand = mfr.brands.find(
+          b => b.name.toLowerCase() === prefill.brandName!.toLowerCase()
+        )
+        if (brand) setSelectedBrand(brand.CarBrand_ID)
+      }
+      return
+    }
+
+    // Otherwise fetch from API
+    setLoadingBrands(true)
+    setBrands([])
+    setModels([])
+    getCarBrands({ manufacturerId: selectedManufacturer })
+      .then(res => {
+        const fetched = res.data as CarBrand[]
+        setBrands(fetched)
+        if (prefill?.brandName) {
+          const brand = fetched.find(
+            b => b.name.toLowerCase() === prefill.brandName!.toLowerCase()
+          )
+          if (brand) setSelectedBrand(brand.CarBrand_ID)
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingBrands(false))
+  }, [selectedManufacturer]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch models when brand changes
+  useEffect(() => {
+    if (!selectedBrand) { setModels([]); return }
+
+    // Check if the brand already has nested models
+    const brand = brands.find(b => b.CarBrand_ID === selectedBrand)
+    if (brand?.models?.length) {
+      setModels(brand.models)
+      return
+    }
+
+    // Otherwise fetch from API
+    setLoadingModels(true)
+    setModels([])
+    getCarModels({ brandId: selectedBrand })
+      .then(res => setModels(res.data as CarModel[]))
+      .catch(console.error)
+      .finally(() => setLoadingModels(false))
+  }, [selectedBrand]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (qtyInvalid || !selectedModel) return
+    if (qtyInvalid) return
 
     const apiPromise = requestNonInventorySparePartAPI({
       require_image: requireImage ? 1 : 0,
       quantity: qty,
-      sparePartDetail: {
-        name,
-        description: desc,
-        carModel_ID: selectedModel.id,
-      },
+      sparePartDetail: { name, description: desc, carModel_ID: selectedModel },
     })
 
     toast
-      .promise(
-        apiPromise,
-        {
-          loading: 'Posting your request...',
-          success: 'Request posted!',
-          error: 'Failed to post request. Please try again.',
-        },
-        { duration: 3000, position: 'bottom-center' }
-      )
+      .promise(apiPromise, {
+        loading: 'Posting your request...',
+        success: 'Request posted!',
+        error: 'Failed to post request. Please try again.',
+      }, { duration: 3000, position: 'bottom-center' })
       .then(() => {
-        setName('')
-        setQty(1)
-        setDesc('')
-        setRequireImage(false)
-        setSelectedCategory(null)
-        setSelectedManufacturer(null)
-        setSelectedBrand(null)
-        setSelectedModel(null)
+        setName(''); setQty(1); setDesc(''); setRequireImage(false)
+        setSelectedManufacturer(''); setSelectedBrand(''); setSelectedModel('')
+        setBrands([]); setModels([])
         navigate('/95668339501103956045/buyer/requests')
       })
       .catch(() => {})
   }
 
-  const inputClasses = 'w-full h-11 rounded-lg border border-gray-3 bg-gray-1 px-4 text-sm text-dark placeholder:text-dark-5 focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition'
-
   return (
-    <>
-      <div className="flex items-center justify-end mb-4">
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Post a Request</h1>
+          <p className="text-sm text-gray-500 mt-1">Fill out the form below to request a spare part.</p>
+        </div>
         <button
           type="button"
           onClick={() => navigate('/95668339501103956045/buyer/requests')}
-          className="inline-flex items-center gap-2 bg-gray-1 text-dark font-medium text-sm py-2.5 px-5 rounded-xl border border-gray-3 hover:bg-gray-2 transition-colors duration-200"
+          className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium py-2.5 px-5 rounded-xl hover:bg-gray-50 transition shadow-sm"
         >
-          <ClipboardList className="h-4 w-4" />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
           My Requests
         </button>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-2xl border border-gray-3 shadow-1 p-5 sm:p-7 space-y-5"
-      >
-        {/* Row 1: Category */}
-        <SearchableFilter
-          label="Category"
-          selected={selectedCategory}
-          onSelect={setSelectedCategory}
-          queryKey="form-categories"
-          queryFn={getSparePartCategories}
-          idKey="Category_ID"
-          nameKey="name"
-          placeholder="Search spare part categories..."
-        />
-
-        {/* Row 2: Manufacturer & Brand */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <SearchableFilter
-            label="Manufacturer"
-            selected={selectedManufacturer}
-            onSelect={(f) => {
-              setSelectedManufacturer(f)
-              if (!f) { setSelectedBrand(null); setSelectedModel(null) }
-            }}
-            queryKey="form-manufacturers"
-            queryFn={getCarManufacturers}
-            idKey="Manufacturer_ID"
-            nameKey="name"
-            placeholder="Search manufacturers..."
-            required
-            getCount={countManufacturer}
-          />
-
-          <SearchableFilter
-            label="Brand"
-            selected={selectedBrand}
-            onSelect={(f) => {
-              setSelectedBrand(f)
-              if (!f) setSelectedModel(null)
-            }}
-            queryKey="form-brands"
-            queryFn={getCarBrands}
-            idKey="CarBrand_ID"
-            nameKey="name"
-            placeholder="Search brands..."
-            required
-            getCount={countBrand}
-          />
-        </div>
-
-        {/* Row 3: Model & Part Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <SearchableFilter
-            label="Model"
-            selected={selectedModel}
-            onSelect={setSelectedModel}
-            queryKey="form-models"
-            queryFn={getCarModels}
-            idKey="CarModel_ID"
-            nameKey="name"
-            placeholder="Search models..."
-            required
-            getCount={countModel}
-          />
-
-          <div>
-            <label className="block mb-2 text-sm font-medium text-dark">
-              Part Name<span className="text-red-500 ml-0.5">*</span>
-            </label>
-            <input
-              value={name}
-              onChange={e => setName(e.target.value)}
-              required
-              placeholder="e.g. Brake pad, Radiator"
-              className={inputClasses}
-            />
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mt-6 space-y-6">
+        {/* Vehicle Selection */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Vehicle Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Manufacturer</label>
+              <select
+                value={selectedManufacturer}
+                onChange={e => { setSelectedManufacturer(e.target.value); setSelectedBrand(''); setSelectedModel(''); setBrands([]); setModels([]) }}
+                required
+                className={inputClass}
+              >
+                <option value="" disabled>Select manufacturer</option>
+                {manufacturers.map(m => (
+                  <option key={m.Manufacturer_ID} value={m.Manufacturer_ID}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Brand</label>
+              <select
+                value={selectedBrand}
+                onChange={e => { setSelectedBrand(e.target.value); setSelectedModel(''); setModels([]) }}
+                required
+                disabled={!brands.length && !loadingBrands}
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  {loadingBrands ? 'Loading brands...' : brands.length ? 'Select brand' : 'Select manufacturer first'}
+                </option>
+                {brands.map(b => (
+                  <option key={b.CarBrand_ID} value={b.CarBrand_ID}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Model</label>
+              <select
+                value={selectedModel}
+                onChange={e => setSelectedModel(e.target.value)}
+                required
+                disabled={!models.length && !loadingModels}
+                className={inputClass}
+              >
+                <option value="" disabled>
+                  {loadingModels ? 'Loading models...' : models.length ? 'Select model' : 'Choose a brand first'}
+                </option>
+                {models.map(m => (
+                  <option key={m.CarModel_ID} value={m.CarModel_ID}>{m.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Row 4: Quantity & Photos Required */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-dark">
-              Quantity<span className="text-red-500 ml-0.5">*</span>
-            </label>
-            <input
-              type="number"
-              value={qty}
-              onChange={e => setQty(+e.target.value)}
-              min={1}
-              required
-              aria-invalid={qtyInvalid}
-              className={`${inputClasses} ${qtyInvalid ? '!border-red-400 !focus:border-red-400 !focus:ring-red-400/20' : ''}`}
-            />
-            {qtyInvalid && (
-              <p className="mt-1.5 text-xs text-red-500">Quantity must be at least 1</p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2.5 h-11">
-            <input
-              type="checkbox"
-              checked={requireImage}
-              onChange={e => setRequireImage(e.target.checked)}
-              id="reqImg"
-              className="h-4 w-4 rounded border-gray-3 text-blue focus:ring-blue/20"
-            />
-            <label htmlFor="reqImg" className="text-sm font-medium text-dark">
-              Require photos from sellers
-            </label>
+        {/* Part Details */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Part Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Part Name</label>
+              <input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+                placeholder="e.g. Radiator, Brake Pad"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Quantity</label>
+              <input
+                type="number"
+                value={qty}
+                onChange={e => setQty(+e.target.value)}
+                min={1}
+                required
+                aria-invalid={qtyInvalid}
+                className={`${inputClass} ${qtyInvalid ? '!border-red-400 !focus:ring-red-300' : ''}`}
+              />
+              {qtyInvalid && <p className="mt-1 text-xs text-red-500">Quantity must be at least 1</p>}
+            </div>
           </div>
         </div>
 
         {/* Description */}
         <div>
-          <label className="block mb-2 text-sm font-medium text-dark">Description</label>
+          <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Description</label>
           <textarea
             value={desc}
             onChange={e => setDesc(e.target.value)}
-            rows={4}
-            placeholder="Describe the part you need..."
-            className="w-full rounded-lg border border-gray-3 bg-gray-1 px-4 py-3 text-sm text-dark placeholder:text-dark-5 focus:border-blue focus:ring-2 focus:ring-blue/20 outline-none transition resize-none"
+            rows={3}
+            placeholder="Describe the part you need, any specific requirements..."
+            className={`${inputClass} resize-none`}
           />
         </div>
+
+        {/* Require Image */}
+        <label className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={requireImage}
+            onChange={e => setRequireImage(e.target.checked)}
+            className="w-4.5 h-4.5 rounded border-gray-300 text-blue focus:ring-blue/30"
+          />
+          <span className="text-sm text-gray-700">Require photos from sellers</span>
+        </label>
 
         {/* Submit */}
         <button
           type="submit"
-          disabled={qtyInvalid || !selectedModel}
-          className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-blue text-white font-medium text-sm py-3 px-8 rounded-xl hover:bg-blue-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          disabled={qtyInvalid}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 px-8 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
         >
-          <Send className="h-4 w-4" />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
           Post Request
         </button>
       </form>
-    </>
+    </div>
   )
 }
 

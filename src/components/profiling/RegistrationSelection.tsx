@@ -19,7 +19,7 @@ const RegistrationSelection: React.FC = () => {
   return (
     <>
     <section className="pt-10"></section>
-    <section className="py-20 bg-white p-4 max-w-4xl w-[80%] mx-auto p-4 pt-20">
+    <section className="py-20 bg-white p-4 max-w-4xl w-[80%] mx-auto p-4 pt-28">
       
     <h2 className="text-xl mb-6">Choose Registration Type</h2>
       <ul className="grid grid-cols-2 gap-4">

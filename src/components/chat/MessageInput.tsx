@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
+import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { Attachment, Message } from './types';
 
 type Props = {
@@ -99,7 +98,7 @@ const MessageInput: React.FC<Props> = ({ onSend, replyingTo, onCancelReply, onTy
 
       {showEmoji && (
         <div className="px-2 pb-2">
-          <Picker data={data} onEmojiSelect={(e: any) => setText(t => t + (e.native || ''))} previewPosition="none" />
+          <EmojiPicker onEmojiClick={(e: EmojiClickData) => setText(t => t + e.emoji)} />
         </div>
       )}
     </div>

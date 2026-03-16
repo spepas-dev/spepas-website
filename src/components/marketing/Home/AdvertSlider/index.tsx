@@ -5,26 +5,25 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { getActiveSliders } from '@/lib/advertApis'
 import type { SliderData } from '@/lib/advertZodValidation'
-import SpepasLoader from '@/components/common/SpepasLoader'
 
 const AdvertSlider: React.FC = () => {
-  const { data: response, isLoading } = useQuery({
+  const { data: response, isLoading, isError } = useQuery({
     queryKey: ['advert-sliders'],
     queryFn: getActiveSliders,
     staleTime: 5 * 60 * 1000,
+    retry: false,
   })
 
   const slides: SliderData[] = response?.data ?? []
 
-  // Don't render the section at all if no adverts and not loading
-  if (!isLoading && slides.length === 0) return null
+  // Don't render the section at all if no adverts, not loading, or errored
+  if ((!isLoading && slides.length === 0) || isError) return null
 
   return (
     <section className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 mt-8 sm:mt-10 lg:mt-14">
       {isLoading ? (
-        <div className="flex items-center justify-center rounded-xl overflow-hidden bg-gray-1 h-[280px] sm:h-[320px] lg:h-[360px]">
-          <SpepasLoader size="lg" label="Loading adverts..." />
-        </div>
+        // Skeleton loader
+        <div className="rounded-xl overflow-hidden bg-gray-100 animate-pulse h-[280px] sm:h-[320px] lg:h-[360px]" />
       ) : (
         <Swiper
           spaceBetween={0}

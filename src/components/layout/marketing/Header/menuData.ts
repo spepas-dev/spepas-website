@@ -3,12 +3,6 @@ import { Menu } from '@/components/layout/marketing/Header/Menu';
 export const menuData: Menu[] = [
   {
     id: 1,
-    title: 'Home',
-    newTab: false,
-    path: '/95668339501103956045/home'
-  },
-  {
-    id: 2,
     title: 'Shop',
     newTab: false,
     path: '/95668339501103956045/shop'

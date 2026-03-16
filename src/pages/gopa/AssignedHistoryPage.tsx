@@ -28,7 +28,7 @@ const AssignedHistoryPage: React.FC = () => {
   }, [userId]);
 
   return (
-    <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-20">
+    <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-28">
       <section className="pt-10"></section>
       <h1 className="text-2xl font-bold mb-4">Your Assignment History</h1>
       {requests.length > 0 ? (

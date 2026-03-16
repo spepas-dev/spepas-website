@@ -22,33 +22,6 @@ delete apiClient.defaults.headers.common['Authorization'];
 
 // ---- Global 401 handler (no refresh attempt) ----
 const SIGNIN_PATH = '/95668339501103956045/auth/signin'; // *adjusted*
-const BASE_PATH = '/95668339501103956045';
-
-// Public paths that should NOT redirect to sign-in on 401
-const PUBLIC_SUFFIXES = [
-  '/home',
-  '/shop',
-  '/about-us',
-  '/contact',
-  '/faqs',
-  '/privacy-policy',
-  '/refund-policy',
-  '/terms',
-  '/auth/',
-];
-
-function isPublicPage(): boolean {
-  try {
-    const path = window.location.pathname;
-    return PUBLIC_SUFFIXES.some(
-      (suffix) =>
-        path === `${BASE_PATH}${suffix}` ||
-        path.startsWith(`${BASE_PATH}${suffix}/`),
-    );
-  } catch {
-    return false;
-  }
-}
 
 apiClient.interceptors.response.use(
   (response) => response,
@@ -56,17 +29,23 @@ apiClient.interceptors.response.use(
     const status = error?.response?.status;
 
     if (status === 401) {
-      // clear local auth state everywhere (context + localStorage)
-      clearAuthEverywhere();
+      // Skip auth redirect for public inventory/catalog endpoints
+      const reqUrl = error?.config?.url ?? '';
+      const isPublicEndpoint = reqUrl.startsWith('/inventry/');
 
-      // only redirect to signin from protected pages, not public ones
-      try {
-        const path = window.location.pathname;
-        if (path !== SIGNIN_PATH && !isPublicPage()) {
-          window.location.replace(SIGNIN_PATH);
+      if (!isPublicEndpoint) {
+        // clear local auth state everywhere (context + localStorage)
+        clearAuthEverywhere();
+
+        // always push user to signin when unauthenticated
+        try {
+          const path = window.location.pathname;
+          if (path !== SIGNIN_PATH) {
+            window.location.replace(SIGNIN_PATH);
+          }
+        } catch {
+          // ignore any window errors (SSR etc.)
         }
-      } catch {
-        // ignore any window errors (SSR etc.)
       }
     }
 

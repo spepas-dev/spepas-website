@@ -7,81 +7,54 @@ interface SingleListItemProps {
   item: ProductVM;
 }
 
-const StarIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 20 20"
-    fill={filled ? '#F59E0B' : 'none'}
-    stroke={filled ? '#F59E0B' : '#D1D5DB'}
-    strokeWidth="1.5"
-  >
-    <path d="M10 1.5l2.47 5.01 5.53.8-4 3.9.94 5.49L10 14.26 5.06 16.7 6 11.21l-4-3.9 5.53-.8L10 1.5z" />
-  </svg>
-);
-
 const SingleListItem: React.FC<SingleListItemProps> = ({ item }) => {
-  const imgSrc = item.image ?? '/images/placeholder.jpg';
-  const rating = Math.min(5, Math.max(0, Math.round((item.reviews ?? 0) / 3)));
-  const detailUrl = `/95668339501103956045/shop/${item.linkId}`;
-
   return (
-    <div className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200">
-      <div className="flex flex-col sm:flex-row">
-        {/* Image */}
-        <Link
-          to={detailUrl}
-          className="relative shrink-0 w-full sm:w-48 md:w-56 aspect-square sm:aspect-auto sm:h-48 bg-gray-50 overflow-hidden"
-          aria-label={`View ${item.title}`}
-        >
-          <img
-            src={imgSrc}
-            alt={item.title}
-            loading="lazy"
-            className="object-contain w-full h-full p-2 group-hover:scale-105 transition-transform duration-300"
-          />
-        </Link>
-
-        {/* Details */}
-        <div className="flex-1 p-4 flex flex-col">
-          {/* Title */}
-          <Link
-            to={detailUrl}
-            className="text-base font-medium text-gray-800 hover:text-blue transition-colors line-clamp-2 leading-snug"
-          >
-            {item.title}
-          </Link>
-
-          {/* Rating */}
-          <div className="flex items-center gap-0.5 mt-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <StarIcon key={i} filled={i < rating} />
-            ))}
-            <span className="text-xs text-gray-500 ml-1.5">({item.reviews ?? 0})</span>
-          </div>
-
-          {/* Price */}
-          <div className="mt-3">
-            <span className="text-xl font-bold text-gray-900">
-              GH₵{Number(item.price ?? 0).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </span>
-          </div>
-
-          {/* CTA */}
-          <div className="mt-auto pt-3">
-            <Link
-              to={detailUrl}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-blue hover:underline"
-            >
-              View Details
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 4l4 4-4 4" />
-              </svg>
-            </Link>
-          </div>
-        </div>
+    <Link
+      to={`${item.linkId}`}
+      className="group flex items-center gap-3 rounded-lg bg-white border border-gray-100 px-3 py-2 hover:border-[var(--color-primary-200)] hover:shadow-sm transition-all"
+      aria-label={`View ${item.title}`}
+    >
+      {/* Small thumbnail — object-contain on neutral bg */}
+      <div className="w-11 h-11 shrink-0 rounded-md overflow-hidden bg-gray-50 flex items-center justify-center p-1">
+        <img
+          src={item.image ?? '/images/placeholder.jpg'}
+          alt=""
+          loading="lazy"
+          className="max-w-full max-h-full object-contain"
+        />
       </div>
-    </div>
+
+      {/* Part name — primary column */}
+      <span className="flex-1 min-w-0 text-sm font-medium text-gray-800 truncate group-hover:text-[var(--color-primary-600)] transition-colors">
+        {item.title}
+      </span>
+
+      {/* Article number */}
+      {item.articleNo && (
+        <span className="hidden sm:block shrink-0 text-[11px] text-gray-400 font-mono w-28 truncate text-right" title={item.articleNo}>
+          {item.articleNo}
+        </span>
+      )}
+
+      {/* Supplier */}
+      {item.supplierName && (
+        <span className="hidden md:block shrink-0 text-[11px] font-semibold text-gray-500 uppercase tracking-wide w-24 truncate text-right" title={item.supplierName}>
+          {item.supplierName}
+        </span>
+      )}
+
+      {/* Category */}
+      {item.categoryName && (
+        <span className="hidden lg:block shrink-0 text-[11px] text-gray-400 w-36 truncate text-right" title={item.categoryName}>
+          {item.categoryName}
+        </span>
+      )}
+
+      {/* Arrow */}
+      <svg className="w-4 h-4 shrink-0 text-gray-300 group-hover:text-[var(--color-primary-400)] transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
+    </Link>
   );
 };
 

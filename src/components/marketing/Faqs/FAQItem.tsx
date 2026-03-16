@@ -15,7 +15,7 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, answer }) => {
         onClick={() => setIsOpen(open => !open)}
         className="flex justify-between items-center w-full text-left focus:outline-none hover:text-blue-500 transition-colors"
       >
-        <span className="text-lg font-medium text-indigo-600">{question}</span>
+        <span className="text-lg font-medium text-blue">{question}</span>
         <span className="text-2xl">{isOpen ? '−' : '+'}</span>
       </button>
       {isOpen && (

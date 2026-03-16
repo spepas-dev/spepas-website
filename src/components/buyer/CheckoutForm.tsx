@@ -1,133 +1,246 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+// src/components/buyer/CheckoutForm.tsx
+import React, { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   checkoutWithExistingAddressAPI,
-  checkoutWithNewAddressAPI,
-} from '@/lib/orderBidsApis';
-import toast from 'react-hot-toast';
-import { MapPin, PlusCircle, Receipt, Truck, Percent, Package, DollarSign, AlertCircle } from 'lucide-react';
+  checkoutWithNewAddressAPI
+} from '@/lib/orderBidsApis'
+import toast from 'react-hot-toast'
+import SpepasLoader from '@/components/common/SpepasLoader'
+
+const inputClass =
+  'w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30 focus:border-blue transition bg-white'
 
 const CheckoutForm: React.FC = () => {
-  const location = useLocation() as any;
-  const { charges, aggeagate } = location.state || {};
+  const location = useLocation() as any
+  const navigate = useNavigate()
+  const { charges, aggeagate } = location.state || {}
+  const [submitting, setSubmitting] = useState(false)
+  const [mode, setMode] = useState<'existing' | 'new'>('existing')
+
+  // New address form state
+  const [title, setTitle] = useState('')
+  const [addressDetails, setAddressDetails] = useState('')
 
   if (!charges) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="h-14 w-14 rounded-full bg-gray-1 flex items-center justify-center mb-4">
-            <AlertCircle className="h-6 w-6 text-dark-4" />
-          </div>
-          <p className="text-sm font-medium text-dark-2">No charge data available</p>
-          <p className="text-xs text-dark-4 mt-1">Please go back to your cart and try again</p>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center space-y-3">
+        <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
+          <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
         </div>
+        <p className="text-sm text-gray-500">No charge data available. Please go back to your cart.</p>
+        <button
+          onClick={() => navigate('/95668339501103956045/buyer/cart')}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-2.5 px-5 rounded-xl shadow-sm hover:opacity-90 transition"
+        >
+          Back to Cart
+        </button>
       </div>
-    );
+    )
   }
 
   const handleExisting = async () => {
+    setSubmitting(true)
     try {
-      // TODO: let user pick address_id from their saved addresses
-      const address_id = 'ADDRESS_ID_HERE';
+      const address_id = 'ADDRESS_ID_HERE' // TODO: let user pick from saved addresses
       await checkoutWithExistingAddressAPI({
         address_id,
         aggeagate: Number(aggeagate),
         paymentDetails: {
           paymentMode: 'WALLET',
           walletNumber: '233554340244',
-          network: 'MTN',
-        },
-      });
-      toast.success('Checkout with existing address successful.');
+          network: 'MTN'
+        }
+      })
+      toast.success('Order placed successfully!', { position: 'bottom-center' })
     } catch {
-      toast.error('Checkout failed.');
+      toast.error('Checkout failed. Please try again.', { position: 'bottom-center' })
+    } finally {
+      setSubmitting(false)
     }
-  };
+  }
 
   const handleNew = async () => {
+    setSubmitting(true)
     try {
-      // TODO: gather these from a sub-form
       const address = {
-        title: 'Office address',
-        addressDetails: 'S 74/8, adjacent to Palace mall',
+        title: title || 'My Address',
+        addressDetails: addressDetails || 'Address details',
         longitude: -73.9712,
-        latitude: 40.7831,
-      };
+        latitude: 40.7831
+      }
       await checkoutWithNewAddressAPI({
         address,
         aggeagate: Number(aggeagate),
         paymentDetails: {
           paymentMode: 'WALLET',
           walletNumber: '233554340244',
-          network: 'MTN',
-        },
-      });
-      toast.success('Checkout with new address successful.');
+          network: 'MTN'
+        }
+      })
+      toast.success('Order placed successfully!', { position: 'bottom-center' })
     } catch {
-      toast.error('Checkout failed.');
+      toast.error('Checkout failed. Please try again.', { position: 'bottom-center' })
+    } finally {
+      setSubmitting(false)
     }
-  };
+  }
 
   const chargeRows = [
-    { icon: DollarSign, label: 'Main Amount', value: `GH\u20B5 ${charges.MAIN_AMOUNT}`, highlight: true },
-    { icon: Receipt, label: 'Service Charge', value: `GH\u20B5 ${charges.SERVICE_CHARGE}` },
-    { icon: Truck, label: 'Delivery Charge', value: `GH\u20B5 ${charges.DELIVERY_CHARGE}` },
-    { icon: Percent, label: 'Tax', value: `${charges.TAX}%` },
-    { icon: Package, label: 'Total Items', value: charges.TOTAL_ITEMS },
-  ];
+    { label: 'Items Total', value: `GH₵ ${charges.MAIN_AMOUNT}` },
+    { label: 'Service Charge', value: `GH₵ ${charges.SERVICE_CHARGE}` },
+    { label: 'Delivery Fee', value: `GH₵ ${charges.DELIVERY_CHARGE}` },
+    { label: 'Tax', value: `${charges.TAX}%` },
+  ]
+
+  const grandTotal =
+    (Number(charges.MAIN_AMOUNT) || 0) +
+    (Number(charges.SERVICE_CHARGE) || 0) +
+    (Number(charges.DELIVERY_CHARGE) || 0)
 
   return (
-    <div className="space-y-6">
-      {/* Charges breakdown */}
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-3">
-          <h3 className="text-base font-semibold text-dark flex items-center gap-2">
-            <Receipt className="h-4 w-4 text-dark-4" />
-            Order Summary
-          </h3>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left: Address Selection */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Address mode tabs */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Delivery Address</h2>
+
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+            <button
+              type="button"
+              onClick={() => setMode('existing')}
+              className={`text-sm font-medium px-5 py-2 rounded-lg transition-all duration-150 ${
+                mode === 'existing'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              Saved Address
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('new')}
+              className={`text-sm font-medium px-5 py-2 rounded-lg transition-all duration-150 ${
+                mode === 'new'
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              New Address
+            </button>
+          </div>
+
+          {mode === 'existing' ? (
+            <div className="space-y-3">
+              <div className="border border-blue/20 bg-blue/5 rounded-xl p-4 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg className="w-4 h-4 text-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Default Address</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Your saved delivery address will be used</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400">Address selection coming soon. Your default address will be used.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Address Title</label>
+                <input
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="e.g. Home, Office"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Address Details</label>
+                <textarea
+                  value={addressDetails}
+                  onChange={e => setAddressDetails(e.target.value)}
+                  rows={3}
+                  placeholder="Street, building, landmarks..."
+                  className={`${inputClass} resize-none`}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="p-5">
-          <div className="space-y-0 divide-y divide-gray-3">
-            {chargeRows.map(({ icon: Icon, label, value, highlight }) => (
-              <div key={label} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-lg bg-gray-1 flex items-center justify-center">
-                    <Icon className="h-4 w-4 text-dark-4" />
-                  </div>
-                  <span className="text-sm text-dark-2">{label}</span>
-                </div>
-                <span className={`text-sm font-semibold ${highlight ? 'text-dark text-base' : 'text-dark-2'}`}>
-                  {value}
-                </span>
-              </div>
-            ))}
+        {/* Payment Method */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Payment Method</h2>
+          <div className="border border-blue/20 bg-blue/5 rounded-xl p-4 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-blue/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-4 h-4 text-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Mobile Wallet (MTN)</p>
+              <p className="text-xs text-gray-500 mt-0.5">Payment will be processed via mobile money</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Checkout actions */}
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1 p-5">
-        <h3 className="text-base font-semibold text-dark mb-4">Choose Delivery Address</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      {/* Right: Order Summary */}
+      <div className="lg:col-span-1">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-28 space-y-5">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Order Summary</h2>
+
+          <div className="space-y-3">
+            {chargeRows.map(row => (
+              <div key={row.label} className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">{row.label}</span>
+                <span className="font-medium text-gray-900">{row.value}</span>
+              </div>
+            ))}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-500">Total Items</span>
+              <span className="font-medium text-gray-900">{charges.TOTAL_ITEMS}</span>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-100 pt-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-gray-900">Grand Total</span>
+              <span className="text-xl font-bold text-gray-900">GH₵ {grandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+
           <button
-            onClick={handleExisting}
-            className="flex items-center justify-center gap-2 bg-blue text-white font-medium text-sm py-3 px-5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
+            onClick={mode === 'existing' ? handleExisting : handleNew}
+            disabled={submitting}
+            className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
           >
-            <MapPin className="h-4 w-4" />
-            Use Existing Address
+            {submitting ? (
+              <SpepasLoader size="sm" className="inline-flex" />
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+            Place Order
           </button>
+
           <button
-            onClick={handleNew}
-            className="flex items-center justify-center gap-2 bg-gray-1 text-dark font-medium text-sm py-3 px-5 rounded-xl border border-gray-3 hover:bg-gray-2 transition-colors duration-200"
+            onClick={() => navigate('/95668339501103956045/buyer/cart')}
+            className="w-full text-center text-sm text-gray-500 hover:text-gray-700 py-2 transition"
           >
-            <PlusCircle className="h-4 w-4" />
-            Use New Address
+            Back to Cart
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CheckoutForm;
+export default CheckoutForm

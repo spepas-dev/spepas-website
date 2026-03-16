@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { getMyWalletDetails } from '@/lib/walletApis';
-import { Wallet, CreditCard, CalendarDays, Hash, Activity } from 'lucide-react';
 import SpepasLoader from '@/components/common/SpepasLoader';
 
-interface WalletData {
+interface Wallet {
   id: number;
   walletID: string;
   date_created: string;
@@ -15,7 +14,7 @@ interface WalletData {
 }
 
 const WalletDetails: React.FC = () => {
-  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,91 +29,53 @@ const WalletDetails: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <SpepasLoader size="lg" label="Loading wallet..." fullSection />;
+    return <SpepasLoader />;
   }
 
   if (!wallet) {
     return (
-      <div>
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-dark">My Wallet</h3>
-          <p className="text-sm text-dark-4 mt-1">Your wallet and balance information</p>
+      <div className="text-center py-12">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+          </svg>
         </div>
-        <div className="flex flex-col items-center justify-center py-12 bg-gray-1 rounded-xl border border-gray-3">
-          <div className="h-14 w-14 rounded-full bg-gray-2 flex items-center justify-center mb-4">
-            <Wallet className="h-6 w-6 text-dark-4" />
-          </div>
-          <p className="text-sm font-medium text-dark-2">No wallet found</p>
-          <p className="text-xs text-dark-4 mt-1">Your wallet will appear here once activated</p>
-        </div>
+        <p className="text-gray-500 text-sm">No wallet details found.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-dark">My Wallet</h3>
-        <p className="text-sm text-dark-4 mt-1">Your wallet and balance information</p>
-      </div>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">My Wallet</h2>
 
-      {/* Balance hero card */}
-      <div className="bg-gradient-to-br from-blue to-blue-dark rounded-2xl p-6 text-white mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Wallet className="h-4 w-4 opacity-70" />
-          <p className="text-sm opacity-80 font-medium">Available Balance</p>
-        </div>
-        <p className="text-3xl font-bold tracking-tight">
-          GH&#x20B5; {wallet.balance.toFixed(2)}
-        </p>
+      {/* Balance card */}
+      <div className="bg-gradient-to-br from-blue to-blue-500 rounded-2xl p-6 text-white mb-6 shadow-lg">
+        <p className="text-sm font-medium text-white/70 uppercase tracking-wide">Available Balance</p>
+        <p className="text-3xl font-bold mt-1">GH₵ {wallet.balance.toFixed(2)}</p>
         <div className="flex items-center gap-2 mt-3">
-          <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${
-            wallet.status === 1
-              ? 'bg-white/20 text-white'
-              : 'bg-red-400/30 text-red-100'
-          }`}>
-            <Activity className="h-3 w-3" />
+          <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${wallet.status === 1 ? 'bg-white/20 text-white' : 'bg-red-400/30 text-red-100'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${wallet.status === 1 ? 'bg-green-300' : 'bg-red-300'}`} />
             {wallet.status === 1 ? 'Active' : 'Inactive'}
           </span>
         </div>
       </div>
 
-      {/* Details card */}
-      <div className="bg-gray-1 rounded-xl border border-gray-3 p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-white flex items-center justify-center border border-gray-3">
-              <Hash className="h-4 w-4 text-dark-4" />
-            </div>
-            <div>
-              <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Wallet Number</p>
-              <p className="text-sm font-medium text-dark mt-0.5 font-mono">{wallet.WalletNumber}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-white flex items-center justify-center border border-gray-3">
-              <CreditCard className="h-4 w-4 text-dark-4" />
-            </div>
-            <div>
-              <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Wallet Type</p>
-              <p className="text-sm font-medium text-dark mt-0.5">{wallet.wallet_type}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-white flex items-center justify-center border border-gray-3">
-              <CalendarDays className="h-4 w-4 text-dark-4" />
-            </div>
-            <div>
-              <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Created</p>
-              <p className="text-sm font-medium text-dark mt-0.5">
-                {new Date(wallet.date_created).toLocaleDateString('en-GB', {
-                  day: 'numeric', month: 'long', year: 'numeric',
-                })}
-              </p>
-            </div>
-          </div>
+      {/* Details grid */}
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Wallet Number</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">{wallet.WalletNumber}</p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Wallet Type</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">{wallet.wallet_type}</p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Created</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">
+            {new Date(wallet.date_created).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
         </div>
       </div>
     </div>

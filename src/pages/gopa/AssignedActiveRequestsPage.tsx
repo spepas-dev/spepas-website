@@ -12,7 +12,7 @@ const AssignedActiveRequestsPage: React.FC = () => {
   if (!gopaProfile) {
     return (
       <div className="p-6">
-        <section className="pt-20"></section>
+        <section className="pt-28"></section>
         <h1 className="text-2xl font-bold mb-4">Your Assigned Active Requests</h1>
         <p className="text-gray-600">No GOPA profile found.</p>
       </div>
@@ -29,7 +29,7 @@ const AssignedActiveRequestsPage: React.FC = () => {
   }, [userId]);
 
   return (
-    <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-20">
+    <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-28">
       <section className="pt-10"></section>
         
       <h1 className="text-2xl font-bold mb-4">Your Assigned Active Requests</h1>

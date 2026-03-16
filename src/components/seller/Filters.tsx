@@ -2,7 +2,7 @@
 import React from 'react';
 
 interface FiltersProps {
-  filter: 'all' | 'have' | 'accepted';
+  filter: 'all'|'have'|'accepted';
   onChange: (f: FiltersProps['filter']) => void;
 }
 
@@ -13,17 +13,14 @@ const labelMap = {
 };
 
 const Filters: React.FC<FiltersProps> = ({ filter, onChange }) => (
-  <div className="flex gap-2">
-    {(['all', 'have'] as const).map((key) => (
+  <div>
+    {(['all','have'] as const).map(key => (
       <button
         key={key}
-        type="button"
-        onClick={() => onChange(key)}
-        className={`font-medium text-sm py-2 px-4 rounded-lg transition-colors duration-200 ${
-          filter === key
-            ? 'bg-blue text-white'
-            : 'bg-white text-dark-2 border border-gray-3 hover:bg-gray-2'
+        className={`ml-2 px-2 py-1 rounded-full text-xs ${
+          filter===key ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
         }`}
+        onClick={() => onChange(key)}
       >
         {labelMap[key]}
       </button>

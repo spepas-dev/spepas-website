@@ -1,57 +1,36 @@
 import React from 'react';
-import { Users, Shield, Tag } from 'lucide-react';
 
 const GroupsRolesTab: React.FC<{ groups: any[]; roles: any[] }> = ({ groups, roles }) => (
   <div>
-    <div className="mb-6">
-      <h3 className="text-lg font-semibold text-dark">Groups & Roles</h3>
-      <p className="text-sm text-dark-4 mt-1">Your assigned groups and permission roles</p>
-    </div>
-
-    {/* Groups */}
-    <div className="bg-gray-1 rounded-xl border border-gray-3 p-5 mb-4">
-      <div className="flex items-center gap-2 mb-3">
-        <Users className="h-4 w-4 text-dark-4" />
-        <p className="text-sm font-semibold text-dark">Groups</p>
-      </div>
-      {groups.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {groups.map((g, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-1.5 text-xs font-medium bg-blue-light-5 text-blue px-3 py-1.5 rounded-full"
-            >
-              <Tag className="h-3 w-3" />
-              {typeof g === 'string' ? g : g?.name ?? JSON.stringify(g)}
+    <h2 className="text-xl font-bold text-gray-800 mb-6">Groups & Roles</h2>
+    <div className="grid sm:grid-cols-2 gap-6">
+      {/* Groups */}
+      <div className="bg-white rounded-xl px-5 py-5 shadow-sm border border-gray-100">
+        <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Groups</span>
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {groups.length > 0 ? groups.map((g, i) => (
+            <span key={i} className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue/10 text-blue text-xs font-medium">
+              {typeof g === 'string' ? g : g.name ?? JSON.stringify(g)}
             </span>
-          ))}
+          )) : (
+            <span className="text-sm text-gray-500">No groups assigned</span>
+          )}
         </div>
-      ) : (
-        <p className="text-sm text-dark-4">No groups assigned</p>
-      )}
-    </div>
-
-    {/* Roles */}
-    <div className="bg-gray-1 rounded-xl border border-gray-3 p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <Shield className="h-4 w-4 text-dark-4" />
-        <p className="text-sm font-semibold text-dark">Roles</p>
       </div>
-      {roles.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {roles.map((r, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-1.5 text-xs font-medium bg-green-50 text-green-700 px-3 py-1.5 rounded-full"
-            >
-              <Shield className="h-3 w-3" />
-              {typeof r === 'string' ? r : r?.name ?? JSON.stringify(r)}
+
+      {/* Roles */}
+      <div className="bg-white rounded-xl px-5 py-5 shadow-sm border border-gray-100">
+        <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Roles</span>
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {roles.length > 0 ? roles.map((r, i) => (
+            <span key={i} className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-medium">
+              {typeof r === 'string' ? r : r.name ?? JSON.stringify(r)}
             </span>
-          ))}
+          )) : (
+            <span className="text-sm text-gray-500">No roles assigned</span>
+          )}
         </div>
-      ) : (
-        <p className="text-sm text-dark-4">No roles assigned</p>
-      )}
+      </div>
     </div>
   </div>
 );
