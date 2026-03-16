@@ -52,6 +52,7 @@ const carModelSchema = z.object({
   bodyTypes: z.array(z.string()).optional(),
   driveTypes: z.array(z.string()).optional(),
   spareParts: z.array(sparePartSchema).optional().default([]),
+  sparePartCount: z.number().optional(),
   carBrand: z
     .object({
       id: z.number(),
@@ -86,6 +87,7 @@ const carBrandSchema = z.object({
   createdAt: z.string(),
   type: z.string(),
   models: z.array(carModelSchema).optional().default([]),
+  modelCount: z.number().optional(),
   manufacturer: z
     .object({
       id: z.number(),

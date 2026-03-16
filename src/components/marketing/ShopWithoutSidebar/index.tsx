@@ -541,7 +541,7 @@ const ShopWithoutSidebar: React.FC = () => {
                   options={brandOptions.map((b: any) => ({
                     value: b.CarBrand_ID,
                     label: b.name,
-                    count: b.models?.length > 0 ? b.models.length : undefined
+                    count: b.modelCount ?? (b.models?.length > 0 ? b.models.length : undefined)
                   }))}
                   value={selectedBrand}
                   onChange={onChangeBrand}
@@ -558,7 +558,7 @@ const ShopWithoutSidebar: React.FC = () => {
                   options={modelOptions.map((m: any) => ({
                     value: m.CarModel_ID,
                     label: `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`,
-                    count: m.spareParts?.length > 0 ? m.spareParts.length : undefined
+                    count: m.sparePartCount ?? (m.spareParts?.length > 0 ? m.spareParts.length : undefined)
                   }))}
                   value={selectedModel}
                   onChange={onChangeModel}
