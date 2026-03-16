@@ -1,10 +1,11 @@
 // src/components/profiling/MepaRegistrationForm.tsx
-import React, { useState, FormEvent, useMemo } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Breadcrumb from '@/components/common/Breadcrumb';
+import MapPicker from '@/components/common/MapPicker'; // *added*
 import { createMepaProfileSelf } from '@/lib/profiling';
 import { mepaRegistrationSchema } from '@/lib/profilingZodValidation';
-import MapPicker from '@/components/common/MapPicker'; // *added*
 
 const MepaRegistrationForm: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const MepaRegistrationForm: React.FC = () => {
         shop_name: shopName,
         address,
         longitude: parseFloat(longitude),
-        latitude: parseFloat(latitude),
+        latitude: parseFloat(latitude)
       };
       mepaRegistrationSchema.parse(payload);
       await createMepaProfileSelf(payload);
@@ -49,7 +50,7 @@ const MepaRegistrationForm: React.FC = () => {
 
   return (
     <>
-    <section className="pt-10"></section>
+      <section className="pt-10"></section>
       <Breadcrumb title="MEPA Registration" pages={['Profiling', 'MEPA Registration']} />
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] mx-auto rounded-xl bg-white shadow p-6">
@@ -60,7 +61,7 @@ const MepaRegistrationForm: React.FC = () => {
             <input
               type="text"
               value={shopName}
-              onChange={e => setShopName(e.target.value)}
+              onChange={(e) => setShopName(e.target.value)}
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
@@ -68,7 +69,7 @@ const MepaRegistrationForm: React.FC = () => {
             <input
               type="text"
               value={address}
-              onChange={e => setAddress(e.target.value)}
+              onChange={(e) => setAddress(e.target.value)}
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
@@ -95,7 +96,7 @@ const MepaRegistrationForm: React.FC = () => {
                     type="number"
                     step="any"
                     value={longitude}
-                    onChange={e => setLongitude(e.target.value)}
+                    onChange={(e) => setLongitude(e.target.value)}
                     className="w-full rounded-lg border bg-gray-100 p-3"
                     required
                   />
@@ -106,22 +107,16 @@ const MepaRegistrationForm: React.FC = () => {
                     type="number"
                     step="any"
                     value={latitude}
-                    onChange={e => setLatitude(e.target.value)}
+                    onChange={(e) => setLatitude(e.target.value)}
                     className="w-full rounded-lg border bg-gray-100 p-3"
                     required
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-500">
-                Tip: Click the map or use “Use my location” to auto-fill the coordinates.
-              </p>
+              <p className="text-xs text-gray-500">Tip: Click the map or use “Use my location” to auto-fill the coordinates.</p>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-dark text-white py-3 rounded-lg"
-            >
+            <button type="submit" disabled={loading} className="w-full bg-dark text-white py-3 rounded-lg">
               {loading ? 'Submitting…' : 'Submit'}
             </button>
           </form>

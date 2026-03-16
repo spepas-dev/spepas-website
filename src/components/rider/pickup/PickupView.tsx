@@ -62,9 +62,7 @@ const PickupView: React.FC = () => {
             Scan QR
           </button>
           {!withinRadius && (
-            <p className="mt-2 text-xs text-gray-500">
-              This button will be enabled once you are within 500m radius of the address.
-            </p>
+            <p className="mt-2 text-xs text-gray-500">This button will be enabled once you are within 500m radius of the address.</p>
           )}
         </div>
       </div>

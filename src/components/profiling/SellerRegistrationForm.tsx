@@ -1,15 +1,16 @@
-import React, { useState, FormEvent, useMemo } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Breadcrumb from '@/components/common/Breadcrumb';
+import MapPicker from '@/components/common/MapPicker'; // *adjusted*
 import { createSellerProfileSelf } from '@/lib/profiling';
 import { sellerRegistrationSchema } from '@/lib/profilingZodValidation';
-import MapPicker from '@/components/common/MapPicker'; // *adjusted*
 
 const SellerRegistrationForm: React.FC = () => {
   const navigate = useNavigate();
   const [storeName, setStoreName] = useState('');
   const [longitude, setLongitude] = useState(''); // keep as string for inputs
-  const [latitude, setLatitude] = useState('');   // keep as string for inputs
+  const [latitude, setLatitude] = useState(''); // keep as string for inputs
   const [phoneNumber, setPhoneNumber] = useState('');
   const [shopAddress, setShopAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,9 @@ const SellerRegistrationForm: React.FC = () => {
   }, [longitude]);
 
   const validatePhone = (value: string): string | null => {
-    if (!value) return 'Phone number is required.';
+    if (!value) {
+      return 'Phone number is required.';
+    }
     if (/[^0-9]/.test(value)) {
       return 'Phone number must contain digits only (0-9).';
     }
@@ -59,7 +62,7 @@ const SellerRegistrationForm: React.FC = () => {
         longitude: parseFloat(longitude),
         latitude: parseFloat(latitude),
         phoneNumber,
-        shopAddress,
+        shopAddress
       };
       sellerRegistrationSchema.parse(payload);
       await createSellerProfileSelf(payload);
@@ -106,11 +109,7 @@ const SellerRegistrationForm: React.FC = () => {
                 className="w-full rounded-lg border bg-gray-100 p-3"
                 required
               />
-              {phoneError && (
-                <p className="mt-1 text-xs text-red-500">
-                  {phoneError}
-                </p>
-              )}
+              {phoneError && <p className="mt-1 text-xs text-red-500">{phoneError}</p>}
             </div>
 
             <div>
@@ -163,16 +162,10 @@ const SellerRegistrationForm: React.FC = () => {
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-500">
-                Tip: Click the map or use “Use my location” to auto-fill the coordinates.
-              </p>
+              <p className="text-xs text-gray-500">Tip: Click the map or use “Use my location” to auto-fill the coordinates.</p>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-dark text-white py-3 rounded-lg"
-            >
+            <button type="submit" disabled={loading} className="w-full bg-dark text-white py-3 rounded-lg">
               {loading ? 'Submitting…' : 'Submit'}
             </button>
           </form>

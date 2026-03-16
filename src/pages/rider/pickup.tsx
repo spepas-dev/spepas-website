@@ -1,4 +1,5 @@
 import React from 'react';
+
 import PickupView from '@/components/rider/pickup/PickupView';
 
 const RiderPickupPage: React.FC = () => {

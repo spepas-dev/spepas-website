@@ -1,6 +1,7 @@
 // src/pages/buyer/CheckoutPage.tsx
-import React from 'react'
-import CheckoutForm from '@/components/buyer/CheckoutForm'
+import React from 'react';
+
+import CheckoutForm from '@/components/buyer/CheckoutForm';
 
 const CheckoutPage: React.FC = () => {
   return (
@@ -12,7 +13,7 @@ const CheckoutPage: React.FC = () => {
       </div>
       <CheckoutForm />
     </div>
-  )
-}
+  );
+};
 
-export default CheckoutPage
+export default CheckoutPage;

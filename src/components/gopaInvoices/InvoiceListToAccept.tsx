@@ -1,10 +1,11 @@
 // src/components/gopaInvoices/InvoiceListToAccept.tsx
 import React, { useEffect, useState } from 'react';
-import { getInvoicesForGopaToAccept, acceptInvoiceByGopa } from '@/lib/gopaInvoiceApis';
+
 import SpepasLoader from '@/components/common/SpepasLoader';
+import { acceptInvoiceByGopa, getInvoicesForGopaToAccept } from '@/lib/gopaInvoiceApis';
 
 const InvoiceListToAccept: React.FC = () => {
-  const [invoices, setInvoices] = useState<any[]>([]);
+  const [invoices, setInvoices] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [loading, setLoading] = useState(true);
 
   const fetchList = async () => {
@@ -53,7 +54,7 @@ const InvoiceListToAccept: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {invoices.map(inv => (
+            {invoices.map((inv) => (
               <tr key={inv.invoice_id}>
                 <td className="border px-2 py-1">{inv.invoice_id}</td>
                 <td className="border px-2 py-1">{inv.total_amount}</td>

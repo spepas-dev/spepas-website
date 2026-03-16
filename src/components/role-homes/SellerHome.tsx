@@ -13,15 +13,18 @@ const SellerHome: React.FC<{ name: string; sellerId?: string }> = ({ name, selle
   const navigate = useNavigate();
 
   // TODO: replace with API data
-  const stats = useMemo(() => ({
-    brandName: 'Ghana Spare Parts Intl.',
-    rating: 4.5,
-    totalOrders: 50,
-    totalProducts: 25,
-    earningsToday: 50,
-    series: [60, 120, 200, 500, 200, 150],
-    dayLabel: 'June 28th',
-  }), []);
+  const stats = useMemo(
+    () => ({
+      brandName: 'Ghana Spare Parts Intl.',
+      rating: 4.5,
+      totalOrders: 50,
+      totalProducts: 25,
+      earningsToday: 50,
+      series: [60, 120, 200, 500, 200, 150],
+      dayLabel: 'June 28th'
+    }),
+    []
+  );
 
   return (
     <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0 py-6 pt-28">
@@ -33,7 +36,8 @@ const SellerHome: React.FC<{ name: string; sellerId?: string }> = ({ name, selle
         <div className="flex-1">
           <p className="font-medium">{stats.brandName}</p>
           <div className="flex items-center gap-1 text-sm text-amber-500">
-            <span>⭐</span><span className="text-gray-700">{stats.rating}</span>
+            <span>⭐</span>
+            <span className="text-gray-700">{stats.rating}</span>
           </div>
         </div>
         {/* {sellerId && (
@@ -87,7 +91,9 @@ const SellerHome: React.FC<{ name: string; sellerId?: string }> = ({ name, selle
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mt-6">Signed in as <span className="font-medium">{name}</span></p>
+      <p className="text-xs text-gray-500 mt-6">
+        Signed in as <span className="font-medium">{name}</span>
+      </p>
     </div>
   );
 };

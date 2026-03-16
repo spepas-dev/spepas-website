@@ -13,7 +13,7 @@ const Contact = () => {
     lastName: '',
     subject: '',
     phone: '',
-    message: '',
+    message: ''
   });
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
@@ -36,8 +36,8 @@ const Contact = () => {
           from_name: `${formData.firstName} ${formData.lastName}`,
           subject: formData.subject || 'New Contact Form Submission',
           phone: formData.phone,
-          message: formData.message,
-        }),
+          message: formData.message
+        })
       });
 
       const data = await res.json();
@@ -62,12 +62,8 @@ const Contact = () => {
         <div className="max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           {/* Header */}
           <header className="text-center space-y-3">
-            <h1 className="text-3xl sm:text-4xl font-semibold text-blue">
-              Contact Us
-            </h1>
-            <p className="text-gray-700 sm:text-lg">
-              Have a question or need help? Get in touch with our team.
-            </p>
+            <h1 className="text-3xl sm:text-4xl font-semibold text-blue">Contact Us</h1>
+            <p className="text-gray-700 sm:text-lg">Have a question or need help? Get in touch with our team.</p>
           </header>
 
           <div className="flex flex-col xl:flex-row gap-7.5">
@@ -224,7 +220,11 @@ const Contact = () => {
                 {status === 'error' && (
                   <div className="mt-4 flex items-center gap-2 text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
                     <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                      />
                     </svg>
                     <p className="text-sm">Failed to send message. Please try again or email us directly at info@spepas.com</p>
                   </div>

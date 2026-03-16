@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import DeliverySuccessCard from '@/components/rider/proof/DeliverySuccessCard';
 
 const RiderDeliveredSuccessPage: React.FC = () => {

@@ -1,12 +1,25 @@
 // src/pages/gopa/UnassignedHistoryPage.tsx
-import React, { useState, useEffect } from 'react';
-import { getGOPAUnassignedRequestHistoryAPI } from '@/lib/orderBidsApis';
+import React, { useEffect, useState } from 'react';
+
 import RequestList from '@/components/gopa/RequestList';
 import { useAuth } from '@/features/auth';
+import { getGOPAUnassignedRequestHistoryAPI } from '@/lib/orderBidsApis';
 
 const UnassignedHistoryPage: React.FC = () => {
   const { authData } = useAuth();
   const gopaProfile = authData?.user?.gopa;
+  const userId = gopaProfile?.Gopa_ID;
+
+  const [requests, setRequests] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+  useEffect(() => {
+    if (!userId) {
+      return;
+    }
+    getGOPAUnassignedRequestHistoryAPI({ user_id: userId })
+      .then((res) => setRequests(res.data))
+      .catch(console.error);
+  }, [userId]);
 
   // Guard: if there's no GOPA profile, show a message instead of crashing
   if (!gopaProfile) {
@@ -17,15 +30,6 @@ const UnassignedHistoryPage: React.FC = () => {
       </div>
     );
   }
-
-  const userId = gopaProfile.Gopa_ID;
-  const [requests, setRequests] = useState<any[]>([]);
-
-  useEffect(() => {
-    getGOPAUnassignedRequestHistoryAPI({ user_id: userId })
-      .then(res => setRequests(res.data))
-      .catch(console.error);
-  }, [userId]);
 
   return (
     <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-28">

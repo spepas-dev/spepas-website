@@ -6,7 +6,9 @@ const DeliverySuccessCard: React.FC<{ earnings?: number; onBack?: () => void }> 
       <span className="text-3xl">🛍️</span>
     </div>
     <h2 className="text-xl font-semibold mb-2">Order delivered successfully</h2>
-    <p className="text-sm text-gray-600 mb-6">Congratulations on a successful delivery! you’ve earned <span className="font-semibold">GH₵ {earnings}.</span></p>
+    <p className="text-sm text-gray-600 mb-6">
+      Congratulations on a successful delivery! you’ve earned <span className="font-semibold">GH₵ {earnings}.</span>
+    </p>
     <button className="px-5 py-3 rounded-lg bg-violet-600 text-white hover:bg-violet-700" onClick={onBack}>
       Back to home
     </button>

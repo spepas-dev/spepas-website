@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/invoices/InvoiceItemDetailPage.tsx
+import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getInvoiceItemDetails } from '@/lib/invoiceApis';
+
 import Breadcrumb from '@/components/marketing/Common/Breadcrumb';
+import { getInvoiceItemDetails } from '@/lib/invoiceApis';
 
 const InvoiceItemDetailPage: React.FC = () => {
   const { item_id } = useParams<{ invoice_id: string; item_id: string }>();
@@ -11,7 +13,7 @@ const InvoiceItemDetailPage: React.FC = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['invoice-item-detail', item_id],
     queryFn: () => getInvoiceItemDetails(item_id!),
-    enabled: !!item_id,
+    enabled: !!item_id
   });
 
   const item = data?.data;
@@ -37,12 +39,12 @@ const InvoiceItemDetailPage: React.FC = () => {
                     item.statusMessage === 'PENDING'
                       ? 'bg-yellow-100 text-yellow-700'
                       : item.statusMessage === 'DELIVERED'
-                      ? 'bg-green-100 text-green-700'
-                      : item.statusMessage === 'SHIPPED'
-                      ? 'bg-blue-100 text-blue-700'
-                      : item.statusMessage === 'READY_FOR_PICKUP'
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'bg-gray-100 text-gray-600'
+                        ? 'bg-green-100 text-green-700'
+                        : item.statusMessage === 'SHIPPED'
+                          ? 'bg-blue-100 text-blue-700'
+                          : item.statusMessage === 'READY_FOR_PICKUP'
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-gray-100 text-gray-600'
                   }`}
                 >
                   {item.statusMessage ?? `Status ${item.status}`}
@@ -137,9 +139,7 @@ const InvoiceItemDetailPage: React.FC = () => {
                         <div className="w-2 h-2 mt-1.5 rounded-full bg-blue-500 flex-shrink-0" />
                         <div>
                           <p className="text-sm font-medium">{t.statusMessage ?? t.status}</p>
-                          {t.createdAt && (
-                            <p className="text-xs text-gray-400">{new Date(t.createdAt).toLocaleString()}</p>
-                          )}
+                          {t.createdAt && <p className="text-xs text-gray-400">{new Date(t.createdAt).toLocaleString()}</p>}
                         </div>
                       </div>
                     ))}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { getMyAddresses, addAddress } from '@/lib/addressApis';
+
 import SpepasLoader from '@/components/common/SpepasLoader';
+import { addAddress, getMyAddresses } from '@/lib/addressApis';
 
 interface Address {
   address_id: string;
@@ -28,11 +29,12 @@ const AddressDetails: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchAddresses(); }, []);
+  useEffect(() => {
+    fetchAddresses();
+  }, []);
 
-  const handleChange = (field: keyof typeof form) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setForm(prev => ({ ...prev, [field]: e.target.value }));
+  const handleChange = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +44,7 @@ const AddressDetails: React.FC = () => {
         title: form.title,
         addressDetails: form.addressDetails,
         longitude: parseFloat(form.longitude),
-        latitude: parseFloat(form.latitude),
+        latitude: parseFloat(form.latitude)
       });
       setForm({ title: '', addressDetails: '', longitude: '', latitude: '' });
       setShowForm(false);
@@ -130,7 +132,9 @@ const AddressDetails: React.FC = () => {
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Saving...
               </>
-            ) : 'Save Address'}
+            ) : (
+              'Save Address'
+            )}
           </button>
         </form>
       )}
@@ -141,7 +145,11 @@ const AddressDetails: React.FC = () => {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
             <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+              />
             </svg>
           </div>
           <p className="text-gray-500 text-sm">No addresses added yet.</p>
@@ -149,13 +157,17 @@ const AddressDetails: React.FC = () => {
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
-          {addresses.map(addr => (
+          {addresses.map((addr) => (
             <div key={addr.address_id} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
               <div className="flex items-start gap-3">
                 <div className="w-9 h-9 rounded-lg bg-blue/10 flex items-center justify-center shrink-0 mt-0.5">
                   <svg className="w-4.5 h-4.5 text-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                    />
                   </svg>
                 </div>
                 <div className="min-w-0">

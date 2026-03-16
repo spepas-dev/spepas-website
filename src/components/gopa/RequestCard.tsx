@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 interface Props {
-  request: any;
+  request: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 const RequestCard: React.FC<Props> = ({ request }) => (

@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/gopaInvoices/GopaAcceptedInvoiceDetails.tsx
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getGopaAcceptedInvoiceDetails } from '@/lib/gopaInvoiceApis';
+import { Link, useParams } from 'react-router-dom';
+
 import SpepasLoader from '@/components/common/SpepasLoader';
+import { getGopaAcceptedInvoiceDetails } from '@/lib/gopaInvoiceApis';
 
 const GopaAcceptedInvoiceDetails: React.FC = () => {
   const { invoice_id } = useParams<{ invoice_id: string }>();
@@ -10,7 +12,9 @@ const GopaAcceptedInvoiceDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!invoice_id) return;
+    if (!invoice_id) {
+      return;
+    }
     (async () => {
       const res = await getGopaAcceptedInvoiceDetails(invoice_id);
       setInvoice(res.data);
@@ -18,17 +22,22 @@ const GopaAcceptedInvoiceDetails: React.FC = () => {
     })();
   }, [invoice_id]);
 
-  if (loading) return <SpepasLoader />;
-  if (!invoice) return <p>No data.</p>;
+  if (loading) {
+    return <SpepasLoader />;
+  }
+  if (!invoice) {
+    return <p>No data.</p>;
+  }
 
   return (
     <div className="p-6">
-         <section className="pt-28"></section>
+      <section className="pt-28"></section>
       <h2 className="text-xl font-semibold mb-4">Invoice {invoice.invoice_id}</h2>
       <p>Total Amount: GH₵ {invoice.total_amount}</p>
       <p>Status: {invoice.statusMessage}</p>
       <h3 className="mt-4 font-medium">Items</h3>
       <ul>
+        {}
         {invoice.items.map((item: any) => (
           <li key={item.item_id}>
             <Link

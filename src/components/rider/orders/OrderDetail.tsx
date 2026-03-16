@@ -27,7 +27,7 @@ const OrderDetail: React.FC = () => {
     distanceKm: 2,
     payment: 50,
     eta: '03:20 PM',
-    status: 'in_progress' as 'in_progress' | 'delivered',
+    status: 'in_progress' as 'in_progress' | 'delivered'
   };
 
   // For now, point to the demo chat created earlier (replace with real chatId later)
@@ -61,24 +61,15 @@ const OrderDetail: React.FC = () => {
       </div>
 
       <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-          onClick={() => navigate(`${PREFIX}/rider/pickup/${order.id}`)}
-        >
+        <button className="px-4 py-2 rounded-lg border hover:bg-gray-50" onClick={() => navigate(`${PREFIX}/rider/pickup/${order.id}`)}>
           See Direction
         </button>
 
-        <button
-          className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-          onClick={() => alert('Calling customer...')}
-        >
+        <button className="px-4 py-2 rounded-lg border hover:bg-gray-50" onClick={() => alert('Calling customer...')}>
           Call
         </button>
 
-        <button
-          className="px-4 py-2 rounded-lg border hover:bg-gray-50"
-          onClick={() => navigate(`${PREFIX}/chat/${chatId}`)}
-        >
+        <button className="px-4 py-2 rounded-lg border hover:bg-gray-50" onClick={() => navigate(`${PREFIX}/chat/${chatId}`)}>
           Chat
         </button>
       </div>

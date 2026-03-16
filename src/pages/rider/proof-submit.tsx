@@ -25,8 +25,12 @@ const RiderProofSubmitPage: React.FC = () => {
         )}
 
         <div className="mt-6 flex gap-3">
-          <button className="px-4 py-2 rounded-lg border" onClick={() => nav(-1)}>Retake picture</button>
-          <button className="px-4 py-2 rounded-lg bg-violet-600 text-white" onClick={submit}>Submit picture</button>
+          <button className="px-4 py-2 rounded-lg border" onClick={() => nav(-1)}>
+            Retake picture
+          </button>
+          <button className="px-4 py-2 rounded-lg bg-violet-600 text-white" onClick={submit}>
+            Submit picture
+          </button>
         </div>
       </div>
     </div>

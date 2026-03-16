@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { UserType } from '@/features/auth';
 
 const Field: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
@@ -16,13 +17,21 @@ const GeneralDetails: React.FC<{ user: UserType }> = ({ user }) => (
       <Field label="Email Address" value={user.email} />
       <Field label="Phone Number" value={user.phoneNumber} />
       <Field label="Role" value={user.role} />
-      <Field label="Member Since" value={new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} />
-      <Field label="Status" value={
-        <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${user.status === 1 ? 'text-green-600' : 'text-amber-600'}`}>
-          <span className={`w-2 h-2 rounded-full ${user.status === 1 ? 'bg-green-500' : 'bg-amber-500'}`} />
-          {user.status === 1 ? 'Active' : 'Inactive'}
-        </span>
-      } />
+      <Field
+        label="Member Since"
+        value={new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+      />
+      <Field
+        label="Status"
+        value={
+          <span
+            className={`inline-flex items-center gap-1.5 text-sm font-semibold ${user.status === 1 ? 'text-green-600' : 'text-amber-600'}`}
+          >
+            <span className={`w-2 h-2 rounded-full ${user.status === 1 ? 'bg-green-500' : 'bg-amber-500'}`} />
+            {user.status === 1 ? 'Active' : 'Inactive'}
+          </span>
+        }
+      />
     </div>
   </div>
 );

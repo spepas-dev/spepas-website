@@ -1,33 +1,24 @@
 // src/components/buyer/OfferBidDetail.tsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const IMAGES: string[] = [
   // Replace with actual URLs later
   'https://www.serac-group.com/wp-content/uploads/2019/09/Parts.jpg',
   'https://thumbs.dreamstime.com/b/set-grey-metal-car-brake-discs-black-pads-photographed-clean-white-background-essential-auto-spare-parts-effective-398612931.jpg',
-  'https://blogs.gomechanic.com/wp-content/uploads/2020/07/How-to-spot-Counterfiet-fake-spare-parts-01.jpg',
+  'https://blogs.gomechanic.com/wp-content/uploads/2020/07/How-to-spot-Counterfiet-fake-spare-parts-01.jpg'
 ];
 
-const Badge: React.FC<{ tone?: 'gray' | 'indigo' | 'green' | 'amber'; children: React.ReactNode }> = ({
-  children,
-  tone = 'gray',
-}) => {
+const Badge: React.FC<{ tone?: 'gray' | 'indigo' | 'green' | 'amber'; children: React.ReactNode }> = ({ children, tone = 'gray' }) => {
   const toneMap = {
     gray: 'bg-gray-100 text-gray-700',
     indigo: 'bg-indigo-100 text-indigo-700',
     green: 'bg-green-100 text-green-700',
-    amber: 'bg-amber-100 text-amber-700',
+    amber: 'bg-amber-100 text-amber-700'
   } as const;
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${toneMap[tone]}`}>
-      {children}
-    </span>
-  );
+  return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${toneMap[tone]}`}>{children}</span>;
 };
 
 const OfferBidDetail: React.FC = () => {
-  const navigate = useNavigate();
   const [active, setActive] = useState(0);
 
   return (
@@ -52,11 +43,7 @@ const OfferBidDetail: React.FC = () => {
         <div className="lg:col-span-3">
           <div className="rounded-2xl bg-white  shadow-sm p-3 sm:p-4">
             <div className="aspect-video w-full overflow-hidden rounded-xl bg-gray-100">
-              <img
-                src={IMAGES[active]}
-                alt={`Offer image ${active + 1}`}
-                className="w-full h-full object-cover"
-              />
+              <img src={IMAGES[active]} alt={`Offer image ${active + 1}`} className="w-full h-full object-cover" />
             </div>
 
             <div className="mt-3 grid grid-cols-5 sm:grid-cols-6 gap-2">
@@ -64,9 +51,7 @@ const OfferBidDetail: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => setActive(i)}
-                  className={`relative overflow-hidden rounded-lg border ${
-                    active === i ? 'ring-2 ring-indigo-500' : 'hover:opacity-90'
-                  }`}
+                  className={`relative overflow-hidden rounded-lg border ${active === i ? 'ring-2 ring-indigo-500' : 'hover:opacity-90'}`}
                   title={`Image ${i + 1}`}
                 >
                   <img src={src} className="h-16 w-full object-cover" />
@@ -88,8 +73,7 @@ const OfferBidDetail: React.FC = () => {
             </div>
 
             <p className="text-gray-700 text-sm leading-relaxed">
-              Brand new radiator with 12-month warranty. OEM grade fit and finish.
-              Ready for immediate pickup or delivery.
+              Brand new radiator with 12-month warranty. OEM grade fit and finish. Ready for immediate pickup or delivery.
             </p>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
@@ -118,9 +102,7 @@ const OfferBidDetail: React.FC = () => {
                   <div className="font-medium">A and A Ventures</div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1.5 rounded-lg border hover:bg-gray-50 text-sm">
-                    View Store
-                  </button>
+                  <button className="px-3 py-1.5 rounded-lg border hover:bg-gray-50 text-sm">View Store</button>
                   <a
                     href="/95668339501103956045/chat/c1"
                     className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 text-sm"

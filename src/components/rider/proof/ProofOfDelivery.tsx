@@ -29,14 +29,24 @@ const ProofOfDelivery: React.FC = () => {
       {!preview ? (
         <div className="border-2 border-dashed rounded-xl p-10 text-center">
           <div className="text-sm text-gray-600 mb-3">Upload picture</div>
-          <button className="px-4 py-2 rounded-lg bg-violet-600 text-white" onClick={onPick}>Take picture</button>
+          <button className="px-4 py-2 rounded-lg bg-violet-600 text-white" onClick={onPick}>
+            Take picture
+          </button>
           <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={onChange} />
         </div>
       ) : (
         <div className="space-y-4">
           <img src={preview} alt="proof" className="w-40 h-40 object-cover rounded-xl" />
           <div className="flex gap-3">
-            <button className="px-4 py-2 rounded-lg border" onClick={() => { setPreview(null); setFile(null); }}>Retake picture</button>
+            <button
+              className="px-4 py-2 rounded-lg border"
+              onClick={() => {
+                setPreview(null);
+                setFile(null);
+              }}
+            >
+              Retake picture
+            </button>
             <button
               className="px-4 py-2 rounded-lg bg-violet-600 text-white"
               onClick={() => navigate(`/95668339501103956045/rider/orders/${orderId}/proof-submit`, { state: { preview } })}

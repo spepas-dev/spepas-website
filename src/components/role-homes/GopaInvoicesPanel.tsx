@@ -1,24 +1,26 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/role-homes/GopaInvoicesPanel.tsx
-import React, { useEffect, useMemo, useState } from "react";
-import SpepasLoader from "@/components/common/SpepasLoader";
+import React, { useEffect, useMemo, useState } from 'react';
+
+import SpepasLoader from '@/components/common/SpepasLoader';
 import {
-  getInvoicesForGopaToAccept,
   acceptInvoiceByGopa,
-  getGopaAcceptedInvoices,
   getGopaAcceptedInvoiceDetails,
   getGopaAcceptedInvoiceItemDetails,
-} from "@/lib/gopaInvoiceApis";
+  getGopaAcceptedInvoices,
+  getInvoicesForGopaToAccept
+} from '@/lib/gopaInvoiceApis';
 
-type InvTab = "TO_ACCEPT" | "ACCEPTED" | "ACCEPT_BY_ID";
+type InvTab = 'TO_ACCEPT' | 'ACCEPTED' | 'ACCEPT_BY_ID';
 
 const INV_TABS: { key: InvTab; label: string }[] = [
-  { key: "TO_ACCEPT", label: "To Accept" },
-  { key: "ACCEPTED", label: "Accepted" },
-  { key: "ACCEPT_BY_ID", label: "Accept by ID" },
+  { key: 'TO_ACCEPT', label: 'To Accept' },
+  { key: 'ACCEPTED', label: 'Accepted' },
+  { key: 'ACCEPT_BY_ID', label: 'Accept by ID' }
 ];
 
 const GopaInvoicesPanel: React.FC = () => {
-  const [tab, setTab] = useState<InvTab>("TO_ACCEPT");
+  const [tab, setTab] = useState<InvTab>('TO_ACCEPT');
 
   // data caches
   const [toAccept, setToAccept] = useState<any[]>([]);
@@ -31,19 +33,19 @@ const GopaInvoicesPanel: React.FC = () => {
   const [err, setErr] = useState<string | null>(null);
 
   // accept-by-id form
-  const [acceptingId, setAcceptingId] = useState("");
+  const [acceptingId, setAcceptingId] = useState('');
   const [acceptingBusy, setAcceptingBusy] = useState(false);
 
   const loaders = useMemo(
     () => ({
       TO_ACCEPT: async () => {
         const res = await getInvoicesForGopaToAccept();
-        setToAccept(Array.isArray(res?.data) ? res.data : res ?? []);
+        setToAccept(Array.isArray(res?.data) ? res.data : (res ?? []));
       },
       ACCEPTED: async () => {
         const res = await getGopaAcceptedInvoices();
-        setAccepted(Array.isArray(res?.data) ? res.data : res ?? []);
-      },
+        setAccepted(Array.isArray(res?.data) ? res.data : (res ?? []));
+      }
     }),
     []
   );
@@ -51,15 +53,21 @@ const GopaInvoicesPanel: React.FC = () => {
   const loadTab = async (force = false) => {
     setErr(null);
     if (!force) {
-      if (tab === "TO_ACCEPT" && toAccept.length) return;
-      if (tab === "ACCEPTED" && accepted.length) return;
-      if (tab === "ACCEPT_BY_ID") return;
+      if (tab === 'TO_ACCEPT' && toAccept.length) {
+        return;
+      }
+      if (tab === 'ACCEPTED' && accepted.length) {
+        return;
+      }
+      if (tab === 'ACCEPT_BY_ID') {
+        return;
+      }
     }
     setLoading(true);
     try {
-      await loaders[tab as "TO_ACCEPT" | "ACCEPTED"]?.();
+      await loaders[tab as 'TO_ACCEPT' | 'ACCEPTED']?.();
     } catch (e: any) {
-      setErr(e?.message || "Failed to load invoices.");
+      setErr(e?.message || 'Failed to load invoices.');
     } finally {
       setLoading(false);
     }
@@ -73,10 +81,7 @@ const GopaInvoicesPanel: React.FC = () => {
   }, [tab]);
 
   const refreshAll = async () => {
-    await Promise.all([
-      loaders.TO_ACCEPT?.(),
-      loaders.ACCEPTED?.(),
-    ]);
+    await Promise.all([loaders.TO_ACCEPT?.(), loaders.ACCEPTED?.()]);
   };
 
   const handleAccept = async (id: string) => {
@@ -92,9 +97,9 @@ const GopaInvoicesPanel: React.FC = () => {
     try {
       const res = await getGopaAcceptedInvoiceDetails(invoice_id);
       setInvoiceDetails(res?.data ?? res);
-      setTab("ACCEPTED"); // ensure we're on Accepted
+      setTab('ACCEPTED'); // ensure we're on Accepted
     } catch (e: any) {
-      setErr(e?.message || "Failed to load invoice details.");
+      setErr(e?.message || 'Failed to load invoice details.');
     } finally {
       setLoading(false);
     }
@@ -107,7 +112,7 @@ const GopaInvoicesPanel: React.FC = () => {
       const res = await getGopaAcceptedInvoiceItemDetails(item_id);
       setItemDetails(res?.data ?? res);
     } catch (e: any) {
-      setErr(e?.message || "Failed to load item details.");
+      setErr(e?.message || 'Failed to load item details.');
     } finally {
       setLoading(false);
     }
@@ -115,13 +120,15 @@ const GopaInvoicesPanel: React.FC = () => {
 
   const submitAcceptById = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!acceptingId.trim()) return;
+    if (!acceptingId.trim()) {
+      return;
+    }
     setAcceptingBusy(true);
     try {
       await acceptInvoiceByGopa({ invoice_id: acceptingId.trim() });
-      setAcceptingId("");
+      setAcceptingId('');
       await refreshAll();
-      setTab("ACCEPTED");
+      setTab('ACCEPTED');
     } finally {
       setAcceptingBusy(false);
     }
@@ -135,19 +142,14 @@ const GopaInvoicesPanel: React.FC = () => {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-3 py-2 rounded-lg text-sm ${
-              tab === t.key
-                ? "bg-blue-700 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              tab === t.key ? 'bg-blue-700 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             {t.label}
           </button>
         ))}
-        {tab !== "ACCEPT_BY_ID" && (
-          <button
-            onClick={() => loadTab(true)}
-            className="ml-auto px-3 py-2 rounded-lg text-sm border hover:bg-gray-50"
-          >
+        {tab !== 'ACCEPT_BY_ID' && (
+          <button onClick={() => loadTab(true)} className="ml-auto px-3 py-2 rounded-lg text-sm border hover:bg-gray-50">
             Refresh
           </button>
         )}
@@ -157,7 +159,7 @@ const GopaInvoicesPanel: React.FC = () => {
       {loading && <SpepasLoader className="p-3 flex items-center justify-center" />}
 
       {/* -------------------- TO ACCEPT -------------------- */}
-      {tab === "TO_ACCEPT" && !loading && (
+      {tab === 'TO_ACCEPT' && !loading && (
         <>
           {toAccept.length === 0 ? (
             <p className="text-sm text-gray-500 p-3">No invoices to accept.</p>
@@ -218,7 +220,7 @@ const GopaInvoicesPanel: React.FC = () => {
       )}
 
       {/* -------------------- ACCEPTED -------------------- */}
-      {tab === "ACCEPTED" && !loading && (
+      {tab === 'ACCEPTED' && !loading && (
         <>
           {accepted.length === 0 ? (
             <p className="text-sm text-gray-500 p-3">No accepted invoices found.</p>
@@ -230,10 +232,7 @@ const GopaInvoicesPanel: React.FC = () => {
                 <ul className="max-h-[380px] overflow-auto divide-y">
                   {accepted.map((inv) => (
                     <li key={inv.invoice_id} className="p-3">
-                      <button
-                        onClick={() => openInvoiceDetails(inv.invoice_id)}
-                        className="text-left w-full hover:underline"
-                      >
+                      <button onClick={() => openInvoiceDetails(inv.invoice_id)} className="text-left w-full hover:underline">
                         #{inv.invoice_id} — GH₵ {inv.total_amount}
                       </button>
                     </li>
@@ -246,9 +245,7 @@ const GopaInvoicesPanel: React.FC = () => {
                 <div className="px-3 py-2 border-b font-medium">Details</div>
                 {invoiceDetails ? (
                   <div className="p-3 text-sm">
-                    <div className="font-semibold mb-1">
-                      Invoice {invoiceDetails.invoice_id}
-                    </div>
+                    <div className="font-semibold mb-1">Invoice {invoiceDetails.invoice_id}</div>
                     <div>Total Amount: GH₵ {invoiceDetails.total_amount}</div>
                     <div>Status: {invoiceDetails.statusMessage}</div>
 
@@ -256,10 +253,7 @@ const GopaInvoicesPanel: React.FC = () => {
                     <ul className="divide-y mt-1">
                       {invoiceDetails.items?.map((it: any) => (
                         <li key={it.item_id} className="py-2">
-                          <button
-                            onClick={() => openItemDetails(it.item_id)}
-                            className="text-blue-600 hover:underline"
-                          >
+                          <button onClick={() => openItemDetails(it.item_id)} className="text-blue-600 hover:underline">
                             {it.item_id} — GH₵ {it.total_amount}
                           </button>
                         </li>
@@ -276,9 +270,7 @@ const GopaInvoicesPanel: React.FC = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="p-3 text-sm text-gray-500">
-                    Select an invoice to view details.
-                  </div>
+                  <div className="p-3 text-sm text-gray-500">Select an invoice to view details.</div>
                 )}
               </div>
             </div>
@@ -287,7 +279,7 @@ const GopaInvoicesPanel: React.FC = () => {
       )}
 
       {/* -------------------- ACCEPT BY ID -------------------- */}
-      {tab === "ACCEPT_BY_ID" && !loading && (
+      {tab === 'ACCEPT_BY_ID' && !loading && (
         <form onSubmit={submitAcceptById} className="max-w-md">
           <h3 className="text-lg font-semibold mb-3">Accept Invoice</h3>
           <label className="block text-sm mb-2">
@@ -300,12 +292,8 @@ const GopaInvoicesPanel: React.FC = () => {
               className="w-full border rounded px-3 py-2 mt-1"
             />
           </label>
-          <button
-            type="submit"
-            disabled={acceptingBusy}
-            className="mt-2 bg-gray-900 text-white px-4 py-2 rounded hover:bg-black/80"
-          >
-            {acceptingBusy ? "Processing…" : "Accept"}
+          <button type="submit" disabled={acceptingBusy} className="mt-2 bg-gray-900 text-white px-4 py-2 rounded hover:bg-black/80">
+            {acceptingBusy ? 'Processing…' : 'Accept'}
           </button>
         </form>
       )}

@@ -59,8 +59,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
 
-import { AuthProvider } from '@/features/auth';
 import { AccountTypeProvider } from '@/features/accountTypeContext';
+import { AuthProvider } from '@/features/auth';
 // local imports
 import { queryClient } from '@/lib';
 
@@ -71,9 +71,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <AccountTypeProvider>
-        <Toaster />
-        <App />
-        </AccountTypeProvider>        
+          <Toaster />
+          <App />
+        </AccountTypeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>

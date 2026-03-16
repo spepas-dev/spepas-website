@@ -1,21 +1,22 @@
-import React, { Fragment, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Disclosure, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/solid';
-import { useAuth } from '@/features/auth';
-import { useAccountType } from '@/features/accountTypeContext';
+import React, { Fragment, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+import { useAccountType } from '@/features/accountTypeContext';
+import { useAuth } from '@/features/auth';
+
+import AddressDetails from './AddressDetails';
+import DeliverProfileTab from './DeliverProfileTab';
 import GeneralDetails from './GeneralDetails';
 import GopaProfileTab from './GopaProfileTab';
-import MepaProfileTab from './MepaProfileTab';
-import SellerDetailsTab from './SellerDetailsTab';
-import DeliverProfileTab from './DeliverProfileTab';
-import PaymentAccountsTab from './PaymentAccountsTab';
 import GroupsRolesTab from './GroupsRolesTab';
-import AddressDetails from './AddressDetails';
-import WalletDetails from './WalletDetails';
-import SellerDocumentsTab from './SellerDocumentsTab';
+import MepaProfileTab from './MepaProfileTab';
+import PaymentAccountsTab from './PaymentAccountsTab';
 import RiderDocumentsTab from './RiderDocumentsTab';
+import SellerDetailsTab from './SellerDetailsTab';
+import SellerDocumentsTab from './SellerDocumentsTab';
+import WalletDetails from './WalletDetails';
 
 type TabKey =
   | 'general'
@@ -37,7 +38,7 @@ const ROLE_LABELS: Record<Role, string> = {
   MEPA: 'MEPA',
   SELLER: 'Seller',
   RIDER: 'Rider',
-  BUYER: 'Buyer',
+  BUYER: 'Buyer'
 };
 
 const MyAccount: React.FC = () => {
@@ -53,17 +54,25 @@ const MyAccount: React.FC = () => {
 
   const createdMonthYear = new Date(user.createdAt).toLocaleString('en-US', {
     month: 'long',
-    year: 'numeric',
+    year: 'numeric'
   });
 
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showSwitcher, setShowSwitcher] = useState(false);
   useEffect(() => {
     const roles: Role[] = [];
-    if (user.gopa) roles.push('GOPA');
-    if (user.mepa) roles.push('MEPA');
-    if (user.sellerDetails) roles.push('SELLER');
-    if (user.deliver) roles.push('RIDER');
+    if (user.gopa) {
+      roles.push('GOPA');
+    }
+    if (user.mepa) {
+      roles.push('MEPA');
+    }
+    if (user.sellerDetails) {
+      roles.push('SELLER');
+    }
+    if (user.deliver) {
+      roles.push('RIDER');
+    }
     roles.push('BUYER');
     setAvailableRoles(roles);
   }, [user]);
@@ -79,29 +88,42 @@ const MyAccount: React.FC = () => {
     ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups & Roles' },
     (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments', label: 'Payment Accounts' },
     { key: 'address', label: 'Addresses' },
-    { key: 'wallet', label: 'Wallet' },
+    { key: 'wallet', label: 'Wallet' }
   ]
     .filter(Boolean)
     .map((item) => item as { key: TabKey; label: string });
 
   const filteredTabs = allTabs.filter(({ key }) => {
-    if (key === 'general') return true;
-    if (accountType === 'GOPA' && key === 'gopa') return true;
-    if (accountType === 'MEPA' && key === 'mepa') return true;
-    if (accountType === 'SELLER' && (key === 'seller' || key === 'sellerDocs' || key === 'wallet')) return true;
-    if (accountType === 'RIDER' && (key === 'deliver' || key === 'riderDocs')) return true;
-    if (accountType === 'BUYER' && (key === 'address' || key === 'payments')) return true;
+    if (key === 'general') {
+      return true;
+    }
+    if (accountType === 'GOPA' && key === 'gopa') {
+      return true;
+    }
+    if (accountType === 'MEPA' && key === 'mepa') {
+      return true;
+    }
+    if (accountType === 'SELLER' && (key === 'seller' || key === 'sellerDocs' || key === 'wallet')) {
+      return true;
+    }
+    if (accountType === 'RIDER' && (key === 'deliver' || key === 'riderDocs')) {
+      return true;
+    }
+    if (accountType === 'BUYER' && (key === 'address' || key === 'payments')) {
+      return true;
+    }
     return false;
   });
 
   const [activeTab, setActiveTab] = useState<TabKey>('general');
 
-  const initials = user.name
-    ?.split(' ')
-    .map((n: string) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || '?';
+  const initials =
+    user.name
+      ?.split(' ')
+      .map((n: string) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?';
 
   return (
     <section className="pt-24 pb-16 bg-gray-50 min-h-screen">
@@ -110,9 +132,7 @@ const MyAccount: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">My Account</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your profile, documents, and settings
-            </p>
+            <p className="text-sm text-gray-500 mt-1">Manage your profile, documents, and settings</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -129,7 +149,11 @@ const MyAccount: React.FC = () => {
               className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-2.5 px-5 rounded-xl shadow-sm hover:opacity-90 transition"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+                />
               </svg>
               Switch Profile
             </button>
@@ -168,9 +192,7 @@ const MyAccount: React.FC = () => {
                       key={key}
                       onClick={() => setActiveTab(key)}
                       className={`w-full text-left text-sm font-medium py-2.5 px-4 rounded-xl transition-all duration-150 ${
-                        activeTab === key
-                          ? 'bg-blue/10 text-blue'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        activeTab === key ? 'bg-blue/10 text-blue' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}
                     >
                       {label}
@@ -179,11 +201,18 @@ const MyAccount: React.FC = () => {
                 </nav>
                 <div className="border-t border-gray-100 mt-3 pt-3">
                   <button
-                    onClick={() => { logout(); navigate('/'); }}
+                    onClick={() => {
+                      logout();
+                      navigate('/');
+                    }}
                     className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+                      />
                     </svg>
                     Sign Out
                   </button>
@@ -215,9 +244,7 @@ const MyAccount: React.FC = () => {
                               as="button"
                               onClick={() => setActiveTab(key)}
                               className={`block w-full text-left text-sm font-medium px-4 py-2.5 rounded-xl transition ${
-                                activeTab === key
-                                  ? 'bg-blue/10 text-blue'
-                                  : 'text-gray-600 hover:bg-gray-50'
+                                activeTab === key ? 'bg-blue/10 text-blue' : 'text-gray-600 hover:bg-gray-50'
                               }`}
                             >
                               {label}
@@ -226,7 +253,10 @@ const MyAccount: React.FC = () => {
                           <div className="border-t border-gray-100 mt-2 pt-2">
                             <Disclosure.Button
                               as="button"
-                              onClick={() => { logout(); navigate('/'); }}
+                              onClick={() => {
+                                logout();
+                                navigate('/');
+                              }}
                               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition"
                             >
                               Sign Out
@@ -266,14 +296,15 @@ const MyAccount: React.FC = () => {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
           onClick={() => setShowSwitcher(false)}
         >
-          <div
-            className="bg-white rounded-2xl shadow-xl p-6 w-[340px] max-w-[90vw]"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-[340px] max-w-[90vw]" onClick={(e) => e.stopPropagation()}>
             <div className="text-center mb-5">
               <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue/10 flex items-center justify-center">
                 <svg className="w-6 h-6 text-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-gray-900">Switch Profile</h3>
@@ -295,9 +326,7 @@ const MyAccount: React.FC = () => {
                     }`}
                   >
                     <span>{ROLE_LABELS[role]}</span>
-                    {accountType === role && (
-                      <span className="text-xs bg-blue text-white px-2 py-0.5 rounded-full">Current</span>
-                    )}
+                    {accountType === role && <span className="text-xs bg-blue text-white px-2 py-0.5 rounded-full">Current</span>}
                   </button>
                 </li>
               ))}

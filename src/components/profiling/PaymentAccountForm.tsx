@@ -1,6 +1,7 @@
 // src/components/profiling/AddPaymentAccountForm.tsx
-import React, { useState, FormEvent } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Breadcrumb from '@/components/common/Breadcrumb';
 import { createPaymentAccountSelf } from '@/lib/profiling';
 import { paymentAccountCreationSchema } from '@/lib/profilingZodValidation';
@@ -11,10 +12,10 @@ const PROVIDER_OPTIONS = ['ECOBANK'] as const;
 
 const AddPaymentAccountForm: React.FC = () => {
   const navigate = useNavigate();
-  const [mode, setMode] = useState('');              // e.g. 'BANK_ACCOUNT'
+  const [mode, setMode] = useState(''); // e.g. 'BANK_ACCOUNT'
   const [accountNumber, setAccountNumber] = useState('');
-  const [provider, setProvider] = useState('');      // e.g. 'ECOBANK'
-  const [name, setName] = useState('');              // account holder name
+  const [provider, setProvider] = useState(''); // e.g. 'ECOBANK'
+  const [name, setName] = useState(''); // account holder name
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -57,28 +58,36 @@ const AddPaymentAccountForm: React.FC = () => {
           <form onSubmit={handleSubmit}>
             {/* Account Type (dropdown) */}
             <div className="mb-5">
-              <label htmlFor="mode" className="block mb-2.5">Account Type</label>
+              <label htmlFor="mode" className="block mb-2.5">
+                Account Type
+              </label>
               <select
                 id="mode"
                 value={mode}
-                onChange={e => setMode(e.target.value)}
+                onChange={(e) => setMode(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-gray-100 py-3 px-5"
                 required
               >
-                <option value="" disabled>Select account type</option>
-                {ACCOUNT_TYPE_OPTIONS.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
+                <option value="" disabled>
+                  Select account type
+                </option>
+                {ACCOUNT_TYPE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="mb-5">
-              <label htmlFor="accountNumber" className="block mb-2.5">Account Number</label>
+              <label htmlFor="accountNumber" className="block mb-2.5">
+                Account Number
+              </label>
               <input
                 id="accountNumber"
                 type="text"
                 value={accountNumber}
-                onChange={e => setAccountNumber(e.target.value)}
+                onChange={(e) => setAccountNumber(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-gray-100 py-3 px-5"
                 required
               />
@@ -86,38 +95,42 @@ const AddPaymentAccountForm: React.FC = () => {
 
             {/* Provider (dropdown) */}
             <div className="mb-5">
-              <label htmlFor="provider" className="block mb-2.5">Provider</label>
+              <label htmlFor="provider" className="block mb-2.5">
+                Provider
+              </label>
               <select
                 id="provider"
                 value={provider}
-                onChange={e => setProvider(e.target.value)}
+                onChange={(e) => setProvider(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-gray-100 py-3 px-5"
                 required
               >
-                <option value="" disabled>Select provider</option>
-                {PROVIDER_OPTIONS.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
+                <option value="" disabled>
+                  Select provider
+                </option>
+                {PROVIDER_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div className="mb-5">
-              <label htmlFor="name" className="block mb-2.5">Account Holder Name</label>
+              <label htmlFor="name" className="block mb-2.5">
+                Account Holder Name
+              </label>
               <input
                 id="name"
                 type="text"
                 value={name}
-                onChange={e => setName(e.target.value)}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 bg-gray-100 py-3 px-5"
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full font-medium text-white bg-dark py-3 px-6 rounded-lg"
-            >
+            <button type="submit" disabled={loading} className="w-full font-medium text-white bg-dark py-3 px-6 rounded-lg">
               {loading ? 'Saving…' : 'Add Account'}
             </button>
           </form>

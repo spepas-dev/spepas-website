@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { MepaProfile } from '@/features/auth';
 
 const MepaProfileTab: React.FC<{ profile: MepaProfile | null }> = ({ profile }) => {
@@ -29,7 +30,9 @@ const MepaProfileTab: React.FC<{ profile: MepaProfile | null }> = ({ profile }) 
         <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
           <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Status</span>
           <p className="mt-1">
-            <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${profile.status === 1 ? 'text-green-600' : 'text-amber-600'}`}>
+            <span
+              className={`inline-flex items-center gap-1.5 text-sm font-semibold ${profile.status === 1 ? 'text-green-600' : 'text-amber-600'}`}
+            >
               <span className={`w-2 h-2 rounded-full ${profile.status === 1 ? 'bg-green-500' : 'bg-amber-500'}`} />
               {profile.status === 1 ? 'Active' : 'Pending'}
             </span>

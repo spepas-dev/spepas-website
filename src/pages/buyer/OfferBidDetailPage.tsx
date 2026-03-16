@@ -1,4 +1,5 @@
 import React from 'react';
+
 import OfferBidDetail from '@/components/buyer/OfferBidDetail';
 
 const OfferBidDetailPage: React.FC = () => {
