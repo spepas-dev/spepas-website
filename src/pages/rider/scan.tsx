@@ -1,4 +1,5 @@
 import React from 'react';
+
 import QRScanner from '@/components/rider/qr/QRScanner';
 
 const RiderScanPage: React.FC = () => {

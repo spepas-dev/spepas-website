@@ -1,6 +1,7 @@
 // src/pages/buyer/CartPage.tsx
-import React from 'react'
-import CartList from '@/components/buyer/CartList'
+import React from 'react';
+
+import CartList from '@/components/buyer/CartList';
 
 const CartPage: React.FC = () => {
   return (
@@ -12,7 +13,7 @@ const CartPage: React.FC = () => {
       </div>
       <CartList />
     </div>
-  )
-}
+  );
+};
 
-export default CartPage
+export default CartPage;

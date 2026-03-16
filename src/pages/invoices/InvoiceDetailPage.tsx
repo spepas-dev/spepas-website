@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/invoices/InvoiceDetailPage.tsx
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { getInvoiceDetails } from '@/lib/invoiceApis';
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import Breadcrumb from '@/components/marketing/Common/Breadcrumb';
+import { getInvoiceDetails } from '@/lib/invoiceApis';
 
 const InvoiceDetailPage: React.FC = () => {
   const { invoice_id } = useParams<{ invoice_id: string }>();
@@ -12,7 +14,7 @@ const InvoiceDetailPage: React.FC = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['invoice-detail', invoice_id],
     queryFn: () => getInvoiceDetails(invoice_id!),
-    enabled: !!invoice_id,
+    enabled: !!invoice_id
   });
 
   const invoice = data?.data;
@@ -32,17 +34,15 @@ const InvoiceDetailPage: React.FC = () => {
                 <div>
                   <h2 className="text-xl font-bold">Invoice</h2>
                   <p className="text-xs font-mono text-gray-400 mt-1">{invoice.invoice_id}</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Created: {new Date(invoice.createdAt).toLocaleString()}
-                  </p>
+                  <p className="text-sm text-gray-500 mt-2">Created: {new Date(invoice.createdAt).toLocaleString()}</p>
                 </div>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-medium self-start ${
                     invoice.statusMessage === 'PENDING'
                       ? 'bg-yellow-100 text-yellow-700'
                       : invoice.statusMessage === 'COMPLETED' || invoice.statusMessage === 'DELIVERED'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-gray-100 text-gray-600'
                   }`}
                 >
                   {invoice.statusMessage ?? `Status ${invoice.status}`}
@@ -93,16 +93,12 @@ const InvoiceDetailPage: React.FC = () => {
             {/* Items */}
             {invoice.items && invoice.items.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h3 className="font-semibold text-lg mb-4">
-                  Items ({invoice.items.length})
-                </h3>
+                <h3 className="font-semibold text-lg mb-4">Items ({invoice.items.length})</h3>
                 <div className="space-y-3">
                   {invoice.items.map((item: any) => (
                     <div
                       key={item.item_id}
-                      onClick={() =>
-                        navigate(`/95668339501103956045/invoices/${invoice.invoice_id}/items/${item.item_id}`)
-                      }
+                      onClick={() => navigate(`/95668339501103956045/invoices/${invoice.invoice_id}/items/${item.item_id}`)}
                       className="flex items-center justify-between bg-gray-50 rounded-lg p-4 border cursor-pointer hover:bg-gray-100 transition"
                     >
                       <div>
@@ -117,8 +113,8 @@ const InvoiceDetailPage: React.FC = () => {
                             item.statusMessage === 'PENDING'
                               ? 'bg-yellow-100 text-yellow-700'
                               : item.statusMessage === 'DELIVERED'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-gray-100 text-gray-600'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-600'
                           }`}
                         >
                           {item.statusMessage ?? `Status ${item.status}`}

@@ -1,23 +1,30 @@
 // src/components/marketing/Home/AdvertSlider/index.tsx
-import React from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Autoplay, Pagination, Navigation } from 'swiper/modules'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { getActiveSliders } from '@/lib/advertApis'
-import type { SliderData } from '@/lib/advertZodValidation'
+import { useQuery } from '@tanstack/react-query';
+import React from 'react';
+import { Autoplay, Navigation, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import { getActiveSliders } from '@/lib/advertApis';
+import type { SliderData } from '@/lib/advertZodValidation';
 
 const AdvertSlider: React.FC = () => {
-  const { data: response, isLoading, isError } = useQuery({
+  const {
+    data: response,
+    isLoading,
+    isError
+  } = useQuery({
     queryKey: ['advert-sliders'],
     queryFn: getActiveSliders,
     staleTime: 5 * 60 * 1000,
-    retry: false,
-  })
+    retry: false
+  });
 
-  const slides: SliderData[] = response?.data ?? []
+  const slides: SliderData[] = response?.data ?? [];
 
   // Don't render the section at all if no adverts, not loading, or errored
-  if ((!isLoading && slides.length === 0) || isError) return null
+  if ((!isLoading && slides.length === 0) || isError) {
+    return null;
+  }
 
   return (
     <section className="max-w-[1170px] w-full mx-auto px-4 sm:px-8 xl:px-0 mt-8 sm:mt-10 lg:mt-14">
@@ -39,20 +46,14 @@ const AdvertSlider: React.FC = () => {
             <SwiperSlide key={slide.slider_id}>
               <div className="relative w-full h-[280px] sm:h-[320px] lg:h-[360px] bg-gradient-to-r from-indigo-50 to-blue-50">
                 {/* Background image */}
-                <img
-                  src={slide.url}
-                  alt={slide.title}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                <img src={slide.url} alt={slide.title} className="absolute inset-0 w-full h-full object-cover" />
 
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
 
                 {/* Text content */}
                 <div className="relative z-10 flex flex-col justify-center h-full px-6 sm:px-10 lg:px-14 max-w-xl">
-                  <h3 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl mb-2 sm:mb-3 drop-shadow-md">
-                    {slide.title}
-                  </h3>
+                  <h3 className="text-white font-bold text-xl sm:text-2xl lg:text-3xl mb-2 sm:mb-3 drop-shadow-md">{slide.title}</h3>
                   <p className="text-white/90 text-sm sm:text-base lg:text-lg leading-relaxed drop-shadow-sm line-clamp-3">
                     {slide.description}
                   </p>
@@ -95,7 +96,7 @@ const AdvertSlider: React.FC = () => {
         `}
       </style>
     </section>
-  )
-}
+  );
+};
 
-export default AdvertSlider
+export default AdvertSlider;

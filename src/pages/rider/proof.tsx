@@ -1,4 +1,5 @@
 import React from 'react';
+
 import ProofOfDelivery from '@/components/rider/proof/ProofOfDelivery';
 
 const RiderProofPage: React.FC = () => {

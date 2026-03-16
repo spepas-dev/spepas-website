@@ -1,15 +1,11 @@
 // src/pages/seller/InvoicesPage.tsx
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  getSellerPendingInvoices,
-  getSellerHistoryInvoices,
-  setOrderItemReadyForPickup,
-  sellerDeliverToRider,
-} from '@/lib/invoiceApis';
-import type { InvoiceData, InvoiceItem } from '@/lib/invoiceZodValidation';
+
 import Breadcrumb from '@/components/marketing/Common/Breadcrumb';
+import { getSellerHistoryInvoices, getSellerPendingInvoices, sellerDeliverToRider, setOrderItemReadyForPickup } from '@/lib/invoiceApis';
+import type { InvoiceData, InvoiceItem } from '@/lib/invoiceZodValidation';
 
 type Tab = 'pending' | 'history';
 
@@ -24,13 +20,13 @@ const SellerInvoicesPage: React.FC = () => {
   const pendingQuery = useQuery({
     queryKey: ['seller-invoices-pending', sellerId],
     queryFn: () => getSellerPendingInvoices(sellerId!),
-    enabled: tab === 'pending' && !!sellerId,
+    enabled: tab === 'pending' && !!sellerId
   });
 
   const historyQuery = useQuery({
     queryKey: ['seller-invoices-history', sellerId],
     queryFn: () => getSellerHistoryInvoices(sellerId!),
-    enabled: tab === 'history' && !!sellerId,
+    enabled: tab === 'history' && !!sellerId
   });
 
   const readyForPickupMutation = useMutation({
@@ -38,7 +34,7 @@ const SellerInvoicesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['seller-invoices-pending'] });
       setSelectedItems([]);
-    },
+    }
   });
 
   const deliverToRiderMutation = useMutation({
@@ -46,16 +42,14 @@ const SellerInvoicesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['seller-invoices-pending'] });
       setSelectedItems([]);
-    },
+    }
   });
 
   const activeQuery = tab === 'pending' ? pendingQuery : historyQuery;
   const invoices: InvoiceData[] = activeQuery.data?.data ?? [];
 
   const toggleItem = (item_id: string) => {
-    setSelectedItems((prev) =>
-      prev.includes(item_id) ? prev.filter((id) => id !== item_id) : [...prev, item_id]
-    );
+    setSelectedItems((prev) => (prev.includes(item_id) ? prev.filter((id) => id !== item_id) : [...prev, item_id]));
   };
 
   return (
@@ -67,11 +61,13 @@ const SellerInvoicesPage: React.FC = () => {
           {(['pending', 'history'] as Tab[]).map((t) => (
             <button
               key={t}
-              onClick={() => { setTab(t); setExpandedInvoice(null); setSelectedItems([]); }}
+              onClick={() => {
+                setTab(t);
+                setExpandedInvoice(null);
+                setSelectedItems([]);
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                tab === t
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                tab === t ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {t === 'pending' ? 'Pending Orders' : 'Order History'}
@@ -80,22 +76,14 @@ const SellerInvoicesPage: React.FC = () => {
         </div>
 
         {/* Loading */}
-        {activeQuery.isLoading && (
-          <div className="text-center py-12 text-gray-500">Loading invoices...</div>
-        )}
+        {activeQuery.isLoading && <div className="text-center py-12 text-gray-500">Loading invoices...</div>}
 
         {/* Error */}
-        {activeQuery.isError && (
-          <div className="text-center py-12 text-red-500">
-            Failed to load invoices. Please try again.
-          </div>
-        )}
+        {activeQuery.isError && <div className="text-center py-12 text-red-500">Failed to load invoices. Please try again.</div>}
 
         {/* Empty */}
         {!activeQuery.isLoading && !activeQuery.isError && invoices.length === 0 && (
-          <div className="text-center py-12 text-gray-400">
-            No {tab} invoices found.
-          </div>
+          <div className="text-center py-12 text-gray-400">No {tab} invoices found.</div>
         )}
 
         {/* Invoice List */}
@@ -115,9 +103,7 @@ const SellerInvoicesPage: React.FC = () => {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
                         <p className="text-xs text-gray-400 font-mono">{inv.invoice_id}</p>
-                        <p className="font-semibold text-lg mt-1">
-                          GH₵ {inv.total_amount?.toFixed(2)}
-                        </p>
+                        <p className="font-semibold text-lg mt-1">GH₵ {inv.total_amount?.toFixed(2)}</p>
                         <p className="text-sm text-gray-500">
                           {inv.total_items} item{inv.total_items !== 1 ? 's' : ''}
                         </p>
@@ -128,15 +114,17 @@ const SellerInvoicesPage: React.FC = () => {
                             inv.statusMessage === 'PENDING'
                               ? 'bg-yellow-100 text-yellow-700'
                               : inv.statusMessage === 'COMPLETED' || inv.statusMessage === 'DELIVERED'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-gray-100 text-gray-600'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-gray-100 text-gray-600'
                           }`}
                         >
                           {inv.statusMessage ?? `Status ${inv.status}`}
                         </span>
                         <svg
                           className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
                         >
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
@@ -149,10 +137,7 @@ const SellerInvoicesPage: React.FC = () => {
                     <div className="border-t px-4 sm:px-6 py-4 bg-gray-50">
                       <div className="space-y-3">
                         {items.map((item) => (
-                          <div
-                            key={item.item_id}
-                            className="flex items-center gap-3 bg-white rounded-lg p-3 border"
-                          >
+                          <div key={item.item_id} className="flex items-center gap-3 bg-white rounded-lg p-3 border">
                             {tab === 'pending' && (
                               <input
                                 type="checkbox"
@@ -172,8 +157,8 @@ const SellerInvoicesPage: React.FC = () => {
                                 item.statusMessage === 'PENDING'
                                   ? 'bg-yellow-100 text-yellow-700'
                                   : item.statusMessage === 'READY_FOR_PICKUP'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-gray-100 text-gray-600'
                               }`}
                             >
                               {item.statusMessage ?? `Status ${item.status}`}

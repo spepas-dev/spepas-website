@@ -1,28 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/seller/RequestDetailPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getRequestDetailAPI } from '@/lib/orderBidsApis';
+
 import SpepasLoader from '@/components/common/SpepasLoader';
+import { getRequestDetailAPI } from '@/lib/orderBidsApis';
 
 const RequestDetailPage: React.FC = () => {
   const { requestId } = useParams<{ requestId: string }>();
   const [detail, setDetail] = useState<any>(null);
 
   useEffect(() => {
-    if (!requestId) return;
+    if (!requestId) {
+      return;
+    }
     getRequestDetailAPI({ request_id: requestId })
-      .then(res => setDetail(res.data))
+      .then((res) => setDetail(res.data))
       .catch(console.error);
   }, [requestId]);
 
-  if (!requestId) return <div>Request ID missing in URL</div>;
-  if (!detail)    return <SpepasLoader />;
+  if (!requestId) {
+    return <div>Request ID missing in URL</div>;
+  }
+  if (!detail) {
+    return <SpepasLoader />;
+  }
 
-  return (
-    <div>
-      {/* render request detail */}
-    </div>
-  );
+  return <div>{/* render request detail */}</div>;
 };
 
 export default RequestDetailPage;

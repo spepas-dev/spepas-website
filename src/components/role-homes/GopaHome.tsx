@@ -1,34 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/role-homes/GopaHome.tsx
-import React, { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/features/auth";
-import RequestList from "@/components/gopa/RequestList";
-import SpepasLoader from "@/components/common/SpepasLoader";
+import React, { useEffect, useMemo, useState } from 'react';
+
+import SpepasLoader from '@/components/common/SpepasLoader';
+import RequestList from '@/components/gopa/RequestList';
+import { useAuth } from '@/features/auth';
 import {
   getGOPAAssignedActiveRequestsAPI,
   getGOPAAssignedRequestHistoryAPI,
   getGOPAUnassignedActiveRequestsAPI,
-  getGOPAUnassignedRequestHistoryAPI,
-} from "@/lib/orderBidsApis";
-import GopaInvoicesPanel from "./GopaInvoicesPanel";
+  getGOPAUnassignedRequestHistoryAPI
+} from '@/lib/orderBidsApis';
 
-type TabKey =
-  | "ASSIGNED_ACTIVE"
-  | "ASSIGNED_HISTORY"
-  | "UNASSIGNED_ACTIVE"
-  | "UNASSIGNED_HISTORY";
+import GopaInvoicesPanel from './GopaInvoicesPanel';
+
+type TabKey = 'ASSIGNED_ACTIVE' | 'ASSIGNED_HISTORY' | 'UNASSIGNED_ACTIVE' | 'UNASSIGNED_HISTORY';
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: "ASSIGNED_ACTIVE", label: "Assigned (Active)" },
-  { key: "ASSIGNED_HISTORY", label: "Assigned (History)" },
-  { key: "UNASSIGNED_ACTIVE", label: "Unassigned (Active)" },
-  { key: "UNASSIGNED_HISTORY", label: "Unassigned (History)" },
+  { key: 'ASSIGNED_ACTIVE', label: 'Assigned (Active)' },
+  { key: 'ASSIGNED_HISTORY', label: 'Assigned (History)' },
+  { key: 'UNASSIGNED_ACTIVE', label: 'Unassigned (Active)' },
+  { key: 'UNASSIGNED_HISTORY', label: 'Unassigned (History)' }
 ];
 
 const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId }) => {
   const { authData } = useAuth();
   const effectiveGopaId = gopaId ?? authData?.user?.gopa?.Gopa_ID ?? null;
 
-  const [activeTab, setActiveTab] = useState<TabKey>("ASSIGNED_ACTIVE");
+  const [activeTab, setActiveTab] = useState<TabKey>('ASSIGNED_ACTIVE');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,26 +35,26 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
     ASSIGNED_ACTIVE: [],
     ASSIGNED_HISTORY: [],
     UNASSIGNED_ACTIVE: [],
-    UNASSIGNED_HISTORY: [],
+    UNASSIGNED_HISTORY: []
   });
 
   const fetcher = useMemo(
     () => ({
-      ASSIGNED_ACTIVE: (user_id: string) =>
-        getGOPAAssignedActiveRequestsAPI({ user_id }),
-      ASSIGNED_HISTORY: (user_id: string) =>
-        getGOPAAssignedRequestHistoryAPI({ user_id }),
-      UNASSIGNED_ACTIVE: (user_id: string) =>
-        getGOPAUnassignedActiveRequestsAPI({ user_id }),
-      UNASSIGNED_HISTORY: (user_id: string) =>
-        getGOPAUnassignedRequestHistoryAPI({ user_id }),
+      ASSIGNED_ACTIVE: (user_id: string) => getGOPAAssignedActiveRequestsAPI({ user_id }),
+      ASSIGNED_HISTORY: (user_id: string) => getGOPAAssignedRequestHistoryAPI({ user_id }),
+      UNASSIGNED_ACTIVE: (user_id: string) => getGOPAUnassignedActiveRequestsAPI({ user_id }),
+      UNASSIGNED_HISTORY: (user_id: string) => getGOPAUnassignedRequestHistoryAPI({ user_id })
     }),
     []
   );
 
   const load = async (tab: TabKey, force = false) => {
-    if (!effectiveGopaId) return;
-    if (!force && cache[tab].length) return;
+    if (!effectiveGopaId) {
+      return;
+    }
+    if (!force && cache[tab].length) {
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -63,14 +62,16 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
       const data = Array.isArray(res?.data) ? res.data : res;
       setCache((prev) => ({ ...prev, [tab]: data ?? [] }));
     } catch (e: any) {
-      setError(e?.message || "Failed to load requests.");
+      setError(e?.message || 'Failed to load requests.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (effectiveGopaId) load(activeTab);
+    if (effectiveGopaId) {
+      load(activeTab);
+    }
   }, [activeTab, effectiveGopaId]);
 
   if (!effectiveGopaId) {
@@ -97,19 +98,14 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               className={`px-3 py-2 rounded-lg text-sm ${
-                activeTab === t.key
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                activeTab === t.key ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {t.label}
             </button>
           ))}
           <div className="ml-auto">
-            <button
-              onClick={() => load(activeTab, true)}
-              className="px-3 py-2 rounded-lg text-sm border hover:bg-gray-50"
-            >
+            <button onClick={() => load(activeTab, true)} className="px-3 py-2 rounded-lg text-sm border hover:bg-gray-50">
               Refresh
             </button>
           </div>
@@ -123,10 +119,10 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
           <RequestList requests={cache[activeTab]} />
         ) : (
           <div className="p-6 text-sm text-gray-500">
-            {activeTab === "ASSIGNED_ACTIVE" && "No active requests assigned to you."}
-            {activeTab === "ASSIGNED_HISTORY" && "No assignment history found."}
-            {activeTab === "UNASSIGNED_ACTIVE" && "No unassigned active requests found."}
-            {activeTab === "UNASSIGNED_HISTORY" && "No unassigned request history found."}
+            {activeTab === 'ASSIGNED_ACTIVE' && 'No active requests assigned to you.'}
+            {activeTab === 'ASSIGNED_HISTORY' && 'No assignment history found.'}
+            {activeTab === 'UNASSIGNED_ACTIVE' && 'No unassigned active requests found.'}
+            {activeTab === 'UNASSIGNED_HISTORY' && 'No unassigned request history found.'}
           </div>
         )}
       </div>

@@ -1,13 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/profiling/RiderRegistrationForm.tsx
-import React, { useState, FormEvent, useMemo } from 'react';
+import React, { FormEvent, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import Breadcrumb from '@/components/common/Breadcrumb';
-import { createRiderProfileSelf, addRiderVehicleSelf } from '@/lib/profiling';
-import {
-  riderRegistrationSchema,
-  riderVehicleRegistrationSchema
-} from '@/lib/profilingZodValidation';
 import MapPicker from '@/components/common/MapPicker'; // *added*
+import { addRiderVehicleSelf, createRiderProfileSelf } from '@/lib/profiling';
+import { riderRegistrationSchema, riderVehicleRegistrationSchema } from '@/lib/profilingZodValidation';
 
 const RiderRegistrationForm: React.FC = () => {
   const navigate = useNavigate();
@@ -40,7 +39,7 @@ const RiderRegistrationForm: React.FC = () => {
       const riderPayload = {
         licenseNumber,
         longitude: parseFloat(longitude),
-        latitude: parseFloat(latitude),
+        latitude: parseFloat(latitude)
       };
       riderRegistrationSchema.parse(riderPayload);
       await createRiderProfileSelf(riderPayload);
@@ -50,7 +49,7 @@ const RiderRegistrationForm: React.FC = () => {
         type: vehicleType,
         model: vehicleModel,
         color: vehicleColor,
-        registrationNumber,
+        registrationNumber
       };
       riderVehicleRegistrationSchema.parse(vehiclePayload);
       await addRiderVehicleSelf(vehiclePayload as any);
@@ -65,7 +64,7 @@ const RiderRegistrationForm: React.FC = () => {
 
   return (
     <>
-    <section className="pt-10"></section>
+      <section className="pt-10"></section>
       <Breadcrumb title="Rider Registration" pages={['Profiling', 'Rider Registration']} />
       <section className="overflow-hidden bg-white">
         <div className="max-w-[570px] mx-auto rounded-xl bg-white shadow p-6">
@@ -76,7 +75,7 @@ const RiderRegistrationForm: React.FC = () => {
             <input
               type="text"
               value={licenseNumber}
-              onChange={e => setLicenseNumber(e.target.value)}
+              onChange={(e) => setLicenseNumber(e.target.value)}
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
@@ -103,7 +102,7 @@ const RiderRegistrationForm: React.FC = () => {
                     type="number"
                     step="any"
                     value={longitude}
-                    onChange={e => setLongitude(e.target.value)}
+                    onChange={(e) => setLongitude(e.target.value)}
                     className="w-full rounded-lg border bg-gray-100 p-3"
                     required
                   />
@@ -114,22 +113,20 @@ const RiderRegistrationForm: React.FC = () => {
                     type="number"
                     step="any"
                     value={latitude}
-                    onChange={e => setLatitude(e.target.value)}
+                    onChange={(e) => setLatitude(e.target.value)}
                     className="w-full rounded-lg border bg-gray-100 p-3"
                     required
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-500">
-                Tip: Click the map or use “Use my location” to auto-fill the coordinates.
-              </p>
+              <p className="text-xs text-gray-500">Tip: Click the map or use “Use my location” to auto-fill the coordinates.</p>
             </div>
 
             <label className="block mb-2.5">Vehicle Type</label>
             <input
               type="text"
               value={vehicleType}
-              onChange={e => setVehicleType(e.target.value)}
+              onChange={(e) => setVehicleType(e.target.value)}
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
@@ -139,7 +136,7 @@ const RiderRegistrationForm: React.FC = () => {
                 <input
                   type="text"
                   value={vehicleModel}
-                  onChange={e => setVehicleModel(e.target.value)}
+                  onChange={(e) => setVehicleModel(e.target.value)}
                   className="w-full rounded-lg border bg-gray-100 p-3"
                   required
                 />
@@ -149,7 +146,7 @@ const RiderRegistrationForm: React.FC = () => {
                 <input
                   type="text"
                   value={vehicleColor}
-                  onChange={e => setVehicleColor(e.target.value)}
+                  onChange={(e) => setVehicleColor(e.target.value)}
                   className="w-full rounded-lg border bg-gray-100 p-3"
                   required
                 />
@@ -159,15 +156,11 @@ const RiderRegistrationForm: React.FC = () => {
             <input
               type="text"
               value={registrationNumber}
-              onChange={e => setRegistrationNumber(e.target.value)}
+              onChange={(e) => setRegistrationNumber(e.target.value)}
               className="w-full rounded-lg border bg-gray-100 p-3 mb-5"
               required
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-dark text-white py-3 rounded-lg"
-            >
+            <button type="submit" disabled={loading} className="w-full bg-dark text-white py-3 rounded-lg">
               {loading ? 'Submitting…' : 'Submit'}
             </button>
           </form>

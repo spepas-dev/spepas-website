@@ -1,17 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/rider/invoices.tsx
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+
+import Breadcrumb from '@/components/marketing/Common/Breadcrumb';
 import {
+  acceptOrderItemPickup,
+  deliverItemToBuyer,
+  getInvoiceItemByQr,
   getInvoicePendingRiderAcceptance,
   getInvoicePendingRiderPickup,
   getReadyToShipInvoiceItems,
-  acceptOrderItemPickup,
-  setItemReadyForShipment,
-  deliverItemToBuyer,
-  getInvoiceItemByQr,
+  setItemReadyForShipment
 } from '@/lib/invoiceApis';
-import Breadcrumb from '@/components/marketing/Common/Breadcrumb';
 
 type Tab = 'acceptance' | 'pickup' | 'ready-to-ship' | 'qr-scan';
 
@@ -28,19 +30,19 @@ const RiderInvoicesPage: React.FC = () => {
   const acceptanceQuery = useQuery({
     queryKey: ['rider-invoices-acceptance'],
     queryFn: getInvoicePendingRiderAcceptance,
-    enabled: tab === 'acceptance',
+    enabled: tab === 'acceptance'
   });
 
   const pickupQuery = useQuery({
     queryKey: ['rider-invoices-pickup'],
     queryFn: getInvoicePendingRiderPickup,
-    enabled: tab === 'pickup',
+    enabled: tab === 'pickup'
   });
 
   const readyToShipQuery = useQuery({
     queryKey: ['rider-invoices-ready-to-ship'],
     queryFn: getReadyToShipInvoiceItems,
-    enabled: tab === 'ready-to-ship',
+    enabled: tab === 'ready-to-ship'
   });
 
   // Mutations
@@ -50,7 +52,7 @@ const RiderInvoicesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['rider-invoices-acceptance'] });
       queryClient.invalidateQueries({ queryKey: ['rider-invoices-pickup'] });
       setSelectedItems([]);
-    },
+    }
   });
 
   const readyForShipmentMutation = useMutation({
@@ -59,7 +61,7 @@ const RiderInvoicesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['rider-invoices-pickup'] });
       queryClient.invalidateQueries({ queryKey: ['rider-invoices-ready-to-ship'] });
       setSelectedItems([]);
-    },
+    }
   });
 
   const deliverToBuyerMutation = useMutation({
@@ -67,17 +69,17 @@ const RiderInvoicesPage: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rider-invoices-ready-to-ship'] });
       setSelectedItems([]);
-    },
+    }
   });
 
   const toggleItem = (item_id: string) => {
-    setSelectedItems((prev) =>
-      prev.includes(item_id) ? prev.filter((id) => id !== item_id) : [...prev, item_id]
-    );
+    setSelectedItems((prev) => (prev.includes(item_id) ? prev.filter((id) => id !== item_id) : [...prev, item_id]));
   };
 
   const handleQrLookup = async () => {
-    if (!qrValue.trim()) return;
+    if (!qrValue.trim()) {
+      return;
+    }
     setQrError('');
     setQrResult(null);
     try {
@@ -90,9 +92,15 @@ const RiderInvoicesPage: React.FC = () => {
 
   // Get active query data
   const getActiveData = () => {
-    if (tab === 'acceptance') return acceptanceQuery;
-    if (tab === 'pickup') return pickupQuery;
-    if (tab === 'ready-to-ship') return readyToShipQuery;
+    if (tab === 'acceptance') {
+      return acceptanceQuery;
+    }
+    if (tab === 'pickup') {
+      return pickupQuery;
+    }
+    if (tab === 'ready-to-ship') {
+      return readyToShipQuery;
+    }
     return null;
   };
 
@@ -104,7 +112,7 @@ const RiderInvoicesPage: React.FC = () => {
     { key: 'acceptance', label: 'Pending Acceptance' },
     { key: 'pickup', label: 'Pending Pickup' },
     { key: 'ready-to-ship', label: 'Ready to Ship' },
-    { key: 'qr-scan', label: 'QR Lookup' },
+    { key: 'qr-scan', label: 'QR Lookup' }
   ];
 
   return (
@@ -116,11 +124,12 @@ const RiderInvoicesPage: React.FC = () => {
           {tabs.map((t) => (
             <button
               key={t.key}
-              onClick={() => { setTab(t.key); setSelectedItems([]); }}
+              onClick={() => {
+                setTab(t.key);
+                setSelectedItems([]);
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                tab === t.key
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                tab === t.key ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {t.label}
@@ -141,10 +150,7 @@ const RiderInvoicesPage: React.FC = () => {
                 className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onKeyDown={(e) => e.key === 'Enter' && handleQrLookup()}
               />
-              <button
-                onClick={handleQrLookup}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-              >
+              <button onClick={handleQrLookup} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 Search
               </button>
             </div>
@@ -172,22 +178,14 @@ const RiderInvoicesPage: React.FC = () => {
         {tab !== 'qr-scan' && (
           <>
             {/* Loading */}
-            {activeQuery?.isLoading && (
-              <div className="text-center py-12 text-gray-500">Loading...</div>
-            )}
+            {activeQuery?.isLoading && <div className="text-center py-12 text-gray-500">Loading...</div>}
 
             {/* Error */}
-            {activeQuery?.isError && (
-              <div className="text-center py-12 text-red-500">
-                Failed to load data. Please try again.
-              </div>
-            )}
+            {activeQuery?.isError && <div className="text-center py-12 text-red-500">Failed to load data. Please try again.</div>}
 
             {/* Empty */}
             {!activeQuery?.isLoading && !activeQuery?.isError && invoiceEntries.length === 0 && (
-              <div className="text-center py-12 text-gray-400">
-                No items found.
-              </div>
+              <div className="text-center py-12 text-gray-400">No items found.</div>
             )}
 
             {/* List */}
@@ -195,10 +193,7 @@ const RiderInvoicesPage: React.FC = () => {
               <div className="space-y-4">
                 {invoiceEntries.map((entry: any, idx: number) => {
                   const invoice = entry.invoice ?? entry;
-                  const allItems = [
-                    ...(entry.aggregatedDeliveries?.flatMap((d: any) => d.items) ?? []),
-                    ...(entry.SingleDeliveries ?? []),
-                  ];
+                  const allItems = [...(entry.aggregatedDeliveries?.flatMap((d: any) => d.items) ?? []), ...(entry.SingleDeliveries ?? [])];
                   // Fallback: if no deliveries structure, use invoice.items
                   const items = allItems.length > 0 ? allItems : (invoice.items ?? []);
 
@@ -209,23 +204,15 @@ const RiderInvoicesPage: React.FC = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                           <div>
                             <p className="text-xs text-gray-400 font-mono">{invoice.invoice_id}</p>
-                            <p className="font-semibold text-lg mt-1">
-                              GH₵ {invoice.total_amount?.toFixed(2)}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Buyer: {invoice.user?.name ?? 'N/A'}
-                            </p>
+                            <p className="font-semibold text-lg mt-1">GH₵ {invoice.total_amount?.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">Buyer: {invoice.user?.name ?? 'N/A'}</p>
                             {invoice.address?.addressDetails && (
-                              <p className="text-sm text-gray-500">
-                                Delivery: {invoice.address.addressDetails}
-                              </p>
+                              <p className="text-sm text-gray-500">Delivery: {invoice.address.addressDetails}</p>
                             )}
                           </div>
                           <span
                             className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                              invoice.statusMessage === 'PENDING'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-gray-100 text-gray-600'
+                              invoice.statusMessage === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
                             }`}
                           >
                             {invoice.statusMessage ?? `Status ${invoice.status}`}

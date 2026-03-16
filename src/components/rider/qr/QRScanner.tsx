@@ -8,7 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 const QRScanner: React.FC = () => {
   const { orderId, type } = useParams<{ orderId: string; type: 'pickup' | 'dropoff' }>();
   const navigate = useNavigate();
-  const [scanning, setScanning] = useState(true);
+  const [, setScanning] = useState(true);
 
   const simulate = () => {
     setScanning(false);
@@ -28,10 +28,7 @@ const QRScanner: React.FC = () => {
         <div className="aspect-square bg-black/40 rounded-2xl border-2 border-white/30 flex items-center justify-center">
           <div className="w-40 h-40 bg-white" />
         </div>
-        <button
-          className="mt-6 w-full px-5 py-3 rounded-lg bg-white text-gray-900"
-          onClick={simulate}
-        >
+        <button className="mt-6 w-full px-5 py-3 rounded-lg bg-white text-gray-900" onClick={simulate}>
           Simulate Scan ({type === 'pickup' ? 'Seller' : 'Buyer'})
         </button>
       </div>

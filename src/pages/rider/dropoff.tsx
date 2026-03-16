@@ -1,4 +1,5 @@
 import React from 'react';
+
 import DropoffView from '@/components/rider/dropoff/DropoffView';
 
 const RiderDropoffPage: React.FC = () => {

@@ -1,10 +1,11 @@
 // src/pages/buyer/MyRequestsOffersPage.tsx
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import RequestsWithOffersList from '@/components/buyer/RequestsWithOffersList'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import RequestsWithOffersList from '@/components/buyer/RequestsWithOffersList';
 
 const MyRequestsOffersPage: React.FC = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8">
@@ -27,7 +28,7 @@ const MyRequestsOffersPage: React.FC = () => {
       </div>
       <RequestsWithOffersList />
     </div>
-  )
-}
+  );
+};
 
-export default MyRequestsOffersPage
+export default MyRequestsOffersPage;
