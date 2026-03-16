@@ -12,11 +12,16 @@ dist
 build
 dist-ssr
 *.local
+local-data/*.db
+local-data/*.db-shm
+local-data/*.db-wal
 .github
-.claude
+.claude/*
+!.claude/skills/
 certs
 NUL
 tree
+.playwright-mcp
 
 # Editor directories and files
 .vscode/*

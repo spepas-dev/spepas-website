@@ -1,88 +1,71 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GopaProfile } from '@/features/auth';
-import { ShieldCheck, Sparkles, CalendarDays, FileText, CheckCircle } from 'lucide-react';
 
-interface GopaProfileTabProps {
-  profile: GopaProfile | null;
-}
-
-const GopaProfileTab: React.FC<GopaProfileTabProps> = ({ profile }) => {
+const GopaProfileTab: React.FC<{ profile: GopaProfile | null }> = ({ profile }) => {
   const navigate = useNavigate();
 
   if (!profile) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 bg-gray-1 rounded-xl border border-gray-3">
-        <div className="h-14 w-14 rounded-full bg-gray-2 flex items-center justify-center mb-4">
-          <ShieldCheck className="h-6 w-6 text-dark-4" />
-        </div>
-        <p className="text-sm font-medium text-dark-2">No GOPA profile found</p>
-        <p className="text-xs text-dark-4 mt-1">Register as a GOPA to see your profile here</p>
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-sm">No GOPA profile found.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-dark">GOPA Profile</h3>
-        <p className="text-sm text-dark-4 mt-1">Your GOPA distributor details</p>
-      </div>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">GOPA Profile</h2>
 
-      <div className="bg-gray-1 rounded-xl border border-gray-3 p-5 mb-6">
-        {/* Specialties */}
-        <div className="flex items-start gap-3 pb-4 border-b border-gray-3">
-          <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-blue-light-5 flex items-center justify-center">
-            <Sparkles className="h-4 w-4 text-blue" />
-          </div>
-          <div>
-            <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Specialties</p>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {profile.Specialties.map((s, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1 text-xs font-medium bg-blue-light-5 text-blue px-2.5 py-1 rounded-full"
-                >
-                  <CheckCircle className="h-3 w-3" />
-                  {s}
-                </span>
-              ))}
-            </div>
+      <div className="grid sm:grid-cols-2 gap-4 mb-8">
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Specialties</span>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {profile.Specialties.length > 0 ? profile.Specialties.map((s, i) => (
+              <span key={i} className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue/10 text-blue text-xs font-medium">
+                {s}
+              </span>
+            )) : (
+              <span className="text-sm text-gray-500">None specified</span>
+            )}
           </div>
         </div>
-
-        {/* Date */}
-        <div className="flex items-start gap-3 pt-4">
-          <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-gray-2 flex items-center justify-center">
-            <CalendarDays className="h-4 w-4 text-dark-4" />
-          </div>
-          <div>
-            <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Became a GOPA</p>
-            <p className="text-sm font-medium text-dark mt-0.5">
-              {new Date(profile.date_added).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </p>
-          </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Became GOPA</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">
+            {new Date(profile.date_added).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Status</span>
+          <p className="mt-1">
+            <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${profile.status === 1 ? 'text-green-600' : 'text-amber-600'}`}>
+              <span className={`w-2 h-2 rounded-full ${profile.status === 1 ? 'bg-green-500' : 'bg-amber-500'}`} />
+              {profile.status === 1 ? 'Active' : 'Pending'}
+            </span>
+          </p>
         </div>
       </div>
 
-      {/* Action buttons */}
+      {/* Quick actions */}
+      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Quick Actions</h3>
       <div className="flex flex-wrap gap-3">
         <button
-          onClick={() => navigate('/95668339501103956045/gopa-invoices/to-accept')}
-          className="inline-flex items-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
+          onClick={() => navigate('/gopa-invoices/to-accept')}
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-2.5 px-5 rounded-xl shadow-sm hover:opacity-90 transition"
         >
-          <FileText className="h-4 w-4" />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           Pending Invoices
         </button>
         <button
-          onClick={() => navigate('/95668339501103956045/gopa-invoices/accepted')}
-          className="inline-flex items-center gap-2 bg-gray-1 text-dark font-medium text-sm py-2.5 px-5 rounded-xl border border-gray-3 hover:bg-gray-2 transition-colors duration-200"
+          onClick={() => navigate('/gopa-invoices/accepted')}
+          className="inline-flex items-center gap-2 bg-white border border-blue text-blue text-sm font-medium py-2.5 px-5 rounded-xl hover:bg-blue/5 transition"
         >
-          <CheckCircle className="h-4 w-4" />
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           Accepted Invoices
         </button>
       </div>

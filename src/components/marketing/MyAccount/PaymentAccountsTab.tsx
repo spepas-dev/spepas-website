@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
 import { PaymentAccount } from '@/features/auth';
-import { Eye, EyeOff, CreditCard, Banknote, Smartphone } from 'lucide-react';
-
-const getModeIcon = (mode: string) => {
-  const lower = mode.toLowerCase();
-  if (lower.includes('mobile') || lower.includes('momo')) return Smartphone;
-  if (lower.includes('bank')) return Banknote;
-  return CreditCard;
-};
+import { Eye, EyeOff } from 'lucide-react';
 
 const PaymentAccountsTab: React.FC<{ accounts: PaymentAccount[] }> = ({ accounts }) => {
   const [visibleAccounts, setVisibleAccounts] = useState<{ [id: string]: boolean }>({});
 
   const toggleVisibility = (id: string) => {
-    setVisibleAccounts((prev) => ({ ...prev, [id]: !prev[id] }));
+    setVisibleAccounts(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const maskAccountNumber = (num: string) => {
@@ -23,59 +16,49 @@ const PaymentAccountsTab: React.FC<{ accounts: PaymentAccount[] }> = ({ accounts
 
   return (
     <div>
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-dark">Payment Accounts</h3>
-        <p className="text-sm text-dark-4 mt-1">Your linked payment methods</p>
-      </div>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">Payment Accounts</h2>
 
-      {accounts.length > 0 ? (
-        <div className="space-y-3">
-          {accounts.map((acc) => {
-            const ModeIcon = getModeIcon(acc.mode);
-            const isVisible = visibleAccounts[acc.Account_ID];
-            return (
-              <div
-                key={acc.Account_ID}
-                className="flex items-center gap-4 bg-gray-1 rounded-xl border border-gray-3 p-4 hover:shadow-1 transition-shadow"
-              >
-                <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-light-5 flex items-center justify-center">
-                  <ModeIcon className="h-5 w-5 text-blue" />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-sm font-semibold text-dark">{acc.provider}</p>
-                    <span className="text-[10px] bg-gray-2 text-dark-3 px-2 py-0.5 rounded-full font-medium">
-                      {acc.mode}
-                    </span>
-                  </div>
-                  <p className="text-sm text-dark-3 mt-0.5 font-mono">
-                    {isVisible ? acc.accountNumber : maskAccountNumber(acc.accountNumber)}
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => toggleVisibility(acc.Account_ID)}
-                  className="flex-shrink-0 h-9 w-9 rounded-lg bg-white border border-gray-3 flex items-center justify-center hover:bg-gray-2 transition-colors"
-                  aria-label="Toggle account number visibility"
-                >
-                  {isVisible ? (
-                    <EyeOff className="h-4 w-4 text-dark-4" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-dark-4" />
-                  )}
-                </button>
-              </div>
-            );
-          })}
+      {accounts.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+            </svg>
+          </div>
+          <p className="text-gray-500 text-sm">No payment accounts found.</p>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 bg-gray-1 rounded-xl border border-gray-3">
-          <div className="h-14 w-14 rounded-full bg-gray-2 flex items-center justify-center mb-4">
-            <CreditCard className="h-6 w-6 text-dark-4" />
-          </div>
-          <p className="text-sm font-medium text-dark-2">No payment accounts</p>
-          <p className="text-xs text-dark-4 mt-1">Add a payment account to see it here</p>
+        <div className="space-y-3">
+          {accounts.map(acc => (
+            <div
+              key={acc.Account_ID}
+              className="flex items-center justify-between bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-blue/10 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-800">{acc.provider}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium mr-2">{acc.mode}</span>
+                    <span className="font-mono">
+                      {visibleAccounts[acc.Account_ID] ? acc.accountNumber : maskAccountNumber(acc.accountNumber)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => toggleVisibility(acc.Account_ID)}
+                className="p-2 rounded-lg text-gray-400 hover:text-blue hover:bg-blue/5 transition"
+                aria-label="Toggle account number visibility"
+              >
+                {visibleAccounts[acc.Account_ID] ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

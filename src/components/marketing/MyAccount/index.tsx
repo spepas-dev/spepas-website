@@ -1,21 +1,7 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Disclosure, Transition } from '@headlessui/react';
-import {
-  ChevronDown,
-  User,
-  ShieldCheck,
-  Store,
-  Truck,
-  CreditCard,
-  MapPin,
-  Wallet,
-  Users,
-  FileText,
-  LogOut,
-  ArrowRightLeft,
-  UserPlus,
-} from 'lucide-react';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '@/features/auth';
 import { useAccountType } from '@/features/accountTypeContext';
 
@@ -46,24 +32,12 @@ type TabKey =
 
 type Role = 'GOPA' | 'MEPA' | 'SELLER' | 'RIDER' | 'BUYER';
 
-const TAB_ICONS: Record<TabKey, React.ElementType> = {
-  general: User,
-  gopa: ShieldCheck,
-  mepa: Store,
-  seller: Store,
-  sellerDocs: FileText,
-  deliver: Truck,
-  riderDocs: FileText,
-  groups: Users,
-  payments: CreditCard,
-  address: MapPin,
-  wallet: Wallet,
-};
-
-const getInitials = (name: string): string => {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return (parts[0]?.[0] ?? '?').toUpperCase();
+const ROLE_LABELS: Record<Role, string> = {
+  GOPA: 'GOPA',
+  MEPA: 'MEPA',
+  SELLER: 'Seller',
+  RIDER: 'Rider',
+  BUYER: 'Buyer',
 };
 
 const MyAccount: React.FC = () => {
@@ -77,7 +51,7 @@ const MyAccount: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const createdMonthYear = new Date(user.createdAt).toLocaleString('default', {
+  const createdMonthYear = new Date(user.createdAt).toLocaleString('en-US', {
     month: 'long',
     year: 'numeric',
   });
@@ -96,16 +70,16 @@ const MyAccount: React.FC = () => {
 
   const allTabs: Array<{ key: TabKey; label: string }> = [
     { key: 'general', label: 'General Profile' },
-    user.gopa && { key: 'gopa', label: 'My GOPA Profile' },
-    user.mepa && { key: 'mepa', label: 'My MEPA Profile' },
-    user.sellerDetails && { key: 'seller', label: 'My Seller Profile' },
+    user.gopa && { key: 'gopa', label: 'GOPA Profile' },
+    user.mepa && { key: 'mepa', label: 'MEPA Profile' },
+    user.sellerDetails && { key: 'seller', label: 'Seller Profile' },
     user.sellerDetails && { key: 'sellerDocs', label: 'Seller Documents' },
-    user.deliver && { key: 'deliver', label: 'My Delivery Profile' },
+    user.deliver && { key: 'deliver', label: 'Delivery Profile' },
     user.deliver && { key: 'riderDocs', label: 'Rider Documents' },
-    ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups/Roles' },
-    (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments', label: 'My Payment Accounts' },
-    { key: 'address', label: 'My Addresses' },
-    { key: 'wallet', label: 'My Wallet' },
+    ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups & Roles' },
+    (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments', label: 'Payment Accounts' },
+    { key: 'address', label: 'Addresses' },
+    { key: 'wallet', label: 'Wallet' },
   ]
     .filter(Boolean)
     .map((item) => item as { key: TabKey; label: string });
@@ -122,82 +96,108 @@ const MyAccount: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<TabKey>('general');
 
+  const initials = user.name
+    ?.split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) || '?';
+
   return (
-    <section className="py-10 sm:py-16 bg-gray-1 min-h-screen">
+    <section className="pt-24 pb-16 bg-gray-50 min-h-screen">
       <div className="max-w-[1170px] mx-auto px-4 sm:px-8 xl:px-0">
-        {/* Top action buttons */}
-        <div className="flex justify-end mb-6 gap-3">
-          <button
-            onClick={() => navigate('/95668339501103956045/registration-selection')}
-            className="inline-flex items-center gap-2 bg-white text-dark font-medium text-sm py-2.5 px-5 rounded-xl border border-gray-3 hover:bg-gray-2 transition-colors duration-200"
-          >
-            <UserPlus className="h-4 w-4" />
-            Add Profile
-          </button>
-          <button
-            onClick={() => setShowSwitcher(true)}
-            className="inline-flex items-center gap-2 bg-blue text-white font-medium text-sm py-2.5 px-5 rounded-xl hover:bg-blue-dark transition-colors duration-200"
-          >
-            <ArrowRightLeft className="h-4 w-4" />
-            Switch Profile
-          </button>
+        {/* Top bar */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">My Account</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Manage your profile, documents, and settings
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/95668339501103956045/registration-selection')}
+              className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium py-2.5 px-5 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add Profile
+            </button>
+            <button
+              onClick={() => setShowSwitcher(true)}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-2.5 px-5 rounded-xl shadow-sm hover:opacity-90 transition"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+              </svg>
+              Switch Profile
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col xl:flex-row gap-6">
           {/* Sidebar */}
-          <aside className="xl:w-[300px] w-full shrink-0">
-            <div className="bg-white rounded-2xl shadow-1 border border-gray-3 sticky top-24">
-              {/* Sidebar header */}
-              <div className="flex items-center gap-3.5 py-5 px-6 border-b border-gray-3">
-                <div className="flex-shrink-0 h-11 w-11 rounded-full bg-blue-light-5 flex items-center justify-center">
-                  <span className="text-blue font-semibold text-base">{getInitials(user.name)}</span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-dark truncate">{user.name}</p>
-                  <p className="text-xs text-dark-4 mt-0.5">Member since {createdMonthYear}</p>
-                </div>
-              </div>
-
-              {/* Desktop tabs */}
-              <div className="p-4 hidden xl:block">
-                <div className="flex flex-col gap-1">
-                  {filteredTabs.map(({ key, label }) => {
-                    const Icon = TAB_ICONS[key];
-                    return (
-                      <button
-                        key={key}
-                        onClick={() => setActiveTab(key)}
-                        className={`w-full text-left flex items-center gap-3 py-2.5 px-4 rounded-xl transition-all duration-200 text-sm font-medium ${
-                          activeTab === key
-                            ? 'bg-blue text-white'
-                            : 'text-dark-2 hover:bg-blue-light-5 hover:text-blue'
-                        }`}
-                      >
-                        <Icon className="h-[18px] w-[18px] flex-shrink-0" />
-                        {label}
-                      </button>
-                    );
-                  })}
-                  <div className="border-t border-gray-3 mt-3 pt-3">
-                    <button
-                      onClick={() => { logout(); navigate('/'); }}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 text-red-600 font-medium text-sm rounded-xl border border-red-200 hover:bg-red-100 transition-colors duration-200"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Sign Out
-                    </button>
+          <aside className="xl:w-[280px] w-full shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+              {/* Profile header */}
+              <div className="bg-gradient-to-br from-blue to-blue-500 px-6 py-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-lg">
+                    {initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{user.name}</p>
+                    <p className="text-xs text-white/70 mt-0.5">Since {createdMonthYear}</p>
                   </div>
                 </div>
+                {accountType && (
+                  <div className="mt-3">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-medium">
+                      {ROLE_LABELS[accountType as Role] || accountType}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Mobile tabs */}
-              <div className="xl:hidden px-4 py-3">
+              {/* Desktop Tabs */}
+              <div className="p-3 hidden xl:block">
+                <nav className="flex flex-col gap-1">
+                  {filteredTabs.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => setActiveTab(key)}
+                      className={`w-full text-left text-sm font-medium py-2.5 px-4 rounded-xl transition-all duration-150 ${
+                        activeTab === key
+                          ? 'bg-blue/10 text-blue'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </nav>
+                <div className="border-t border-gray-100 mt-3 pt-3">
+                  <button
+                    onClick={() => { logout(); navigate('/'); }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Tabs */}
+              <div className="xl:hidden p-3">
                 <Disclosure as="div">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="w-full flex justify-between items-center bg-blue text-white text-sm font-medium px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue/30 transition">
+                      <Disclosure.Button className="w-full flex justify-between items-center bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium px-4 py-2.5 rounded-xl focus:outline-none transition">
                         <span>Menu</span>
-                        <ChevronDown className={`w-5 h-5 transition-transform ${open ? 'rotate-180' : 'rotate-0'}`} />
+                        <ChevronDownIcon className={`w-5 h-5 transition-transform ${open ? 'rotate-180' : 'rotate-0'}`} />
                       </Disclosure.Button>
                       <Transition
                         as={Fragment}
@@ -209,31 +209,26 @@ const MyAccount: React.FC = () => {
                         leaveTo="transform scale-95 opacity-0"
                       >
                         <Disclosure.Panel className="mt-2 space-y-1">
-                          {filteredTabs.map(({ key, label }) => {
-                            const Icon = TAB_ICONS[key];
-                            return (
-                              <Disclosure.Button
-                                key={key}
-                                as="button"
-                                onClick={() => setActiveTab(key)}
-                                className={`flex items-center gap-3 w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                                  activeTab === key
-                                    ? 'bg-blue text-white'
-                                    : 'text-dark-2 hover:bg-blue-light-5 hover:text-blue'
-                                }`}
-                              >
-                                <Icon className="h-4 w-4 flex-shrink-0" />
-                                {label}
-                              </Disclosure.Button>
-                            );
-                          })}
-                          <div className="border-t border-gray-3 mt-2 pt-2">
+                          {filteredTabs.map(({ key, label }) => (
+                            <Disclosure.Button
+                              key={key}
+                              as="button"
+                              onClick={() => setActiveTab(key)}
+                              className={`block w-full text-left text-sm font-medium px-4 py-2.5 rounded-xl transition ${
+                                activeTab === key
+                                  ? 'bg-blue/10 text-blue'
+                                  : 'text-gray-600 hover:bg-gray-50'
+                              }`}
+                            >
+                              {label}
+                            </Disclosure.Button>
+                          ))}
+                          <div className="border-t border-gray-100 mt-2 pt-2">
                             <Disclosure.Button
                               as="button"
                               onClick={() => { logout(); navigate('/'); }}
-                              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-red-50 text-red-600 font-medium text-sm rounded-xl border border-red-200 hover:bg-red-100 transition-colors duration-200"
+                              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition"
                             >
-                              <LogOut className="h-4 w-4" />
                               Sign Out
                             </Disclosure.Button>
                           </div>
@@ -246,9 +241,9 @@ const MyAccount: React.FC = () => {
             </div>
           </aside>
 
-          {/* Main content */}
-          <main className="xl:flex-1 w-full min-w-0">
-            <div className="bg-white rounded-2xl shadow-1 border border-gray-3 py-8 px-6 sm:px-8 xl:px-10">
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 xl:p-10">
               {activeTab === 'general' && <GeneralDetails user={user} />}
               {activeTab === 'gopa' && user.gopa && <GopaProfileTab profile={user.gopa} />}
               {activeTab === 'mepa' && user.mepa && <MepaProfileTab profile={user.mepa} />}
@@ -265,58 +260,51 @@ const MyAccount: React.FC = () => {
         </div>
       </div>
 
-      {/* Profile switcher modal */}
+      {/* Profile Switcher Modal */}
       {showSwitcher && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-dark/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
           onClick={() => setShowSwitcher(false)}
         >
           <div
-            className="bg-white rounded-2xl shadow-3 p-8 w-full max-w-sm mx-4"
+            className="bg-white rounded-2xl shadow-xl p-6 w-[340px] max-w-[90vw]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-10 w-10 rounded-xl bg-blue-light-5 flex items-center justify-center">
-                <ArrowRightLeft className="h-5 w-5 text-blue" />
+            <div className="text-center mb-5">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue/10 flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-dark">Switch Profile</h3>
-                <p className="text-xs text-dark-4">Select the account type to switch to</p>
-              </div>
+              <h3 className="text-lg font-bold text-gray-900">Switch Profile</h3>
+              <p className="text-sm text-gray-500 mt-1">Select the account type you want to use</p>
             </div>
-
             <ul className="space-y-2">
-              {availableRoles.map((role) => {
-                const isActive = accountType === role;
-                return (
-                  <li key={role}>
-                    <button
-                      onClick={() => {
-                        localStorage.setItem('pendingAccountType', role);
-                        setShowSwitcher(false);
-                        navigate('/95668339501103956045/auth/profile-switch-otp');
-                      }}
-                      className={`w-full flex items-center justify-between py-3 px-4 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                        isActive
-                          ? 'bg-blue-light-5 text-blue border border-blue/20'
-                          : 'bg-gray-1 text-dark-2 border border-gray-3 hover:bg-gray-2'
-                      }`}
-                    >
-                      <span>{role}</span>
-                      {isActive && (
-                        <span className="text-[10px] bg-blue text-white px-2 py-0.5 rounded-full">
-                          Active
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
+              {availableRoles.map((role) => (
+                <li key={role}>
+                  <button
+                    onClick={() => {
+                      localStorage.setItem('pendingAccountType', role);
+                      setShowSwitcher(false);
+                      navigate('/95668339501103956045/auth/profile-switch-otp');
+                    }}
+                    className={`w-full flex items-center justify-between py-3 px-4 rounded-xl text-sm font-medium transition ${
+                      accountType === role
+                        ? 'bg-blue/10 text-blue border border-blue/20'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-transparent'
+                    }`}
+                  >
+                    <span>{ROLE_LABELS[role]}</span>
+                    {accountType === role && (
+                      <span className="text-xs bg-blue text-white px-2 py-0.5 rounded-full">Current</span>
+                    )}
+                  </button>
+                </li>
+              ))}
             </ul>
-
             <button
               onClick={() => setShowSwitcher(false)}
-              className="mt-5 w-full py-2.5 text-sm font-medium text-dark-4 hover:text-dark transition-colors"
+              className="mt-4 w-full text-center text-sm text-gray-500 hover:text-gray-700 py-2 transition"
             >
               Cancel
             </button>

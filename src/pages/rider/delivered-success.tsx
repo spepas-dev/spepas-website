@@ -2,19 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import DeliverySuccessCard from '@/components/rider/proof/DeliverySuccessCard';
 
-const PREFIX = '/95668339501103956045';
-
 const RiderDeliveredSuccessPage: React.FC = () => {
-  const navigate = useNavigate();
-
+  const nav = useNavigate();
   return (
-    <section className="pt-24 pb-10 sm:pt-28 sm:pb-16 bg-gray-1 min-h-screen">
-      <div className="max-w-lg mx-auto px-4 sm:px-8">
-        <DeliverySuccessCard
-          onBack={() => navigate(`${PREFIX}/rider/invoices`)}
-        />
-      </div>
-    </section>
+    <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8">
+      <section className="pt-6"></section>
+      <DeliverySuccessCard onBack={() => nav('/')} />
+    </div>
   );
 };
 

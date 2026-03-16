@@ -11,7 +11,7 @@ const UnassignedHistoryPage: React.FC = () => {
   // Guard: if there's no GOPA profile, show a message instead of crashing
   if (!gopaProfile) {
     return (
-      <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-20">
+      <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-28">
         <h1 className="text-2xl font-bold mb-4">Unassigned Request History</h1>
         <p className="text-gray-600">No GOPA profile found.</p>
       </div>
@@ -28,7 +28,7 @@ const UnassignedHistoryPage: React.FC = () => {
   }, [userId]);
 
   return (
-    <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-20">
+    <div className="p-6 max-w-4xl w-full px-4 sm:px-6 lg:px-8 mx-auto pt-28">
       <section className="pt-10"></section>
       <h1 className="text-2xl font-bold mb-4">Unassigned Request History</h1>
       {requests.length > 0 ? (

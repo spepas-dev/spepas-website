@@ -13,9 +13,9 @@ const ShopWithSidebar: React.FC = () => {
   const [stickyMenu, setStickyMenu] = useState(false);
 
   const options = [
-    { label: 'Latest Products', value: '0' },
-    { label: 'Best Selling', value: '1' },
-    { label: 'Old Products', value: '2' }
+    { label: 'Recently Listed', value: '0' },
+    { label: 'Most Requested', value: '1' },
+    { label: 'Oldest Listings', value: '2' }
   ];
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const ShopWithSidebar: React.FC = () => {
   return (
     <>
       <Breadcrumb
-        title="Explore All Products"
+        title="Explore All Parts"
         pages={['shop', '/', 'shop with sidebar']}
       />
       <section className="overflow-hidden relative pb-20 pt-5 lg:pt-20 xl:pt-28 bg-[#f3f4f6]">
@@ -95,7 +95,7 @@ const ShopWithSidebar: React.FC = () => {
                   <div className="bg-white shadow-1 rounded-lg py-4 px-5">
                     <div className="flex items-center justify-between">
                       <p>Filters:</p>
-                      <button className="text-blue">Clean All</button>
+                      <button className="text-blue">Clear All</button>
                     </div>
                   </div>
 
@@ -127,7 +127,7 @@ const ShopWithSidebar: React.FC = () => {
                     <CustomSelect options={options} />
 
                     <p>
-                      Showing <span className="text-dark">9 of 50</span> Products
+                      Showing <span className="text-dark">9 of 50</span> Parts
                     </p>
                   </div>
 

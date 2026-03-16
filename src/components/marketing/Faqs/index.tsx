@@ -166,10 +166,10 @@ const faqSections = [
         answer: (
           <p>
             Email{' '}
-            <a href="mailto:support@spepas.com" className="text-indigo-600 hover:underline">
-              support@spepas.com
+            <a href="mailto:info@spepas.com" className="text-blue hover:underline">
+              info@spepas.com
             </a>{' '}
-            or call [Phone Number].
+            and we'll get back to you.
           </p>
         )
       },
@@ -191,9 +191,9 @@ const faqSections = [
         answer: (
           <>
             <ul className="list-disc list-inside mb-4">
-              <li><Link to="/return-policy" className="text-indigo-600 hover:underline">Return Policy</Link></li>
-              <li><Link to="/terms-of-use" className="text-indigo-600 hover:underline">Terms of Use</Link></li>
-              <li><Link to="/privacy-policy" className="text-indigo-600 hover:underline">Privacy Policy</Link></li>
+              <li><Link to="/return-policy" className="text-blue hover:underline">Return Policy</Link></li>
+              <li><Link to="/terms-of-use" className="text-blue hover:underline">Terms of Use</Link></li>
+              <li><Link to="/privacy-policy" className="text-blue hover:underline">Privacy Policy</Link></li>
             </ul>
             <p>By using SpePas you agree to all our policies.</p>
           </>
@@ -211,7 +211,7 @@ const Faq: React.FC = () => (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Header */}
         <header className="text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-bold text-indigo-600">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-blue">
             Frequently Asked Questions
           </h1>
           <p className="text-gray-700 sm:text-lg">
@@ -219,22 +219,13 @@ const Faq: React.FC = () => (
           </p>
         </header>
 
-        {/* Illustration */}
-        <div className="rounded-lg overflow-hidden">
-          <img
-            src="/images/images/faq.png"
-            alt="FAQ"
-            className="w-full h-auto object-cover"
-          />
-        </div>
-
         {/* FAQ Sections */}
         {faqSections.map((sec, idx) => (
           <article
             key={idx}
             className="bg-white rounded-lg shadow-md p-6 sm:p-8 space-y-4"
           >
-            <h2 className="text-xl sm:text-2xl font-semibold text-indigo-700">
+            <h2 className="text-xl sm:text-2xl font-semibold text-blue">
               {sec.heading}
             </h2>
             <div className="space-y-4">

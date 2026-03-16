@@ -1,58 +1,45 @@
 import React from 'react';
 import { MepaProfile } from '@/features/auth';
-import { Store, Hash, MapPin, Building2 } from 'lucide-react';
 
 const MepaProfileTab: React.FC<{ profile: MepaProfile | null }> = ({ profile }) => {
   if (!profile) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 bg-gray-1 rounded-xl border border-gray-3">
-        <div className="h-14 w-14 rounded-full bg-gray-2 flex items-center justify-center mb-4">
-          <Store className="h-6 w-6 text-dark-4" />
-        </div>
-        <p className="text-sm font-medium text-dark-2">No MEPA profile found</p>
-        <p className="text-xs text-dark-4 mt-1">Register as a MEPA to see your profile here</p>
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-sm">No MEPA profile found.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-dark">MEPA Profile</h3>
-        <p className="text-sm text-dark-4 mt-1">Your Mechanical Parts Agent details</p>
-      </div>
-
-      <div className="bg-gray-1 rounded-xl border border-gray-3 p-5">
-        <div className="space-y-0 divide-y divide-gray-3">
-          <div className="flex items-start gap-3 py-3.5 first:pt-0">
-            <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-blue-light-5 flex items-center justify-center">
-              <Hash className="h-4 w-4 text-blue" />
-            </div>
-            <div>
-              <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">MEPA ID</p>
-              <p className="text-sm font-medium text-dark mt-0.5 font-mono">{profile.Mepa_ID}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 py-3.5">
-            <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-gray-2 flex items-center justify-center">
-              <Building2 className="h-4 w-4 text-dark-4" />
-            </div>
-            <div>
-              <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Shop Name</p>
-              <p className="text-sm font-medium text-dark mt-0.5">{profile.shop_name}</p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 py-3.5 last:pb-0">
-            <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-gray-2 flex items-center justify-center">
-              <MapPin className="h-4 w-4 text-dark-4" />
-            </div>
-            <div>
-              <p className="text-xs text-dark-4 font-medium uppercase tracking-wide">Address</p>
-              <p className="text-sm font-medium text-dark mt-0.5">{profile.address}</p>
-            </div>
-          </div>
+      <h2 className="text-xl font-bold text-gray-800 mb-6">MEPA Profile</h2>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">MEPA ID</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1 font-mono">{profile.Mepa_ID}</p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Shop Name</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">{profile.shop_name || '—'}</p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100 sm:col-span-2">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Address</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">{profile.address || '—'}</p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Status</span>
+          <p className="mt-1">
+            <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${profile.status === 1 ? 'text-green-600' : 'text-amber-600'}`}>
+              <span className={`w-2 h-2 rounded-full ${profile.status === 1 ? 'bg-green-500' : 'bg-amber-500'}`} />
+              {profile.status === 1 ? 'Active' : 'Pending'}
+            </span>
+          </p>
+        </div>
+        <div className="bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
+          <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Joined</span>
+          <p className="text-sm font-semibold text-gray-800 mt-1">
+            {new Date(profile.date_added).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
         </div>
       </div>
     </div>

@@ -1,136 +1,179 @@
-// src/components/marketing/Home/AltHome/index.tsx
 import React from 'react'
+import {
+  MagnifyingGlassIcon,
+  MegaphoneIcon,
+  TagIcon,
+  TruckIcon,
+  ShieldCheckIcon,
+} from '@heroicons/react/24/outline'
+import logoSvg from '@/assets/logo.svg'
+
+const features = [
+  {
+    icon: MagnifyingGlassIcon,
+    label: 'Find Any Part',
+    description: 'Search thousands of new and used parts by vehicle',
+  },
+  {
+    icon: MegaphoneIcon,
+    label: 'Request What You Need',
+    description: 'Post a request and let sellers come to you',
+  },
+  {
+    icon: TagIcon,
+    label: 'Sell Your Parts',
+    description: 'List inventory and reach buyers across Ghana',
+  },
+  {
+    icon: TruckIcon,
+    label: 'Fast Delivery',
+    description: 'Reliable delivery through our verified rider network',
+  },
+  {
+    icon: ShieldCheckIcon,
+    label: 'Shop with Confidence',
+    description: 'Every listing verified for quality and accuracy',
+  },
+]
 
 const AltHome: React.FC = () => {
   return (
-    <section className="relative w-full lg:h-screen">
-      {/* Neon's inline styles for pulse effect */}
-      <style>
-        {`
-          @keyframes pulseOut {
-            0% {
-              transform: scale(1);
-              opacity: 1;
-            }
-            100% {
-              transform: scale(1.5);
-              opacity: 0;
-            }
-          }
-          .neon-pulse {
-            position: relative;
-            border: 2px solid #0000FF;
-            box-shadow: 0 0 10px rgba(42, 18, 255, 0.3);
-            overflow: visible;
-            border-radius: 2rem; /* match rounded-md */
-          }
-          .neon-pulse::before,
-          .neon-pulse::after {
-            content: "";
-            position: absolute;
-            inset: -2px;
-            border: 2px solid rgba(65, 65, 255, 0.33);
-            border-radius: inherit;
-            animation: pulseOut 3s ease-out infinite;
-            opacity: 0;
-          }
-          .neon-pulse::after {
-            animation-delay: 1.5s;
-          }
-        `}
-      </style>
-
-      {/* 1) Hero image container */}
+    <section className="relative min-h-screen w-full bg-white flex flex-col items-center justify-center overflow-hidden px-4 py-16">
+      {/* Subtle radial gradient accent */}
       <div
-        className="
-          relative w-full
-          min-h-[200px]
-          sm:min-h-[300px]
-          md:min-h-[480px]
-          lg:h-screen
-        "
-      >
-        <img
-          src="/images/landing/gearsFall.jpg"
-          alt="Gears background"
-          className="w-full h-full object-cover opacity-50"
-        />
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 50% at 50% 40%, var(--color-primary-50) 0%, var(--color-primary-100) 30%, transparent 70%)',
+        }}
+      />
 
-        {/* 2) Overlayed content */}
-        <div
-          className="
-            absolute inset-0
-            flex flex-col items-center
-            justify-start
-            pt-8 sm:pt-12 md:pt-16 lg:pt-0
-            px-4 space-y-6 text-center
-            max-w-screen-xl mx-auto w-full
-          "
-        >
-          {/* Logo */}
-          <div className="w-24 h-24 sm:w-48 sm:h-48 lg:w-56 lg:h-56">
-            <img
-              src="/images/logo/Logos.png"
-              alt="SpePas Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
+      {/* Content */}
+      <div className="relative z-10 flex w-full max-w-5xl flex-col items-center gap-6 text-center">
+        {/* Logo + brand name */}
+        <div className="flex items-center gap-3">
+          <img
+            src={logoSvg}
+            alt="SpePas Logo"
+            className="h-14 w-14 sm:h-16 sm:w-16"
+          />
+          <span
+            className="text-primary-500"
+            style={{
+              fontSize: '36px',
+              fontWeight: 500,
+              letterSpacing: '-1.44px',
+              lineHeight: '44px',
+            }}
+          >
+            SpePas
+          </span>
+        </div>
 
-          {/* Heading */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-blue-400">
+        {/* Heading */}
+        <div className="flex flex-col items-center gap-2">
+          <h1
+            className="text-primary-500"
+            style={{
+              fontSize: '48px',
+              fontWeight: 500,
+              letterSpacing: '-0.96px',
+              lineHeight: '60px',
+            }}
+          >
             COMING SOON
           </h1>
+          {/* Yellow accent dot */}
+          <div className="h-1.5 w-12 rounded-full bg-secondary-500" />
+        </div>
 
-          {/* Description */}
-          <p className="text-gray-700 max-w-2xl mx-auto">
-            SpePas is Ghana’s online marketplace for new and used car parts. We connect
-            buyers, sellers, and mechanics—making it easy to find the right part and get it
-            delivered fast.
-          </p>
+        {/* Tagline */}
+        <p
+          className="text-dark"
+          style={{
+            fontSize: '30px',
+            fontWeight: 400,
+            letterSpacing: '-0.9px',
+            lineHeight: '38px',
+          }}
+        >
+          Your One-Stop Marketplace for Auto Parts in Ghana
+        </p>
 
-          {/* Early Access Neon Button */}
-          <div className="mt-2 text-center">
-              <a
-                href="https://forms.office.com/r/M4akU0t8US"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="
-                  neon-pulse
-                  inline-block items-center justify-center
-                  font-medium text-white text-custom-sm
-                  py-3 px-8
-                  bg-gradient-to-r from-blue-400 to-indigo-700
-                  shadow-lg hover:shadow-2xl
-                  transform hover:scale-105
-                  transition duration-300 ease-out
-                "
+        {/* Description */}
+        <p
+          className="mx-auto max-w-2xl text-dark"
+          style={{
+            fontSize: '18px',
+            fontWeight: 400,
+            letterSpacing: '-0.54px',
+            lineHeight: '28px',
+          }}
+        >
+          We're building the easiest way to find, buy, and sell new and used car
+          parts — connecting buyers, sellers, and mechanics across Ghana.
+        </p>
+
+        {/* Primary CTA */}
+        <a
+          href="https://forms.office.com/r/M4akU0t8US"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block rounded-full bg-primary-500 text-white transition-colors hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 focus:ring-offset-2"
+          style={{
+            fontSize: '16px',
+            fontWeight: 500,
+            letterSpacing: '-0.64px',
+            lineHeight: '24px',
+            padding: '12px 32px',
+          }}
+        >
+          Join the Waitlist
+        </a>
+        <p
+          className="text-neutral-700"
+          style={{
+            fontSize: '14px',
+            fontWeight: 500,
+            letterSpacing: '-0.42px',
+            lineHeight: '20px',
+          }}
+        >
+          Be the first to know when we launch.
+        </p>
+
+        {/* Feature cards */}
+        <div className="mt-8 grid w-full grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+          {features.map((f) => (
+            <div
+              key={f.label}
+              className="flex flex-col items-center gap-2 rounded-xl border border-neutral-200 p-5"
+            >
+              <f.icon className="h-8 w-8 text-primary-500" />
+              <span
+                className="text-dark"
                 style={{
-                  opacity: 75,
-                    animation:
-                      'fadeIn 1s ease-in-out 1s forwards, bounceSlow 2s ease-in-out 2s infinite',
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  letterSpacing: '-0.42px',
+                  lineHeight: '20px',
                 }}
               >
-                Get Early Access
-              </a>
+                {f.label}
+              </span>
+              <span
+                className="text-neutral-700"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 400,
+                  letterSpacing: '-0.36px',
+                  lineHeight: '18px',
+                }}
+              >
+                {f.description}
+              </span>
             </div>
-
-          {/* What You Can Do Section */}
-          <div className="text-center max-w-2xl mx-auto space-y-4 mb-8 pb-10">
-            <h2 className="text-xl sm:text-2xl lg:text-lg font-semibold text-blue-400">
-              What You Can Do on SpePas:
-            </h2>
-            <ul className="list-disc list-inside marker:text-blue-500 space-y-1 text-gray-700 text-sm sm:text-base lg:text-sm">
-              <li>Search for new and used auto parts</li>
-              <li>Post a request if you can’t find what you need</li>
-              <li>List parts for sale</li>
-              <li>Get reliable delivery through our trusted riders</li>
-              <li>Shop confidently with verified listings</li>
-            </ul>
-            <p className="text-gray-700 text-sm sm:text-base lg:text-sm">
-              SpePas brings the parts to you—quick, simple, and hassle-free.
-            </p>
-          </div>
-
+          ))}
         </div>
       </div>
     </section>

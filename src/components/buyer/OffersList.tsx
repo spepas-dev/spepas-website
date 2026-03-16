@@ -1,5 +1,6 @@
+// src/components/buyer/OffersList.tsx
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   getRequestBidsAllAPI,
   addBidToCartAPI,
@@ -7,10 +8,10 @@ import {
 } from '@/lib/orderBidsApis'
 import OfferCard from './OfferCard'
 import SpepasLoader from '@/components/common/SpepasLoader'
-import { AlertCircle, Package, CalendarDays, Hash, PackageOpen } from 'lucide-react'
 
 const OffersList: React.FC = () => {
   const { requestId } = useParams<{ requestId: string }>()
+  const navigate = useNavigate()
   const [offers, setOffers] = useState<any[]>([])
   const [cartMap, setCartMap] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
@@ -48,28 +49,32 @@ const OffersList: React.FC = () => {
 
   if (!requestId)
     return (
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="h-14 w-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
-            <AlertCircle className="h-6 w-6 text-red-500" />
-          </div>
-          <p className="text-sm font-medium text-dark-2">No request selected</p>
-        </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+        <p className="text-sm text-red-500">No request selected.</p>
       </div>
     )
 
-  if (loading)
-    return <SpepasLoader size="lg" label="Loading offers..." fullSection />
+  if (loading) return <SpepasLoader size="lg" label="Loading offers..." />
 
   if (!offers.length)
     return (
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1">
-        <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div className="h-14 w-14 rounded-full bg-gray-1 flex items-center justify-center mb-4">
-            <PackageOpen className="h-6 w-6 text-dark-4" />
+      <div className="space-y-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back
+        </button>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center space-y-3">
+          <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
+            <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+            </svg>
           </div>
-          <p className="text-sm font-medium text-dark-2">No offers yet</p>
-          <p className="text-xs text-dark-4 mt-1">Sellers haven't responded to this request yet</p>
+          <p className="text-sm text-gray-500">No offers have been made yet for this request.</p>
         </div>
       </div>
     )
@@ -77,60 +82,76 @@ const OffersList: React.FC = () => {
   // Request details from first offer
   const { orderRequest } = offers[0]
   const { sparePart, quantity, createdAt } = orderRequest
-  const img = sparePart?.images?.[0]
+  const img = sparePart.images?.[0]
 
   return (
     <div className="space-y-6">
+      {/* Back button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Back to Requests
+      </button>
+
       {/* Request Details Card */}
-      <div className="bg-white rounded-2xl border border-gray-3 shadow-1 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-3">
-          <h3 className="text-base font-semibold text-dark">Request Details</h3>
-        </div>
-        <div className="p-5">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {img && (
-              <div className="flex-shrink-0 h-24 w-24 rounded-xl bg-gray-1 border border-gray-3 overflow-hidden">
-                <img src={img} alt={sparePart.name} className="h-full w-full object-cover" />
-              </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Request Details</h2>
+        <div className="flex flex-col sm:flex-row gap-5">
+          {img && (
+            <div className="w-full sm:w-24 h-40 sm:h-24 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
+              <img src={img} alt={sparePart.name} className="w-full h-full object-cover" />
+            </div>
+          )}
+          <div className="flex-1 space-y-2">
+            <h3 className="text-lg font-bold text-gray-900">{sparePart.name}</h3>
+            {sparePart.description && (
+              <p className="text-sm text-gray-500">{sparePart.description}</p>
             )}
-            <div className="flex-1 min-w-0">
-              <h4 className="text-base font-semibold text-dark">{sparePart.name}</h4>
-              {sparePart.description && (
-                <p className="text-sm text-dark-3 mt-1 line-clamp-2">{sparePart.description}</p>
-              )}
-              <div className="flex flex-wrap gap-4 mt-3">
-                <div className="flex items-center gap-1.5 text-xs text-dark-4">
-                  <Hash className="h-3 w-3" />
-                  Qty: <span className="font-medium text-dark">{quantity}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-dark-4">
-                  <CalendarDays className="h-3 w-3" />
-                  {new Date(createdAt).toLocaleDateString('en-GB', {
-                    day: 'numeric', month: 'short', year: 'numeric',
+            <div className="flex flex-wrap gap-4 pt-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-400">Qty:</span>
+                <span className="text-sm font-semibold text-gray-900">{quantity}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-400">Requested:</span>
+                <span className="text-sm text-gray-600">
+                  {new Date(createdAt).toLocaleDateString(undefined, {
+                    year: 'numeric', month: 'short', day: 'numeric',
                   })}
-                </div>
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-gray-400">Offers:</span>
+                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  {offers.length}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Offers count */}
-      <p className="text-sm text-dark-4 font-medium">
-        {offers.length} offer{offers.length !== 1 ? 's' : ''} available
-      </p>
-
       {/* Offers Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {offers.map(o => (
-          <OfferCard
-            key={o.bidding_ID}
-            offer={o}
-            inCart={!!cartMap[o.bidding_ID]}
-            onAdd={handleAdd}
-            onRemove={handleRemove}
-          />
-        ))}
+      <div>
+        <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">
+          {offers.length} {offers.length === 1 ? 'Offer' : 'Offers'} Available
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {offers.map(o => (
+            <OfferCard
+              key={o.bidding_ID}
+              offer={o}
+              inCart={!!cartMap[o.bidding_ID]}
+              onAdd={handleAdd}
+              onRemove={handleRemove}
+            />
+          ))}
+        </div>
       </div>
     </div>
   )
