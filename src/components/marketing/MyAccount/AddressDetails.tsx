@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
+import MapPicker from '@/components/common/MapPicker';
 import SpepasLoader from '@/components/common/SpepasLoader';
 import { addAddress, getMyAddresses } from '@/lib/addressApis';
 
@@ -18,6 +19,9 @@ const AddressDetails: React.FC = () => {
   const [form, setForm] = useState({ title: '', addressDetails: '', longitude: '', latitude: '' });
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
+
+  const latNum = useMemo(() => { const n = parseFloat(form.latitude); return Number.isFinite(n) ? n : null; }, [form.latitude]);
+  const lngNum = useMemo(() => { const n = parseFloat(form.longitude); return Number.isFinite(n) ? n : null; }, [form.longitude]);
 
   const fetchAddresses = async () => {
     setLoading(true);
@@ -96,6 +100,17 @@ const AddressDetails: React.FC = () => {
               rows={2}
               placeholder="Street, City, Region"
               className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30 focus:border-blue transition resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Location</label>
+            <MapPicker
+              value={{ lat: latNum, lng: lngNum }}
+              onChange={(lat, lng) => setForm((prev) => ({ ...prev, latitude: String(lat), longitude: String(lng) }))}
+              height={260}
+              showLocate
+              showSearch
+              defaultZoom={12}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

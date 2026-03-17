@@ -1,6 +1,11 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
+import MapPicker from '@/components/common/MapPicker';
+
+// TODO: replace with real dropoff coordinates from order data
+const DROPOFF_COORDS = { lat: 5.6145, lng: -0.2053 };
+
 const DropoffView: React.FC = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -8,8 +13,17 @@ const DropoffView: React.FC = () => {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200">
-      <div className="h-72 w-full rounded-t-xl bg-gray-100 flex items-center justify-center">
-        <div className="text-gray-500">[Map preview here]</div>
+      <div className="h-72 w-full rounded-t-xl overflow-hidden">
+        <MapPicker
+          value={DROPOFF_COORDS}
+          onChange={() => {}}
+          height="100%"
+          readOnly
+          showLocate={false}
+          showSearch={false}
+          defaultCenter={DROPOFF_COORDS}
+          defaultZoom={15}
+        />
       </div>
 
       <div className="p-4">
