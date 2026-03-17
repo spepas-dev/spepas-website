@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/marketing/ShopDetails/index.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Breadcrumb from '../Common/Breadcrumb';
@@ -13,6 +14,7 @@ const ShopDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isNumericId = !!id && /^\d+$/.test(id ?? '');
+  const [showAllVehicles, setShowAllVehicles] = useState(false);
 
   const query = useQuery({
     queryKey: ['shop-detail', id],
@@ -50,18 +52,33 @@ const ShopDetails: React.FC = () => {
   // Part info
   const articleNo = item?.article_no ?? item?.articleNo;
   const supplierName = item?.supplier_name ?? item?.supplierName;
+  const categoryName = item?.category?.name;
 
-  // Vehicle info
-  const manufacturer = item?.carModel?.carBrand?.manufacturer?.name;
-  const model = item?.carModel?.carBrand?.name;
-  const engineVariant = item?.carModel?.name;
-  const year = item?.carModel?.yearOfMake;
-  // live API returns arrays (INV-6); local mock returns singular strings
-  const fuelType = item?.carModel?.fuelTypes?.[0] ?? item?.carModel?.fuelType;
-  const bodyType = item?.carModel?.bodyTypes?.[0] ?? item?.carModel?.bodyType;
-  const driveType = item?.carModel?.driveTypes?.[0] ?? item?.carModel?.driveType;
+  // All compatible vehicles from partVehicles array
+  const partVehicles: any[] = item?.partVehicles ?? [];
+  const totalVehicleCount = item?._count?.partVehicles ?? partVehicles.length;
 
-  const hasVehicle = manufacturer || model || year || fuelType || bodyType || driveType;
+  // Group vehicles by brand for a cleaner display
+  const vehiclesByBrand = React.useMemo(() => {
+    const map = new Map<string, { brand: string; manufacturer: string; yearRange: string; vehicles: any[] }>();
+    for (const pv of partVehicles) {
+      const cm = pv?.carModel;
+      if (!cm) continue;
+      const brandName = cm.carBrand?.name ?? 'Unknown';
+      const mfrName = cm.carBrand?.manufacturer?.name ?? '';
+      const brandKey = cm.carBrand_ID ?? brandName;
+      if (!map.has(brandKey)) {
+        const yFrom = cm.carBrand?.yearFrom;
+        const yTo = cm.carBrand?.yearTo;
+        const yearRange = yFrom ? `${yFrom}–${yTo ?? 'present'}` : '';
+        map.set(brandKey, { brand: brandName, manufacturer: mfrName, yearRange, vehicles: [] });
+      }
+      map.get(brandKey)!.vehicles.push(cm);
+    }
+    return [...map.values()].sort((a, b) => a.brand.localeCompare(b.brand));
+  }, [partVehicles]);
+
+  const hasVehicles = vehiclesByBrand.length > 0;
 
   // Loading skeleton
   if (query.isLoading) {
@@ -123,15 +140,15 @@ const ShopDetails: React.FC = () => {
   const imgSrc =
     item?.images?.find((i: any) => i?.image_url)?.image_url ?? '/images/placeholder.jpg';
 
-  // Spec items for the grid
-  const specs: { label: string; value: string }[] = [];
-  if (manufacturer) specs.push({ label: 'Manufacturer', value: manufacturer });
-  if (model) specs.push({ label: 'Model', value: model });
-  if (engineVariant) specs.push({ label: 'Engine variant', value: engineVariant });
-  if (year) specs.push({ label: 'Year', value: String(year) });
-  if (fuelType) specs.push({ label: 'Fuel', value: fuelType });
-  if (bodyType) specs.push({ label: 'Body style', value: bodyType });
-  if (driveType) specs.push({ label: 'Drivetrain', value: driveType });
+  // For the CTA link — use first vehicle's info
+  const firstVehicle = partVehicles[0]?.carModel;
+  const firstManufacturer = firstVehicle?.carBrand?.manufacturer?.name;
+  const firstBrand = firstVehicle?.carBrand?.name;
+
+  // How many brand groups to show before "Show more"
+  const INITIAL_BRANDS = 3;
+  const visibleBrands = showAllVehicles ? vehiclesByBrand : vehiclesByBrand.slice(0, INITIAL_BRANDS);
+  const hasMoreBrands = vehiclesByBrand.length > INITIAL_BRANDS;
 
   return (
     <>
@@ -180,37 +197,93 @@ const ShopDetails: React.FC = () => {
                 {title}
               </h1>
 
-              {/* Article number */}
-              {articleNo && (
-                <p className="text-sm text-gray-500 font-mono tracking-wide mb-5">
-                  Art. {articleNo}
-                </p>
-              )}
+              {/* Article number & category */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-5">
+                {articleNo && (
+                  <span className="text-sm text-gray-500 font-mono tracking-wide">
+                    Art. {articleNo}
+                  </span>
+                )}
+                {categoryName && (
+                  <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                    {categoryName}
+                  </span>
+                )}
+              </div>
 
-              {/* Vehicle compatibility */}
-              {hasVehicle && (
+              {/* Compatible vehicles */}
+              {hasVehicles && (
                 <div className="border border-gray-150 rounded-xl overflow-hidden mb-6">
                   {/* Section header */}
                   <div className="bg-gray-50 px-4 py-2.5 border-b border-gray-150 flex items-center gap-2">
                     <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-6.867c0-.298-.119-.585-.33-.796l-3.525-3.525A1.125 1.125 0 0016.618 6H15m-3 0H9.375a1.125 1.125 0 00-1.125 1.125v11.25" />
                     </svg>
-                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Compatible vehicle</span>
+                    <span className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Compatible vehicles
+                    </span>
+                    {totalVehicleCount > 0 && (
+                      <span className="ml-auto text-[11px] font-medium text-gray-400">
+                        {totalVehicleCount} variant{totalVehicleCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
                   </div>
 
-                  {/* Spec grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 divide-x divide-y divide-gray-100">
-                    {specs.map((spec) => (
-                      <div key={spec.label} className="px-4 py-3">
-                        <dt className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-0.5">
-                          {spec.label}
-                        </dt>
-                        <dd className="text-sm font-medium text-gray-800 truncate" title={spec.value}>
-                          {spec.value}
-                        </dd>
+                  {/* Vehicle groups by brand */}
+                  <div className="divide-y divide-gray-100">
+                    {visibleBrands.map((group) => (
+                      <div key={group.brand} className="px-4 py-3">
+                        {/* Brand header */}
+                        <div className="flex items-baseline gap-2 mb-2">
+                          <span className="text-xs font-bold text-[var(--color-primary-700)] uppercase tracking-wider">
+                            {group.manufacturer}
+                          </span>
+                          <span className="text-sm font-semibold text-gray-800">
+                            {group.brand}
+                          </span>
+                          {group.yearRange && (
+                            <span className="text-[11px] text-gray-400">
+                              ({group.yearRange})
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Model variants */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                          {group.vehicles.map((v: any, idx: number) => (
+                            <div key={v.CarModel_ID ?? idx} className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-2.5 py-1.5">
+                              <span className="font-medium text-gray-700 truncate flex-1" title={v.name}>
+                                {v.name}
+                              </span>
+                              {v.powerPs && (
+                                <span className="shrink-0 text-gray-400">{v.powerPs} hp</span>
+                              )}
+                              {v.fuelTypes?.[0] && (
+                                <span className="shrink-0 text-gray-400">{v.fuelTypes[0]}</span>
+                              )}
+                              {v.constructionStart && (
+                                <span className="shrink-0 text-gray-400">
+                                  {v.constructionStart}–{v.constructionEnd ?? '...'}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
+
+                  {/* Show more / less toggle */}
+                  {hasMoreBrands && (
+                    <button
+                      onClick={() => setShowAllVehicles(!showAllVehicles)}
+                      className="w-full text-center text-xs font-medium text-[var(--color-primary-600)] hover:text-[var(--color-primary-700)] py-2.5 border-t border-gray-100 transition-colors"
+                    >
+                      {showAllVehicles
+                        ? 'Show fewer'
+                        : `Show all ${vehiclesByBrand.length} vehicle groups`}
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -220,8 +293,8 @@ const ShopDetails: React.FC = () => {
                   to="../buyer/post-request"
                   state={{
                     partName: title,
-                    manufacturerName: manufacturer,
-                    brandName: model,
+                    manufacturerName: firstManufacturer,
+                    brandName: firstBrand,
                   }}
                   className="inline-flex items-center gap-2 bg-[var(--color-secondary-500)] hover:bg-[var(--color-secondary-600)] text-white font-semibold py-3 px-7 rounded-xl transition-colors shadow-sm hover:shadow"
                 >

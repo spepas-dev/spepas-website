@@ -157,19 +157,18 @@ const ShopWithoutSidebar: React.FC = () => {
   const fuelTypeOptions = useMemo(() => {
     let variants = variantsData?.data ?? [];
     if (selectedBodyType) {
-      variants = variants.filter((v: any) => v.bodyType === selectedBodyType);
+      variants = variants.filter((v: any) => v.bodyTypes?.includes(selectedBodyType));
     }
     if (selectedDriveType) {
-      variants = variants.filter((v: any) => v.driveType === selectedDriveType);
+      variants = variants.filter((v: any) => v.driveTypes?.includes(selectedDriveType));
     }
     if (selectedEngine) {
       variants = variants.filter((v: any) => v.name === selectedEngine);
     }
     const counts = new Map<string, number>();
     for (const v of variants) {
-      const ft = (v as any).fuelType;
-      if (ft) {
-        counts.set(ft, (counts.get(ft) ?? 0) + 1);
+      for (const ft of (v as any).fuelTypes ?? []) {
+        if (ft) counts.set(ft, (counts.get(ft) ?? 0) + 1);
       }
     }
     return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([value, count]) => ({ value, count }));
@@ -178,19 +177,18 @@ const ShopWithoutSidebar: React.FC = () => {
   const bodyTypeOptions = useMemo(() => {
     let variants = variantsData?.data ?? [];
     if (selectedFuelType) {
-      variants = variants.filter((v: any) => v.fuelType === selectedFuelType);
+      variants = variants.filter((v: any) => v.fuelTypes?.includes(selectedFuelType));
     }
     if (selectedDriveType) {
-      variants = variants.filter((v: any) => v.driveType === selectedDriveType);
+      variants = variants.filter((v: any) => v.driveTypes?.includes(selectedDriveType));
     }
     if (selectedEngine) {
       variants = variants.filter((v: any) => v.name === selectedEngine);
     }
     const counts = new Map<string, number>();
     for (const v of variants) {
-      const bt = (v as any).bodyType;
-      if (bt) {
-        counts.set(bt, (counts.get(bt) ?? 0) + 1);
+      for (const bt of (v as any).bodyTypes ?? []) {
+        if (bt) counts.set(bt, (counts.get(bt) ?? 0) + 1);
       }
     }
     return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([value, count]) => ({ value, count }));
@@ -199,19 +197,18 @@ const ShopWithoutSidebar: React.FC = () => {
   const driveTypeOptions = useMemo(() => {
     let variants = variantsData?.data ?? [];
     if (selectedFuelType) {
-      variants = variants.filter((v: any) => v.fuelType === selectedFuelType);
+      variants = variants.filter((v: any) => v.fuelTypes?.includes(selectedFuelType));
     }
     if (selectedBodyType) {
-      variants = variants.filter((v: any) => v.bodyType === selectedBodyType);
+      variants = variants.filter((v: any) => v.bodyTypes?.includes(selectedBodyType));
     }
     if (selectedEngine) {
       variants = variants.filter((v: any) => v.name === selectedEngine);
     }
     const counts = new Map<string, number>();
     for (const v of variants) {
-      const dt = (v as any).driveType;
-      if (dt) {
-        counts.set(dt, (counts.get(dt) ?? 0) + 1);
+      for (const dt of (v as any).driveTypes ?? []) {
+        if (dt) counts.set(dt, (counts.get(dt) ?? 0) + 1);
       }
     }
     return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([value, count]) => ({ value, count }));
@@ -220,13 +217,13 @@ const ShopWithoutSidebar: React.FC = () => {
   const engineOptions = useMemo(() => {
     let variants = variantsData?.data ?? [];
     if (selectedFuelType) {
-      variants = variants.filter((v: any) => v.fuelType === selectedFuelType);
+      variants = variants.filter((v: any) => v.fuelTypes?.includes(selectedFuelType));
     }
     if (selectedBodyType) {
-      variants = variants.filter((v: any) => v.bodyType === selectedBodyType);
+      variants = variants.filter((v: any) => v.bodyTypes?.includes(selectedBodyType));
     }
     if (selectedDriveType) {
-      variants = variants.filter((v: any) => v.driveType === selectedDriveType);
+      variants = variants.filter((v: any) => v.driveTypes?.includes(selectedDriveType));
     }
     const counts = new Map<string, number>();
     for (const v of variants) {
@@ -265,13 +262,14 @@ const ShopWithoutSidebar: React.FC = () => {
       selectedBrand
         ? {
             brandId: selectedBrand,
+            ...(selectedModel ? { modelId: selectedModel } : {}),
             ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
             ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
             ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
             ...(selectedEngine ? { engineType: selectedEngine } : {})
           }
         : undefined,
-    [selectedBrand, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine]
+    [selectedBrand, selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine]
   );
 
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
@@ -398,7 +396,7 @@ const ShopWithoutSidebar: React.FC = () => {
       image: sp.images?.find((i: any) => !!i?.image_url)?.image_url ?? '/images/placeholder.jpg',
       articleNo: sp.article_no ?? sp.articleNo ?? undefined,
       supplierName: sp.supplier_name ?? sp.supplierName ?? undefined,
-      categoryName: sp.category_ID ? catNameById.get(sp.category_ID) : undefined
+      categoryName: sp.category?.name ?? (sp.category_ID ? catNameById.get(sp.category_ID) : undefined)
     }));
   }, [partsData, catNameById]);
 
@@ -501,7 +499,19 @@ const ShopWithoutSidebar: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* ── Vehicle selector ──────────────────────────────────── */}
           <div className="bg-white rounded-xl px-6 py-5 mb-6 shadow-sm">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3">Find parts for your vehicle</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-700">Find parts for your vehicle</h2>
+              {selectedMake && (
+                <button
+                  onClick={() =>
+                    updateParams({ year: '', make: '', brand: '', model: '', cat: '', fuel: '', body: '', drive: '', engine: '', q: '', page: '' })
+                  }
+                  className="text-xs font-medium text-gray-400 hover:text-[var(--color-primary-600)] transition-colors"
+                >
+                  Reset all filters
+                </button>
+              )}
+            </div>
             <div className={`grid grid-cols-1 gap-3 ${hasYears ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
               {/* Year — only shown when the years endpoint is available (local DB) */}
               {hasYears && (
@@ -567,6 +577,7 @@ const ShopWithoutSidebar: React.FC = () => {
                   disabled={!selectedBrand}
                 />
               </div>
+
             </div>
 
             {/* Vehicle attribute filters — inline strip, visible after model selection */}

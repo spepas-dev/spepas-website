@@ -1,8 +1,9 @@
 // src/components/buyer/CheckoutForm.tsx
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import MapPicker from '@/components/common/MapPicker';
 import SpepasLoader from '@/components/common/SpepasLoader';
 import { checkoutWithExistingAddressAPI, checkoutWithNewAddressAPI } from '@/lib/orderBidsApis';
 
@@ -19,6 +20,11 @@ const CheckoutForm: React.FC = () => {
   // New address form state
   const [title, setTitle] = useState('');
   const [addressDetails, setAddressDetails] = useState('');
+  const [newLat, setNewLat] = useState('');
+  const [newLng, setNewLng] = useState('');
+
+  const latNum = useMemo(() => { const n = parseFloat(newLat); return Number.isFinite(n) ? n : null; }, [newLat]);
+  const lngNum = useMemo(() => { const n = parseFloat(newLng); return Number.isFinite(n) ? n : null; }, [newLng]);
 
   if (!charges) {
     return (
@@ -70,8 +76,8 @@ const CheckoutForm: React.FC = () => {
       const address = {
         title: title || 'My Address',
         addressDetails: addressDetails || 'Address details',
-        longitude: -73.9712,
-        latitude: 40.7831
+        longitude: lngNum ?? 0,
+        latitude: latNum ?? 0,
       };
       await checkoutWithNewAddressAPI({
         address,
@@ -162,6 +168,17 @@ const CheckoutForm: React.FC = () => {
                   rows={3}
                   placeholder="Street, building, landmarks..."
                   className={`${inputClass} resize-none`}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1.5">Delivery Location</label>
+                <MapPicker
+                  value={{ lat: latNum, lng: lngNum }}
+                  onChange={(lat, lng) => { setNewLat(String(lat)); setNewLng(String(lng)); }}
+                  height={240}
+                  showLocate
+                  showSearch
+                  defaultZoom={12}
                 />
               </div>
             </div>

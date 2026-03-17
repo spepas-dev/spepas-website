@@ -1,13 +1,13 @@
 //src/lib/inventoryApis.ts
 import apiClient from './axios';
 import {
-  carManufacturersResponseSchema,
   carBrandsResponseSchema,
+  carManufacturersResponseSchema,
   carModelsResponseSchema,
-  sparePartsResponseSchema,
-  sparePartDetailResponseSchema,
-  sparePartCategoriesResponseSchema,
   carYearsResponseSchema,
+  sparePartCategoriesResponseSchema,
+  sparePartDetailResponseSchema,
+  sparePartsResponseSchema
 } from './inventoryZodValidation';
 
 // Filter interfaces — query params forwarded to the API (see docs/issue-tracking.md INV-3..5)
@@ -25,6 +25,7 @@ export interface SparePartsFilter {
 
 export interface CategoryFilter {
   brandId?: string;
+  modelId?: string;
   fuelType?: string;
   bodyType?: string;
   driveType?: string;
@@ -37,19 +38,8 @@ function cacheBusterParams() {
 
 // GET: distinct manufacture years — local mock only until INV-2 lands on real API
 export const getCarYears = async () => {
-  console.log('[inventoryApis] GET /inventry/car-years-all');
-  try {
-    const { data } = await apiClient.get('/inventry/car-years-all', cacheBusterParams());
-    console.log('[inventoryApis] car-years-all — raw response:', data);
-    return carYearsResponseSchema.parse(data);
-  } catch (err: any) {
-    console.error('[inventoryApis] car-years-all — FAILED:', {
-      status: err?.response?.status,
-      data: err?.response?.data,
-      message: err?.message,
-    });
-    throw err;
-  }
+  const { data } = await apiClient.get('/inventry/car-years-all', cacheBusterParams());
+  return carYearsResponseSchema.parse(data);
 };
 
 // GET: list car manufacturers
@@ -63,29 +53,16 @@ export const getCarManufacturers = async () => {
 async function fetchAllPages<T>(
   url: string,
   params: Record<string, unknown>,
-  schema: { parse: (d: unknown) => T & { data?: unknown[]; meta?: { totalPages?: number } } },
+  schema: { parse: (d: unknown) => T & { data?: unknown[]; meta?: { totalPages?: number } } }
 ): Promise<T> {
-  console.log(`[inventoryApis] fetchAllPages → GET ${url}`, params);
-  let first;
-  try {
-    const res = await apiClient.get(url, { params });
-    first = res.data;
-    console.log(`[inventoryApis] ${url} — raw response:`, first);
-  } catch (err: any) {
-    console.error(`[inventoryApis] ${url} — request FAILED:`, {
-      status: err?.response?.status,
-      data: err?.response?.data,
-      message: err?.message,
-    });
-    throw err;
-  }
+  const res = await apiClient.get(url, { params });
+  const first = res.data;
+
   const parsed = schema.parse(first);
   const totalPages = parsed.meta?.totalPages ?? 1;
   if (totalPages > 1 && parsed.data) {
     const pageNums = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
-    const results = await Promise.allSettled(
-      pageNums.map((page) => apiClient.get(url, { params: { ...params, page } }))
-    );
+    const results = await Promise.allSettled(pageNums.map((page) => apiClient.get(url, { params: { ...params, page } })));
     for (const result of results) {
       if (result.status === 'fulfilled') {
         const page = schema.parse(result.value.data);
@@ -112,49 +89,26 @@ export const getCarModels = async (filters?: { brandId?: string }) => {
 
 // GET: list all spare parts (filters forwarded as query params — see INV-3)
 export const getSpareParts = async (filters?: SparePartsFilter) => {
-  console.log('[inventoryApis] GET /inventry/sparepart-all', filters);
-  try {
-    const { data } = await apiClient.get('/inventry/sparepart-all', {
-      params: { ts: Date.now(), ...filters },
-    });
-    console.log('[inventoryApis] sparepart-all — raw response:', data);
-    return sparePartsResponseSchema.parse(data);
-  } catch (err: any) {
-    console.error('[inventoryApis] sparepart-all — FAILED:', {
-      status: err?.response?.status,
-      data: err?.response?.data,
-      message: err?.message,
-    });
-    throw err;
-  }
+  const { data } = await apiClient.get('/inventry/sparepart-all', {
+    params: { ts: Date.now(), ...filters }
+  });
+
+  return sparePartsResponseSchema.parse(data);
 };
 
 // GET: spare part detail by code (numeric code)
 export const getSparePartDetailByCode = async (spare_part_code: string | number) => {
   const code = encodeURIComponent(String(spare_part_code));
-  const { data } = await apiClient.get(
-    `/inventry/sparepart-detail/${code}`,
-    cacheBusterParams()
-  );
-  // console.log('Response from sparepart-detail:', data);
+  const { data } = await apiClient.get(`/inventry/sparepart-detail/${code}`, cacheBusterParams());
+
   return sparePartDetailResponseSchema.parse(data);
 };
 
 // GET: list all spare part categories (filters scope part counts — see INV-4)
 export const getSparePartCategories = async (filters?: CategoryFilter) => {
-  console.log('[inventoryApis] GET /inventry/category-all', filters);
-  try {
-    const { data } = await apiClient.get('/inventry/category-all', {
-      params: { ts: Date.now(), ...filters },
-    });
-    console.log('[inventoryApis] category-all — raw response:', data);
-    return sparePartCategoriesResponseSchema.parse(data);
-  } catch (err: any) {
-    console.error('[inventoryApis] category-all — FAILED:', {
-      status: err?.response?.status,
-      data: err?.response?.data,
-      message: err?.message,
-    });
-    throw err;
-  }
+  const { data } = await apiClient.get('/inventry/category-all', {
+    params: { ts: Date.now(), ...filters }
+  });
+
+  return sparePartCategoriesResponseSchema.parse(data);
 };
