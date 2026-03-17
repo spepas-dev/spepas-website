@@ -95,7 +95,10 @@ const ShopWithoutSidebar: React.FC = () => {
     retry: false
   });
 
-  const hasYears = !yearsError && (yearsData?.data?.length ?? 0) > 0;
+  const hasYearsEndpoint = !yearsError && (yearsData?.data?.length ?? 0) > 0;
+  // hasYears is updated later once parts data loads (see allYearOptions)
+  // For initial render, use the endpoint check; it gets overridden below
+  let hasYears = hasYearsEndpoint;
 
   const { data: manufacturersData, isLoading: makesLoading } = useQuery({
     queryKey: ['car-manufacturers'],
@@ -243,12 +246,37 @@ const ShopWithoutSidebar: React.FC = () => {
   }, [yearsData]);
 
   const makeOptions = useMemo(() => {
-    return manufacturersData?.data ?? [];
-  }, [manufacturersData]);
+    const all = manufacturersData?.data ?? [];
+    if (!selectedYear) return all;
+    const yr = Number(selectedYear);
+    if (Number.isNaN(yr)) return all;
+    return all.filter((m: any) => {
+      const brands = m.brands ?? [];
+      if (brands.length === 0) return true; // no inline brands → can't filter, keep it
+      return brands.some((b: any) => {
+        const from = b.yearFrom ?? null;
+        const to = b.yearTo ?? null;
+        if (from === null && to === null) return true; // no year range → keep
+        if (from !== null && yr < from) return false;
+        if (to !== null && yr > to) return false;
+        return true;
+      });
+    });
+  }, [manufacturersData, selectedYear]);
 
   const brandOptions = useMemo(() => {
-    return brandsForMake;
-  }, [brandsForMake]);
+    if (!selectedYear) return brandsForMake;
+    const yr = Number(selectedYear);
+    if (Number.isNaN(yr)) return brandsForMake;
+    return brandsForMake.filter((b: any) => {
+      const from = b.yearFrom ?? null;
+      const to = b.yearTo ?? null;
+      if (from === null && to === null) return true;
+      if (from !== null && yr < from) return false;
+      if (to !== null && yr > to) return false;
+      return true;
+    });
+  }, [brandsForMake, selectedYear]);
 
   const modelOptions = useMemo(() => {
     return modelsForBrand;
@@ -257,69 +285,72 @@ const ShopWithoutSidebar: React.FC = () => {
   // ══════════════════════════════════════════════════════════════════════════
   // Queries — categories (scoped to selected brand)
   // ══════════════════════════════════════════════════════════════════════════
+  // Categories are always fetched (no brand gate) so users can browse by category first
   const categoryFilters = useMemo(
-    () =>
-      selectedBrand
-        ? {
-            brandId: selectedBrand,
-            ...(selectedModel ? { modelId: selectedModel } : {}),
-            ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
-            ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
-            ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
-            ...(selectedEngine ? { engineType: selectedEngine } : {})
-          }
-        : undefined,
+    () => ({
+      ...(selectedBrand ? { brandId: selectedBrand } : {}),
+      ...(selectedModel ? { modelId: selectedModel } : {}),
+      ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
+      ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
+      ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
+      ...(selectedEngine ? { engineType: selectedEngine } : {})
+    }),
     [selectedBrand, selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine]
   );
 
   const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
     queryKey: ['sparepart-categories', categoryFilters],
     queryFn: () => getSparePartCategories(categoryFilters),
-    staleTime: 5 * 60_000,
-    enabled: !!selectedBrand
+    staleTime: 5 * 60_000
   });
 
-  // Build ordered category tree: top-level items first, then children nested under parents.
-  // Categories whose parent_ID doesn't match any returned category are promoted to top-level.
-  // Flatten categories to max 2 levels (top-level parents + direct children).
-  // 3rd-level categories are folded into their parent's results.
+  // Build ordered category tree: level 0 → level 1 → level 2.
+  // Uses the `level` field from the API to determine nesting depth.
+  // `_count.spareParts` is used for the count badge.
   const orderedCategories = useMemo(() => {
     const allCats = categoriesData?.data ?? [];
-    const byId = new Map(allCats.map((c) => [c.Category_ID, c]));
-
-    const topLevel: typeof allCats = [];
     const childrenOf = new Map<string, typeof allCats>();
 
     for (const cat of allCats) {
-      if (!cat.parent_ID || !byId.has(cat.parent_ID)) {
-        topLevel.push(cat);
-      } else {
+      if (cat.parent_ID) {
         const arr = childrenOf.get(cat.parent_ID) ?? [];
         arr.push(cat);
         childrenOf.set(cat.parent_ID, arr);
       }
     }
 
+    const topLevel = allCats.filter((c) => !c.parent_ID);
     topLevel.sort((a, b) => a.name.localeCompare(b.name));
 
     type CatNode = {
       Category_ID: string;
       name: string;
-      count?: number;
+      count: number;
       isParent: boolean;
       depth: number;
       parentCategoryId?: string;
     };
     const result: CatNode[] = [];
 
-    for (const parent of topLevel) {
-      const children = childrenOf.get(parent.Category_ID) ?? [];
-      result.push({ ...parent, isParent: children.length > 0, depth: 0 });
-      children.sort((a, b) => a.name.localeCompare(b.name));
-      for (const child of children) {
-        result.push({ ...child, isParent: false, depth: 1, parentCategoryId: parent.Category_ID });
+    // Recursive walk — supports unlimited nesting depth
+    const walk = (items: typeof allCats, depth: number, parentId?: string) => {
+      for (const cat of items) {
+        const count = cat._count?.spareParts ?? cat.count ?? 0;
+        const children = (childrenOf.get(cat.Category_ID) ?? []).sort((a, b) => a.name.localeCompare(b.name));
+        result.push({
+          Category_ID: cat.Category_ID,
+          name: cat.name,
+          count,
+          isParent: children.length > 0,
+          depth,
+          parentCategoryId: parentId
+        });
+        if (children.length > 0) {
+          walk(children, depth + 1, cat.Category_ID);
+        }
       }
-    }
+    };
+    walk(topLevel, 0);
     return result;
   }, [categoriesData]);
 
@@ -347,24 +378,24 @@ const ShopWithoutSidebar: React.FC = () => {
   );
 
   // ══════════════════════════════════════════════════════════════════════════
-  // Query — parts (server-side filtered + paginated)
+  // Query — parts (server-side filtered by brand/category/search + paginated)
+  // Note: fuelType/bodyType/driveType/engine are model attributes — the
+  //       sparepart-all API doesn't support them, so we filter client-side.
   // ══════════════════════════════════════════════════════════════════════════
   const partsFilters = useMemo(
     () => ({
       ...(selectedBrand ? { brandId: selectedBrand } : {}),
       ...(selectedCategory ? { categoryId: selectedCategory } : {}),
-      ...(selectedFuelType ? { fuelType: selectedFuelType } : {}),
-      ...(selectedBodyType ? { bodyType: selectedBodyType } : {}),
-      ...(selectedDriveType ? { driveType: selectedDriveType } : {}),
-      ...(selectedEngine ? { engineType: selectedEngine } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
       limit: PAGE_SIZE,
       page
     }),
-    [selectedBrand, selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, search, page]
+    [selectedBrand, selectedCategory, search, page]
   );
 
   const vehicleSelected = !!selectedBrand;
+  // Allow browsing by category or search alone (not just brand)
+  const showResults = !!(selectedBrand || selectedCategory || search.trim());
 
   const {
     data: partsData,
@@ -374,11 +405,103 @@ const ShopWithoutSidebar: React.FC = () => {
     queryKey: ['spareparts', partsFilters],
     queryFn: () => getSpareParts(partsFilters),
     staleTime: 60_000,
-    enabled: vehicleSelected
+    enabled: showResults
   });
 
-  const total = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
-  const totalPages = partsData?.meta?.totalPages ?? Math.max(1, Math.ceil(total / PAGE_SIZE));
+  // ── Client-side attribute filtering ──────────────────────────────────────
+  // Compute model IDs that match all selected fuel/body/drive/engine filters
+  const hasAttributeFilters = !!(selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine || selectedModel);
+  const hasYearFilter = !!selectedYear;
+
+  const matchingModelIds = useMemo(() => {
+    if (!hasAttributeFilters) {
+      return null; // null = no filtering needed
+    }
+    let variants = modelsForBrand;
+    if (selectedModel) {
+      variants = variants.filter((v: any) => v.CarModel_ID === selectedModel);
+    }
+    if (selectedFuelType) {
+      variants = variants.filter((v: any) => v.fuelTypes?.includes(selectedFuelType));
+    }
+    if (selectedBodyType) {
+      variants = variants.filter((v: any) => v.bodyTypes?.includes(selectedBodyType));
+    }
+    if (selectedDriveType) {
+      variants = variants.filter((v: any) => v.driveTypes?.includes(selectedDriveType));
+    }
+    if (selectedEngine) {
+      variants = variants.filter((v: any) => v.name === selectedEngine);
+    }
+    return new Set(variants.map((v: any) => v.CarModel_ID as string));
+  }, [modelsForBrand, selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, hasAttributeFilters]);
+
+  // Filter parts: keep only those with at least one compatible vehicle matching the selected attributes + year
+  const filteredParts = useMemo(() => {
+    const all = partsData?.data ?? [];
+    const needsModelFilter = !!matchingModelIds;
+    const needsYearFilter = hasYearFilter;
+    if (!needsModelFilter && !needsYearFilter) {
+      return all;
+    }
+    const yearNum = needsYearFilter ? parseInt(selectedYear, 10) : NaN;
+    return all.filter((sp: any) => {
+      const pvs: any[] = sp.partVehicles ?? [];
+      // If no partVehicles at all, check direct carModel_ID for model filter only
+      if (pvs.length === 0) {
+        if (needsYearFilter) {
+          return false;
+        }
+        return !needsModelFilter || (sp.carModel_ID && matchingModelIds!.has(sp.carModel_ID));
+      }
+      // At least one partVehicle must match ALL active filters
+      return pvs.some((pv: any) => {
+        const modelId = pv.carModel?.CarModel_ID ?? pv.carModel_ID;
+        if (needsModelFilter && !(modelId && matchingModelIds!.has(modelId))) {
+          return false;
+        }
+        if (needsYearFilter) {
+          const pvYear = pv.carModel?.yearOfMake;
+          if (pvYear !== yearNum) {
+            return false;
+          }
+        }
+        return true;
+      });
+    });
+  }, [partsData, matchingModelIds, hasYearFilter, selectedYear]);
+
+  // Extract unique years from loaded parts data (fallback when car-years endpoint unavailable)
+  const partsYearOptions = useMemo(() => {
+    const years = new Set<number>();
+    for (const sp of partsData?.data ?? []) {
+      for (const pv of (sp as any).partVehicles ?? []) {
+        const y = pv.carModel?.yearOfMake;
+        if (typeof y === 'number' && y > 0) {
+          years.add(y);
+        }
+      }
+    }
+    return [...years].sort((a, b) => b - a).map(String);
+  }, [partsData]);
+
+  // Merge year sources: dedicated endpoint (if available) + years from parts data
+  const allYearOptions = useMemo(() => {
+    if (yearOptions.length > 0) {
+      return yearOptions;
+    }
+    return partsYearOptions;
+  }, [yearOptions, partsYearOptions]);
+
+  // Update hasYears now that we have parts-derived year options
+  hasYears = hasYearsEndpoint || allYearOptions.length > 0;
+
+  const serverTotal = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
+  const hasClientFilter = hasAttributeFilters || hasYearFilter;
+  const total = hasClientFilter ? filteredParts.length : serverTotal;
+  const totalPages = hasClientFilter
+    ? Math.max(1, Math.ceil(total / 1)) // all filtered results shown on one "page"
+    : (partsData?.meta?.totalPages ?? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)));
 
   // Build a category uuid→name lookup for enriching items
   const catNameById = useMemo(() => {
@@ -390,7 +513,7 @@ const ShopWithoutSidebar: React.FC = () => {
   }, [categoriesData]);
 
   const items: ProductVM[] = useMemo(() => {
-    return (partsData?.data ?? []).map((sp: any) => ({
+    return filteredParts.map((sp: any) => ({
       linkId: String(sp.id ?? sp.SparePart_ID ?? ''),
       title: sp.name,
       image: sp.images?.find((i: any) => !!i?.image_url)?.image_url ?? '/images/placeholder.jpg',
@@ -398,7 +521,7 @@ const ShopWithoutSidebar: React.FC = () => {
       supplierName: sp.supplier_name ?? sp.supplierName ?? undefined,
       categoryName: sp.category?.name ?? (sp.category_ID ? catNameById.get(sp.category_ID) : undefined)
     }));
-  }, [partsData, catNameById]);
+  }, [filteredParts, catNameById]);
 
   // ══════════════════════════════════════════════════════════════════════════
   // Filter chips
@@ -475,17 +598,18 @@ const ShopWithoutSidebar: React.FC = () => {
   // ══════════════════════════════════════════════════════════════════════════
   // Cascade change handlers (reset children)
   // ══════════════════════════════════════════════════════════════════════════
+  // Category is independent of the vehicle cascade — don't clear it on vehicle changes
   const onChangeYear = (val: string) => {
-    updateParams({ year: val, make: '', brand: '', model: '', cat: '', fuel: '', body: '', drive: '', engine: '', page: '', q: '' });
+    updateParams({ year: val, make: '', brand: '', model: '', fuel: '', body: '', drive: '', engine: '', page: '' });
   };
   const onChangeMake = (val: string) => {
-    updateParams({ make: val, brand: '', model: '', cat: '', fuel: '', body: '', drive: '', engine: '', page: '', q: '' });
+    updateParams({ make: val, brand: '', model: '', fuel: '', body: '', drive: '', engine: '', page: '' });
   };
   const onChangeBrand = (val: string) => {
-    updateParams({ brand: val, model: '', cat: '', fuel: '', body: '', drive: '', engine: '', page: '' });
+    updateParams({ brand: val, model: '', fuel: '', body: '', drive: '', engine: '', page: '' });
   };
   const onChangeModel = (val: string) => {
-    updateParams({ model: val, cat: '', fuel: '', body: '', drive: '', engine: '', page: '' });
+    updateParams({ model: val, fuel: '', body: '', drive: '', engine: '', page: '' });
   };
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -518,7 +642,7 @@ const ShopWithoutSidebar: React.FC = () => {
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Year</label>
                   <SearchableCombobox
-                    options={yearOptions.map((y) => ({ value: y, label: y }))}
+                    options={allYearOptions.map((y) => ({ value: y, label: y }))}
                     value={selectedYear}
                     onChange={onChangeYear}
                     placeholderLabel="All years"
@@ -534,7 +658,7 @@ const ShopWithoutSidebar: React.FC = () => {
                   options={makeOptions.map((m: any) => ({
                     value: m.Manufacturer_ID,
                     label: m.name,
-                    count: m.brands?.length > 0 ? m.brands.length : undefined
+                    count: m._count?.brands ?? m.brandCount ?? (m.brands?.length > 0 ? m.brands.length : undefined)
                   }))}
                   value={selectedMake}
                   onChange={onChangeMake}
@@ -551,7 +675,7 @@ const ShopWithoutSidebar: React.FC = () => {
                   options={brandOptions.map((b: any) => ({
                     value: b.CarBrand_ID,
                     label: b.name,
-                    count: b.modelCount ?? (b.models?.length > 0 ? b.models.length : undefined)
+                    count: b._count?.models ?? b.modelCount ?? (b.models?.length > 0 ? b.models.length : undefined)
                   }))}
                   value={selectedBrand}
                   onChange={onChangeBrand}
@@ -696,8 +820,8 @@ const ShopWithoutSidebar: React.FC = () => {
 
           {/* ── Main layout: sidebar + content ────────────────────── */}
           <div className="flex gap-6">
-            {/* Sidebar — categories (hidden until vehicle selected) */}
-            <aside className={`w-72 shrink-0 ${vehicleSelected ? 'hidden lg:block' : 'hidden'}`}>
+            {/* Sidebar — categories (always visible on desktop) */}
+            <aside className="w-72 shrink-0 hidden lg:block">
               <div className="bg-white rounded-xl shadow-sm p-4 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">Categories</h3>
 
@@ -730,7 +854,10 @@ const ShopWithoutSidebar: React.FC = () => {
                     }
 
                     const isActive = selectedCategory === cat.Category_ID;
+                    // Dynamic indentation: 12px base + 16px per depth level
+                    const padLeft = 12 + cat.depth * 16;
 
+                    // Parent nodes (have children) — show expand/collapse chevron
                     if (cat.isParent) {
                       const expanded = isExpanded(cat.Category_ID);
                       return (
@@ -740,7 +867,8 @@ const ShopWithoutSidebar: React.FC = () => {
                             toggleCategory(cat.Category_ID);
                             updateParams({ cat: cat.Category_ID, page: '' });
                           }}
-                          className={`w-full flex items-center gap-1.5 py-2 px-3 rounded-lg text-sm transition-colors mt-1 ${
+                          style={{ paddingLeft: padLeft, paddingRight: 12 }}
+                          className={`w-full flex items-center gap-1.5 py-2 rounded-lg text-sm transition-colors ${cat.depth === 0 ? 'mt-1' : ''} ${
                             isActive
                               ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
                               : 'text-gray-700 hover:bg-gray-50'
@@ -755,21 +883,21 @@ const ShopWithoutSidebar: React.FC = () => {
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                           </svg>
-                          <span className="flex-1 text-left font-medium truncate" title={cat.name}>
+                          <span className={`flex-1 text-left truncate ${cat.depth === 0 ? 'font-medium' : ''}`} title={cat.name}>
                             {cat.name}
                           </span>
-                          {cat.count != null && cat.count > 0 && (
-                            <span className="shrink-0 text-xs text-gray-400 font-normal">{cat.count}</span>
-                          )}
+                          {cat.count > 0 && <span className="shrink-0 text-xs text-gray-400 font-normal">{cat.count}</span>}
                         </button>
                       );
                     }
 
+                    // Leaf nodes (no children)
                     return (
                       <button
                         key={cat.Category_ID}
                         onClick={() => updateParams({ cat: cat.Category_ID, page: '' })}
-                        className={`w-full flex items-baseline justify-between gap-2 py-1.5 pl-7 pr-3 rounded-lg text-sm transition-colors ${
+                        style={{ paddingLeft: padLeft, paddingRight: 12 }}
+                        className={`w-full flex items-baseline justify-between gap-2 py-1.5 rounded-lg text-sm transition-colors ${
                           isActive
                             ? 'bg-[var(--color-primary-50)] text-[var(--color-primary-600)] font-medium'
                             : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
@@ -778,7 +906,7 @@ const ShopWithoutSidebar: React.FC = () => {
                         <span className="text-left truncate" title={cat.name}>
                           {cat.name}
                         </span>
-                        {cat.count != null && cat.count > 0 && <span className="shrink-0 text-xs text-gray-400">{cat.count}</span>}
+                        {cat.count > 0 && <span className="shrink-0 text-xs text-gray-400">{cat.count}</span>}
                       </button>
                     );
                   })}
@@ -787,113 +915,113 @@ const ShopWithoutSidebar: React.FC = () => {
 
             {/* Main content */}
             <div className="flex-1 min-w-0">
-              {/* Search + filter chips (hidden until vehicle selected) */}
-              {vehicleSelected && (
-                <div className="flex flex-col gap-3 mb-6">
-                  {/* Row: search + result count */}
-                  <div className="flex flex-wrap items-center gap-3 justify-between">
-                    <div className="flex items-center gap-3">
-                      {/* Search */}
-                      <div className="relative">
-                        <input
-                          value={search}
-                          onChange={(e) => updateParams({ q: e.target.value, page: '' })}
-                          placeholder="Search by part name or number…"
-                          className="h-10 w-64 sm:w-80 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+              {/* Search + filter chips + mobile category selector */}
+              <div className="flex flex-col gap-3 mb-6">
+                {/* Row: search + result count */}
+                <div className="flex flex-wrap items-center gap-3 justify-between">
+                  <div className="flex items-center gap-3">
+                    {/* Search */}
+                    <div className="relative">
+                      <input
+                        value={search}
+                        onChange={(e) => updateParams({ q: e.target.value, page: '' })}
+                        placeholder="Search by part name or number…"
+                        className="h-10 w-64 sm:w-80 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+                      />
+                      <svg
+                        className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M21 21l-4.35-4.35m1.1-4.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z"
                         />
-                        <svg
-                          className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M21 21l-4.35-4.35m1.1-4.4a7.25 7.25 0 11-14.5 0 7.25 7.25 0 0114.5 0z"
-                          />
-                        </svg>
-                      </div>
+                      </svg>
+                    </div>
 
+                    {showResults && (
                       <span className="text-sm text-gray-500 hidden sm:inline">
                         {total.toLocaleString()} part{total !== 1 ? 's' : ''} found
                       </span>
-                    </div>
-
-                    {/* View toggle */}
-                    <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
-                      <button
-                        onClick={() => setView('grid')}
-                        className={`p-2 ${view === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                        aria-label="Grid view"
-                      >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => setView('list')}
-                        className={`p-2 ${view === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
-                        aria-label="List view"
-                      >
-                        <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
-                        </svg>
-                      </button>
-                    </div>
+                    )}
                   </div>
 
-                  {/* Filter chips */}
-                  {activeFilters.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      {activeFilters.map((chip) => (
-                        <span
-                          key={chip.key}
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-sm"
-                        >
-                          {chip.label}
-                          <button
-                            onClick={chip.onClear}
-                            className="ml-0.5 hover:text-[var(--color-primary-900)]"
-                            aria-label={`Remove ${chip.label} filter`}
-                          >
-                            &times;
-                          </button>
-                        </span>
-                      ))}
-                      {activeFilters.length > 1 && (
-                        <button onClick={clearAllFilters} className="text-sm text-gray-500 hover:text-gray-700 underline">
-                          Clear all
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Mobile category selector (visible on small screens) */}
-                  <div className="lg:hidden">
-                    <SearchableCombobox
-                      options={[
-                        { value: '', label: 'All categories' },
-                        ...orderedCategories.map((cat) => ({
-                          value: cat.Category_ID,
-                          label: cat.depth > 0 ? `  ${cat.name}` : cat.name,
-                          count: cat.count != null && cat.count > 0 ? cat.count : undefined
-                        }))
-                      ]}
-                      value={selectedCategory}
-                      onChange={(val) => updateParams({ cat: val, page: '' })}
-                      placeholderLabel="All categories"
-                      isLoading={categoriesLoading}
-                    />
+                  {/* View toggle */}
+                  <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setView('grid')}
+                      className={`p-2 ${view === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                      aria-label="Grid view"
+                    >
+                      <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setView('list')}
+                      className={`p-2 ${view === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+                      aria-label="List view"
+                    >
+                      <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-              )}
+
+                {/* Filter chips */}
+                {activeFilters.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {activeFilters.map((chip) => (
+                      <span
+                        key={chip.key}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-sm"
+                      >
+                        {chip.label}
+                        <button
+                          onClick={chip.onClear}
+                          className="ml-0.5 hover:text-[var(--color-primary-900)]"
+                          aria-label={`Remove ${chip.label} filter`}
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                    {activeFilters.length > 1 && (
+                      <button onClick={clearAllFilters} className="text-sm text-gray-500 hover:text-gray-700 underline">
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Mobile category selector (visible on small screens) */}
+                <div className="lg:hidden">
+                  <SearchableCombobox
+                    options={[
+                      { value: '', label: 'All categories' },
+                      ...orderedCategories.map((cat) => ({
+                        value: cat.Category_ID,
+                        label: '\u00A0\u00A0'.repeat(cat.depth) + cat.name,
+                        count: cat.count != null && cat.count > 0 ? cat.count : undefined
+                      }))
+                    ]}
+                    value={selectedCategory}
+                    onChange={(val) => updateParams({ cat: val, page: '' })}
+                    placeholderLabel="All categories"
+                    isLoading={categoriesLoading}
+                  />
+                </div>
+              </div>
 
               {/* Loading skeleton */}
               {partsLoading && (
@@ -947,27 +1075,27 @@ const ShopWithoutSidebar: React.FC = () => {
                 </div>
               )}
 
-              {/* Prompt to select vehicle */}
-              {!vehicleSelected && (
+              {/* Prompt — shown when no results criteria selected */}
+              {!showResults && !partsLoading && (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <div className="w-16 h-16 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center mb-5">
                     <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125v-6.867c0-.298-.119-.585-.33-.796l-3.525-3.525A1.125 1.125 0 0016.618 6H15m-3 0H9.375a1.125 1.125 0 00-1.125 1.125v11.25"
+                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
                       />
                     </svg>
                   </div>
-                  <p className="text-base font-semibold text-gray-700 mb-1.5">Select your vehicle to get started</p>
+                  <p className="text-base font-semibold text-gray-700 mb-1.5">Browse spare parts</p>
                   <p className="text-sm text-gray-400 max-w-xs">
-                    Choose a {hasYears ? 'year, manufacturer, and brand' : 'manufacturer and brand'} above to browse available spare parts.
+                    Pick a category, search by name, or select your vehicle above to find parts.
                   </p>
                 </div>
               )}
 
               {/* Empty state */}
-              {vehicleSelected && !partsLoading && !partsError && items.length === 0 && (
+              {showResults && !partsLoading && !partsError && items.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-5">
                     <svg className="w-7 h-7 text-gray-300" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">

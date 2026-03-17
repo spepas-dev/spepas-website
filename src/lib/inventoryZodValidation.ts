@@ -32,6 +32,20 @@ const sparePartSchema = z.object({
   typeEngineName: z.string().nullable().optional(),
   supplier_name: z.string().nullable().optional(),
   images: z.array(imageSchema),
+  // partVehicles: list of compatible vehicles (included in list + detail responses)
+  partVehicles: z.array(z.object({
+    carModel_ID: z.string().optional(),
+    carModel: z.object({
+      CarModel_ID: z.string(),
+      name: z.string(),
+      fuelTypes: z.array(z.string()).optional(),
+      bodyTypes: z.array(z.string()).optional(),
+      driveTypes: z.array(z.string()).optional(),
+    }).passthrough().optional(),
+  }).passthrough()).optional(),
+  category: z.object({
+    name: z.string(),
+  }).passthrough().optional(),
 });
 
 const carModelSchema = z.object({
@@ -86,8 +100,11 @@ const carBrandSchema = z.object({
   externalID: z.number().nullable().optional(),
   createdAt: z.string(),
   type: z.string(),
+  yearFrom: z.number().nullable().optional(),
+  yearTo: z.number().nullable().optional(),
   models: z.array(carModelSchema).optional().default([]),
   modelCount: z.number().optional(),
+  _count: z.object({ models: z.number() }).optional(),
   manufacturer: z
     .object({
       id: z.number(),
@@ -110,6 +127,8 @@ const manufacturerSchema = z.object({
   status: z.number(),
   createdAt: z.string(),
   brands: z.array(carBrandSchema).optional().default([]),
+  brandCount: z.number().optional(),
+  _count: z.object({ brands: z.number() }).optional(),
 });
 
 // Pagination metadata returned by the live API (absent in local mock)
@@ -207,7 +226,11 @@ export const sparePartCategoriesResponseSchema = z.object({
       Category_ID: z.string(),
       name: z.string(),
       parent_ID: z.string().nullable(),
+      externalID: z.number().nullable().optional(),
+      level: z.number().optional(),
       count: z.number().optional(),
+      _count: z.object({ spareParts: z.number() }).optional(),
     })
   ),
+  meta: paginationMeta,
 });

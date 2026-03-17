@@ -105,10 +105,7 @@ export const getSparePartDetailByCode = async (spare_part_code: string | number)
 };
 
 // GET: list all spare part categories (filters scope part counts — see INV-4)
+// API paginates at 100 max — fetch all pages to get the full category tree
 export const getSparePartCategories = async (filters?: CategoryFilter) => {
-  const { data } = await apiClient.get('/inventry/category-all', {
-    params: { ts: Date.now(), ...filters }
-  });
-
-  return sparePartCategoriesResponseSchema.parse(data);
+  return fetchAllPages('/inventry/category-all', { limit: 100, ...filters }, sparePartCategoriesResponseSchema);
 };
