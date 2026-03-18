@@ -55,6 +55,9 @@ const carModelSchema = z.object({
   yearOfMake: z.number(),
   carBrand_ID: z.string(),
   externalID: z.number().nullable().optional(),
+  constructionStart: z.number().nullable().optional(),
+  constructionEnd: z.number().nullable().optional(),
+  powerPs: z.number().nullable().optional(),
   status: z.number(),
   createdAt: z.string(),
   // singular strings: local mock format
@@ -67,6 +70,7 @@ const carModelSchema = z.object({
   driveTypes: z.array(z.string()).optional(),
   spareParts: z.array(sparePartSchema).optional().default([]),
   sparePartCount: z.number().optional(),
+  _count: z.object({ partVehicles: z.number() }).optional(),
   carBrand: z
     .object({
       id: z.number(),
@@ -75,6 +79,8 @@ const carModelSchema = z.object({
       status: z.number(),
       manufacturer_ID: z.string(),
       externalID: z.number().nullable().optional(),
+      yearFrom: z.number().nullable().optional(),
+      yearTo: z.number().nullable().optional(),
       createdAt: z.string(),
       type: z.string(),
       manufacturer: z.object({

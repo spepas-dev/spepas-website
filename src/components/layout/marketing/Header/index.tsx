@@ -40,7 +40,7 @@ const Header = () => {
         <div className={`flex flex-row gap-5 items-center justify-between ease-out duration-200 ${stickyMenu ? 'py-4' : 'py-4'}`}>
           <div className="xl:w-auto flex-col sm:flex-row flex justify-between gap-5 sm:gap-10">
             <Link className="flex-shrink-0 max-[430px]:mx-auto" to="/95668339501103956045/home">
-              <img src="/images/logo/Logos.png" alt="SPEPAS Logo" className="h-10 w-auto" />
+              <img src="/images/logo/spelogo.png" alt="SPEPAS Logo" className="h-14 w-auto" />
             </Link>
           </div>
 
