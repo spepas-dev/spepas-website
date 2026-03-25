@@ -16,6 +16,7 @@ type Props = Pick<
   | 'orderedCategories'
   | 'categoriesLoading'
   | 'selectedCategory'
+  | 'toggleCategoryFilter'
 > & {
   view: ViewMode;
   setView: (v: ViewMode) => void;
@@ -32,7 +33,8 @@ const PartsToolbar: React.FC<Props> = ({
   clearAllFilters,
   orderedCategories,
   categoriesLoading,
-  selectedCategory
+  selectedCategory,
+  toggleCategoryFilter
 }) => (
   <div className="flex flex-col gap-3 mb-6">
     {/* Row: search + result count + view toggle */}
@@ -128,7 +130,13 @@ const PartsToolbar: React.FC<Props> = ({
           }))
         ]}
         value={selectedCategory}
-        onChange={(val) => updateParams({ cat: val, page: '' })}
+        onChange={(val) => {
+          if (val === '') {
+            updateParams({ cat: '', page: '' });
+          } else {
+            toggleCategoryFilter(val);
+          }
+        }}
         placeholderLabel="All categories"
         isLoading={categoriesLoading}
       />

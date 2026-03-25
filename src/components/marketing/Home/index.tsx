@@ -18,7 +18,7 @@ const Home: React.FC = () => {
 
   const name   = authData?.user?.name ?? 'User';
   const sellerId = authData?.user?.sellerDetails?.Seller_ID;
-  const gopaId   = authData?.user?.gopa?.Gopa_ID;
+  const gopaId   = authData?.user?.gopa?.User_ID;
   // const riderId  = authData?.user?.rider?.Rider_ID; // if/when available
 
   // Not signed in → marketing landing

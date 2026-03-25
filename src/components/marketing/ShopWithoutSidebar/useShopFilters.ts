@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
@@ -9,6 +9,8 @@ import { ProductVM } from '../Shop/shopTypes';
 
 type ViewMode = 'grid' | 'list';
 const PAGE_SIZE = 48;
+const STATIC_STALE = 10 * 60_000; // 10 min — rarely changes (years, makes, brands, models)
+const DYNAMIC_STALE = 5 * 60_000; // 5 min — categories & parts
 
 // ── Pagination helper ──────────────────────────────────────────────────────
 export function pageNumbers(current: number, total: number): (number | '...')[] {
@@ -45,7 +47,13 @@ export function useShopFilters() {
   const selectedBodyType = sp('body');
   const selectedDriveType = sp('drive');
   const selectedEngine = sp('engine');
-  const selectedCategory = sp('cat');
+  const selectedCategoryRaw = sp('cat');
+  const selectedCategories: string[] = useMemo(
+    () => selectedCategoryRaw ? selectedCategoryRaw.split(',').filter(Boolean) : [],
+    [selectedCategoryRaw]
+  );
+  // Back-compat alias: first selected category (used where a single value is needed)
+  const selectedCategory = selectedCategoryRaw;
   const search = sp('q');
   const page = Math.max(1, parseInt(sp('page') || '1', 10));
 
@@ -74,7 +82,28 @@ export function useShopFilters() {
 
   const setPage = (v: number) => updateParams({ page: v <= 1 ? '' : String(v) });
 
+  // Toggle a category in/out of the multi-select list
+  const toggleCategoryFilter = useCallback(
+    (catId: string) => {
+      const current = selectedCategoryRaw ? selectedCategoryRaw.split(',').filter(Boolean) : [];
+      const next = current.includes(catId) ? current.filter((id) => id !== catId) : [...current, catId];
+      updateParams({ cat: next.join(','), page: '' });
+    },
+    [selectedCategoryRaw, updateParams]
+  );
+
+  // Remove a single category from multi-select
+  const removeCategoryFilter = useCallback(
+    (catId: string) => {
+      const current = selectedCategoryRaw ? selectedCategoryRaw.split(',').filter(Boolean) : [];
+      const next = current.filter((id) => id !== catId);
+      updateParams({ cat: next.join(','), page: '' });
+    },
+    [selectedCategoryRaw, updateParams]
+  );
+
   // ── Queries — vehicle cascade ───────────────────────────────────────────
+  // Years & manufacturers load in PARALLEL on mount (no dependency between them)
   const {
     data: yearsData,
     isLoading: yearsLoading,
@@ -82,7 +111,7 @@ export function useShopFilters() {
   } = useQuery({
     queryKey: ['car-years'],
     queryFn: getCarYears,
-    staleTime: 10 * 60_000,
+    staleTime: STATIC_STALE,
     retry: false
   });
 
@@ -92,16 +121,16 @@ export function useShopFilters() {
   const { data: manufacturersData, isLoading: makesLoading } = useQuery({
     queryKey: ['car-manufacturers'],
     queryFn: () => getCarManufacturers(),
-    staleTime: 10 * 60_000,
-    enabled: !yearsLoading,
+    staleTime: STATIC_STALE,
     retry: 1
+    // No `enabled` gate — loads immediately in parallel with years
   });
 
   const brandFilters = useMemo(() => (selectedMake ? { manufacturerId: selectedMake } : undefined), [selectedMake]);
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
     queryKey: ['car-brands', brandFilters],
     queryFn: () => getCarBrands(brandFilters),
-    staleTime: 10 * 60_000,
+    staleTime: STATIC_STALE,
     enabled: !!selectedMake
   });
 
@@ -125,7 +154,7 @@ export function useShopFilters() {
   const { data: modelsData, isLoading: modelsLoading } = useQuery({
     queryKey: ['car-models', selectedBrand],
     queryFn: () => getCarModels({ brandId: selectedBrand }),
-    staleTime: 10 * 60_000,
+    staleTime: STATIC_STALE,
     enabled: !!selectedBrand
   });
 
@@ -227,6 +256,15 @@ export function useShopFilters() {
   const modelOptions = useMemo(() => modelsForBrand, [modelsForBrand]);
 
   // ── Query — categories ──────────────────────────────────────────────────
+  // Eagerly load ALL categories on mount (no filters) for instant sidebar
+  const { data: allCategoriesData, isLoading: allCategoriesLoading } = useQuery({
+    queryKey: ['sparepart-categories', {}],
+    queryFn: () => getSparePartCategories(),
+    staleTime: DYNAMIC_STALE,
+    retry: 2
+  });
+
+  // Also fetch filtered categories when vehicle filters are active
   const categoryFilters = useMemo(
     () => ({
       ...(selectedBrand ? { brandId: selectedBrand } : {}),
@@ -239,11 +277,21 @@ export function useShopFilters() {
     [selectedBrand, selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine]
   );
 
-  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+  const hasVehicleFilters = !!(selectedBrand || selectedModel || selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine);
+
+  const { data: filteredCategoriesData, isLoading: filteredCategoriesLoading } = useQuery({
     queryKey: ['sparepart-categories', categoryFilters],
     queryFn: () => getSparePartCategories(categoryFilters),
-    staleTime: 5 * 60_000
+    staleTime: DYNAMIC_STALE,
+    enabled: hasVehicleFilters,
+    placeholderData: keepPreviousData // keep showing old tree while new one loads
   });
+
+  // Use filtered categories when vehicle filters are active, otherwise use all
+  const categoriesData = hasVehicleFilters ? (filteredCategoriesData ?? allCategoriesData) : allCategoriesData;
+  const categoriesLoading = hasVehicleFilters
+    ? (filteredCategoriesLoading && !filteredCategoriesData && allCategoriesLoading)
+    : allCategoriesLoading;
 
   // ── Category tree ───────────────────────────────────────────────────────
   type CatNode = {
@@ -302,30 +350,38 @@ export function useShopFilters() {
   const isExpanded = useCallback((catId: string) => !collapsedCategories.has(catId), [collapsedCategories]);
 
   // ── Query — parts ───────────────────────────────────────────────────────
+  // Send categoryId to API only when exactly 1 category selected; otherwise filter client-side
+  const singleCategoryForApi = selectedCategories.length === 1 ? selectedCategories[0] : '';
   const partsFilters = useMemo(
     () => ({
       ...(selectedBrand ? { brandId: selectedBrand } : {}),
-      ...(selectedCategory ? { categoryId: selectedCategory } : {}),
+      ...(singleCategoryForApi ? { categoryId: singleCategoryForApi } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
       limit: PAGE_SIZE,
       page
     }),
-    [selectedBrand, selectedCategory, search, page]
+    [selectedBrand, singleCategoryForApi, search, page]
   );
 
   const vehicleSelected = !!selectedBrand;
-  const showResults = !!(selectedBrand || selectedCategory || search.trim());
+  const showResults = !!(selectedBrand || selectedCategories.length > 0 || search.trim());
 
   const {
     data: partsData,
     isLoading: partsLoading,
-    isError: partsError
+    isError: partsErrorRaw,
+    isPlaceholderData
   } = useQuery({
     queryKey: ['spareparts', partsFilters],
     queryFn: () => getSpareParts(partsFilters),
-    staleTime: 60_000,
-    enabled: showResults
+    staleTime: DYNAMIC_STALE,
+    enabled: showResults,
+    placeholderData: keepPreviousData,
+    retry: 1
   });
+
+  // Don't show error state if we still have placeholder data to display
+  const partsError = partsErrorRaw && !isPlaceholderData && !partsData;
 
   // ── Client-side attribute filtering ─────────────────────────────────────
   const hasAttributeFilters = !!(selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine || selectedModel);
@@ -343,7 +399,15 @@ export function useShopFilters() {
   }, [modelsForBrand, selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, hasAttributeFilters]);
 
   const filteredParts = useMemo(() => {
-    const all = partsData?.data ?? [];
+    let all = partsData?.data ?? [];
+    // Multi-category client-side filter (when 2+ categories selected, API only has 1 or none)
+    if (selectedCategories.length > 1) {
+      const catSet = new Set(selectedCategories);
+      all = all.filter((sp: any) => {
+        const catId = sp.category_ID ?? sp.category?.Category_ID;
+        return catId && catSet.has(catId);
+      });
+    }
     const needsModelFilter = !!matchingModelIds;
     const needsYearFilter = hasYearFilter;
     if (!needsModelFilter && !needsYearFilter) return all;
@@ -389,8 +453,19 @@ export function useShopFilters() {
   const hasClientFilter = hasAttributeFilters || hasYearFilter;
   const total = hasClientFilter ? filteredParts.length : serverTotal;
   const totalPages = hasClientFilter
-    ? Math.max(1, Math.ceil(total / 1))
+    ? Math.max(1, Math.ceil(total / PAGE_SIZE))
     : (partsData?.meta?.totalPages ?? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)));
+
+  // ── Category IDs that contain matching results ─────────────────────────
+  const matchingCategoryIds = useMemo(() => {
+    if (!showResults || filteredParts.length === 0) return new Set<string>();
+    const ids = new Set<string>();
+    for (const sp of filteredParts as any[]) {
+      const catId = sp.category_ID ?? sp.category?.Category_ID;
+      if (catId) ids.add(catId);
+    }
+    return ids;
+  }, [filteredParts, showResults]);
 
   // ── Items view model ────────────────────────────────────────────────────
   const catNameById = useMemo(() => {
@@ -413,9 +488,9 @@ export function useShopFilters() {
   // ── Filter chips ────────────────────────────────────────────────────────
   const activeFilters = useMemo(() => {
     const chips: { key: string; label: string; onClear: () => void }[] = [];
-    if (selectedCategory) {
-      const catName = categoriesData?.data?.find((c) => c.Category_ID === selectedCategory)?.name ?? 'Category';
-      chips.push({ key: 'category', label: catName, onClear: () => updateParams({ cat: '', page: '' }) });
+    for (const catId of selectedCategories) {
+      const catName = categoriesData?.data?.find((c) => c.Category_ID === catId)?.name ?? 'Category';
+      chips.push({ key: `category-${catId}`, label: catName, onClear: () => removeCategoryFilter(catId) });
     }
     if (selectedFuelType) chips.push({ key: 'fuelType', label: selectedFuelType, onClear: () => updateParams({ fuel: '', page: '' }) });
     if (selectedBodyType) chips.push({ key: 'bodyType', label: selectedBodyType, onClear: () => updateParams({ body: '', page: '' }) });
@@ -423,7 +498,7 @@ export function useShopFilters() {
     if (selectedEngine) chips.push({ key: 'engine', label: selectedEngine, onClear: () => updateParams({ engine: '', page: '' }) });
     if (search.trim()) chips.push({ key: 'search', label: `"${search.trim()}"`, onClear: () => updateParams({ q: '', page: '' }) });
     return chips;
-  }, [selectedCategory, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, search, categoriesData]);
+  }, [selectedCategories, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, search, categoriesData, removeCategoryFilter]);
 
   const clearAllFilters = () => updateParams({ cat: '', fuel: '', body: '', drive: '', engine: '', q: '', page: '' });
 
@@ -457,6 +532,9 @@ export function useShopFilters() {
     selectedDriveType,
     selectedEngine,
     selectedCategory,
+    selectedCategories,
+    toggleCategoryFilter,
+    removeCategoryFilter,
     search,
     page,
     view,
@@ -488,6 +566,7 @@ export function useShopFilters() {
     // Category tree
     toggleCategory,
     isExpanded,
+    matchingCategoryIds,
 
     // Cascade handlers
     onChangeYear,

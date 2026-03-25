@@ -8,9 +8,9 @@ interface Props {
 }
 
 const RequestList: React.FC<Props> = ({ requests }) => (
-  <div className="grid gap-4">
+  <div className="space-y-3">
     {requests.map((req) => (
-      <RequestCard key={req.request_id} request={req} />
+      <RequestCard key={req.bidding_ID ?? req.request_ID ?? req.request_id ?? req.id} request={req} />
     ))}
   </div>
 );
