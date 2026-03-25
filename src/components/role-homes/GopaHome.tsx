@@ -26,7 +26,7 @@ const TABS: { key: TabKey; label: string; emptyMsg: string }[] = [
   { key: 'UNASSIGNED_HISTORY', label: 'History', emptyMsg: 'No unassigned request history.' }
 ];
 
-const POLL_INTERVAL = 30_000; // 30 seconds
+const STALE_TIME = 10 * 60_000; // 10 minutes — data stays fresh, manual refresh to update
 
 const fetchers: Record<TabKey, (user_id: string) => Promise<any>> = {
   ASSIGNED_ACTIVE: (user_id) => getGOPAAssignedActiveRequestsAPI({ user_id }),
@@ -53,8 +53,7 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
     queryKey: ['gopa-requests', activeTab, effectiveGopaId],
     queryFn: () => fetchers[activeTab](effectiveGopaId!),
     enabled: !!effectiveGopaId,
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
+    staleTime: STALE_TIME,
     select: (res) => {
       const data: any[] = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
       // Deduplicate by request_ID
@@ -72,8 +71,7 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
     queryKey: ['gopa-requests', 'ASSIGNED_ACTIVE', effectiveGopaId],
     queryFn: () => fetchers.ASSIGNED_ACTIVE(effectiveGopaId!),
     enabled: !!effectiveGopaId && activeTab !== 'ASSIGNED_ACTIVE',
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
+    staleTime: STALE_TIME,
     select: (res) => {
       const data: any[] = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
       const seen = new Set<string>();
@@ -89,8 +87,7 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
     queryKey: ['gopa-requests', 'UNASSIGNED_ACTIVE', effectiveGopaId],
     queryFn: () => fetchers.UNASSIGNED_ACTIVE(effectiveGopaId!),
     enabled: !!effectiveGopaId && activeTab !== 'UNASSIGNED_ACTIVE',
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
+    staleTime: STALE_TIME,
     select: (res) => {
       const data: any[] = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
       const seen = new Set<string>();
@@ -109,9 +106,8 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
     queries: groupedRequests.map(([reqId]) => ({
       queryKey: ['request-bids', reqId],
       queryFn: () => getRequestBidsAllAPI({ request_id: reqId }),
-      staleTime: POLL_INTERVAL,
-      refetchInterval: POLL_INTERVAL,
-      select: (res: any) => {
+      staleTime: STALE_TIME,
+        select: (res: any) => {
         const bids: any[] = Array.isArray(res?.data) ? res.data : [];
         return { total: bids.length, submitted: bids.filter((b: any) => b.status === 1).length };
       },
