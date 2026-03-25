@@ -42,11 +42,24 @@ const PostRequestForm: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const prefill = location.state as {
-    partName?: string;
-    manufacturerName?: string;
-    brandName?: string;
-  } | null;
+
+  // Read prefill from route state first, then fall back to sessionStorage (survives login redirect)
+  const prefill = (() => {
+    const fromState = location.state as {
+      partName?: string;
+      manufacturerName?: string;
+      brandName?: string;
+    } | null;
+    if (fromState?.partName || fromState?.manufacturerName || fromState?.brandName) return fromState;
+    try {
+      const stored = sessionStorage.getItem('pendingPartRequest');
+      if (stored) {
+        sessionStorage.removeItem('pendingPartRequest');
+        return JSON.parse(stored) as { partName?: string; manufacturerName?: string; brandName?: string };
+      }
+    } catch { /* ignore */ }
+    return null;
+  })();
 
   const qtyInvalid = qty <= 0;
 

@@ -17,7 +17,7 @@ const Header = () => {
   const { accountType } = useAccountType();
 
   const sellerId = authData?.user?.sellerDetails?.Seller_ID;
-  const gopaId = authData?.user?.gopa?.Gopa_ID;
+  const gopaId = authData?.user?.gopa?.User_ID;
 
   const handleStickyMenu = () => {
     if (window.scrollY >= 80) {

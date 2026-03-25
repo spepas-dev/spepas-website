@@ -1,7 +1,7 @@
 // src/pages/auth/Signin.tsx
 import React, { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { useAccountType } from '@/features/accountTypeContext';
 import { Eye, EyeOff } from 'lucide-react';
@@ -17,6 +17,8 @@ const Signin: React.FC = () => {
   const { login, authData } = useAuth();
   const { setAccountType } = useAccountType();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect');
 
   // Form state
   const [email, setEmail] = useState('');
@@ -111,7 +113,7 @@ const Signin: React.FC = () => {
       setShowRoleSelector(true);
     } else {
       setAccountType('BUYER');
-      navigate('/95668339501103956045/home');
+      navigate(redirectTo || '/95668339501103956045/home');
     }
   }, [didLogin, authData.user, navigate, setAccountType]);
 
@@ -119,7 +121,7 @@ const Signin: React.FC = () => {
   const handleRoleSelect = (role: Role) => {
     setAccountType(role);
     setShowRoleSelector(false);
-    navigate('/95668339501103956045/home');
+    navigate(redirectTo || '/95668339501103956045/home');
   };
 
   const emailInvalid = touched.email && Boolean(errors.email);

@@ -5,6 +5,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Breadcrumb from '../Common/Breadcrumb';
 import { getSparePartDetailByCode, getSpareParts } from '@/lib/inventoryApis';
+import { useAuth } from '@/features/auth';
 
 type DetailPayload =
   | { source: 'detail' | 'list'; item: any | null }
@@ -13,6 +14,7 @@ type DetailPayload =
 const ShopDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const isNumericId = !!id && /^\d+$/.test(id ?? '');
   const [showAllVehicles, setShowAllVehicles] = useState(false);
 
@@ -289,12 +291,23 @@ const ShopDetails: React.FC = () => {
 
               {/* CTA */}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <Link
-                  to="../buyer/post-request"
-                  state={{
-                    partName: title,
-                    manufacturerName: firstManufacturer,
-                    brandName: firstBrand,
+                <button
+                  onClick={() => {
+                    const prefillData = {
+                      partName: title,
+                      manufacturerName: firstManufacturer,
+                      brandName: firstBrand,
+                    };
+                    // Always save to sessionStorage so it survives the login redirect
+                    sessionStorage.setItem('pendingPartRequest', JSON.stringify(prefillData));
+
+                    if (isAuthenticated) {
+                      // Go directly to the request form with route state
+                      navigate('/95668339501103956045/buyer/post-request', { state: prefillData });
+                    } else {
+                      // Send to login with redirect back to the request form
+                      navigate(`/95668339501103956045/auth/signin?redirect=${encodeURIComponent('/95668339501103956045/buyer/post-request')}`);
+                    }
                   }}
                   className="inline-flex items-center gap-2 bg-[var(--color-secondary-500)] hover:bg-[var(--color-secondary-600)] text-white font-semibold py-3 px-7 rounded-xl transition-colors shadow-sm hover:shadow"
                 >
@@ -302,7 +315,7 @@ const ShopDetails: React.FC = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121 0 2.086-.777 2.328-1.874l1.518-6.694A1.125 1.125 0 0019.32 4.5H6.23" />
                   </svg>
                   Request This Part
-                </Link>
+                </button>
                 <span className="text-xs text-gray-400">Price available on request</span>
               </div>
             </div>
