@@ -10,7 +10,7 @@ import { assignRequestToSellerAPI, getGOPASellerForRequestAPI, getRequestBidsAll
 
 type Toast = { type: 'success' | 'error'; message: string } | null;
 
-const POLL_INTERVAL = 30_000;
+const STALE_TIME = 10 * 60_000; // 10 minutes
 
 const RequestSellersPage: React.FC = () => {
   const { gopaId: paramGopaId, requestId } = useParams<{ gopaId: string; requestId: string }>();
@@ -34,8 +34,7 @@ const RequestSellersPage: React.FC = () => {
     queryKey: ['request-bids', requestId],
     queryFn: () => getRequestBidsAllAPI({ request_id: requestId! }),
     enabled: !!requestId && !!isAuthorized,
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
+    staleTime: STALE_TIME,
     select: (res) => (Array.isArray(res?.data) ? res.data : []) as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
@@ -44,8 +43,7 @@ const RequestSellersPage: React.FC = () => {
     queryKey: ['gopa-sellers-for-request', gopaProfile?.Gopa_ID, requestId],
     queryFn: () => getGOPASellerForRequestAPI({ gopa_id: gopaProfile!.Gopa_ID, request_id: requestId! }),
     enabled: !!requestId && !!isAuthorized && !!gopaProfile?.Gopa_ID,
-    staleTime: POLL_INTERVAL,
-    refetchInterval: POLL_INTERVAL,
+    staleTime: STALE_TIME,
     select: (res) => {
       if (Array.isArray(res?.data)) return res.data;
       if (res?.data) return [res.data];
