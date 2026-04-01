@@ -30,12 +30,12 @@ const PartsContent: React.FC<Props> = ({
   // Loading skeleton
   if (partsLoading) {
     return (
-      <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'flex flex-col gap-1'}>
-        {Array.from({ length: view === 'grid' ? 12 : 8 }).map((_, i) =>
+      <div className={view === 'grid' ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4' : 'flex flex-col gap-1'}>
+        {Array.from({ length: view === 'grid' ? 8 : 6 }).map((_, i) =>
           view === 'grid' ? (
             <div key={i} className="animate-pulse bg-white rounded-xl border border-gray-100 overflow-hidden">
               <div className="aspect-[4/3] bg-gray-100" />
-              <div className="px-3.5 py-3 space-y-2">
+              <div className="px-2.5 sm:px-3.5 py-2 sm:py-3 space-y-2">
                 <div className="h-4 bg-gray-100 rounded w-3/4" />
                 <div className="h-3 bg-gray-50 rounded w-1/2" />
               </div>
@@ -130,31 +130,31 @@ const PartsContent: React.FC<Props> = ({
         </div>
       )}
 
-      <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4' : 'flex flex-col gap-1'}>
+      <div className={view === 'grid' ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4' : 'flex flex-col gap-1'}>
         {items.map((item) =>
           view === 'grid' ? <SingleGridItem item={item} key={item.linkId} /> : <SingleListItem item={item} key={item.linkId} />
         )}
       </div>
 
       {totalPages > 1 && (
-        <nav className="flex justify-center items-center gap-1 mt-10">
+        <nav className="flex justify-center items-center gap-0.5 sm:gap-1 mt-6 sm:mt-10">
           <button
             disabled={page <= 1}
             onClick={() => setPage(page - 1)}
-            className="px-3 py-2 rounded-lg text-sm border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
           >
             Prev
           </button>
           {pageNumbers(page, totalPages).map((p, idx) =>
             p === '...' ? (
-              <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">
+              <span key={`ellipsis-${idx}`} className="px-1 sm:px-2 text-gray-400 text-xs sm:text-sm">
                 &hellip;
               </span>
             ) : (
               <button
                 key={p}
                 onClick={() => setPage(p as number)}
-                className={`px-3 py-2 rounded-lg text-sm border ${
+                className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm border ${
                   p === page
                     ? 'bg-[var(--color-primary-500)] text-white border-[var(--color-primary-500)]'
                     : 'border-gray-200 hover:bg-gray-50'
@@ -167,7 +167,7 @@ const PartsContent: React.FC<Props> = ({
           <button
             disabled={page >= totalPages}
             onClick={() => setPage(page + 1)}
-            className="px-3 py-2 rounded-lg text-sm border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm border border-gray-200 disabled:opacity-40 hover:bg-gray-50"
           >
             Next
           </button>

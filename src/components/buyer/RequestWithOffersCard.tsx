@@ -11,7 +11,9 @@ const RequestWithOffersCard: React.FC<Props> = ({ req }) => {
   const img = req.sparePart?.images?.[0];
   const name = req.sparePart?.name ?? 'Unknown Part';
   const description = req.sparePart?.description;
-  const bids = Array.isArray(req.bidings) ? req.bidings : [];
+  const bids = (Array.isArray(req.bidings) ? req.bidings : []).filter(
+    (b: any) => b.Seller_ID != null && b.seller
+  );
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col">

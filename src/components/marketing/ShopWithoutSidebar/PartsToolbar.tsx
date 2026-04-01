@@ -1,7 +1,7 @@
 import React from 'react';
 
-import SearchableCombobox from '../Common/SearchableCombobox';
 import { ShopFilters } from './useShopFilters';
+import MobileCategoryDrawer from './MobileCategoryDrawer';
 
 type ViewMode = 'grid' | 'list';
 
@@ -15,7 +15,7 @@ type Props = Pick<
   | 'clearAllFilters'
   | 'orderedCategories'
   | 'categoriesLoading'
-  | 'selectedCategory'
+  | 'selectedCategories'
   | 'toggleCategoryFilter'
 > & {
   view: ViewMode;
@@ -33,19 +33,19 @@ const PartsToolbar: React.FC<Props> = ({
   clearAllFilters,
   orderedCategories,
   categoriesLoading,
-  selectedCategory,
+  selectedCategories,
   toggleCategoryFilter
 }) => (
-  <div className="flex flex-col gap-3 mb-6">
+  <div className="flex flex-col gap-2 sm:gap-3 mb-4 sm:mb-6">
     {/* Row: search + result count + view toggle */}
-    <div className="flex flex-wrap items-center gap-3 justify-between">
-      <div className="flex items-center gap-3">
-        <div className="relative">
+    <div className="flex flex-wrap items-center gap-2 sm:gap-3 justify-between">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <div className="relative flex-1 sm:flex-none">
           <input
             value={search}
             onChange={(e) => updateParams({ q: e.target.value, page: '' })}
             placeholder="Search by part name or number…"
-            className="h-10 w-64 sm:w-80 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
+            className="h-10 w-full sm:w-80 rounded-lg border border-gray-200 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-500)]"
           />
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none"
@@ -59,20 +59,20 @@ const PartsToolbar: React.FC<Props> = ({
           </svg>
         </div>
         {showResults && (
-          <span className="text-sm text-gray-500 hidden sm:inline">
+          <span className="text-xs sm:text-sm text-gray-500 hidden sm:inline shrink-0">
             {total.toLocaleString()} part{total !== 1 ? 's' : ''} found
           </span>
         )}
       </div>
 
       {/* View toggle */}
-      <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+      <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden shrink-0">
         <button
           onClick={() => setView('grid')}
-          className={`p-2 ${view === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+          className={`p-1.5 sm:p-2 ${view === 'grid' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
           aria-label="Grid view"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -82,23 +82,30 @@ const PartsToolbar: React.FC<Props> = ({
         </button>
         <button
           onClick={() => setView('list')}
-          className={`p-2 ${view === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
+          className={`p-1.5 sm:p-2 ${view === 'list' ? 'bg-gray-100' : 'hover:bg-gray-50'}`}
           aria-label="List view"
         >
-          <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 5.25h16.5m-16.5-10.5h16.5" />
           </svg>
         </button>
       </div>
     </div>
 
+    {/* Mobile result count */}
+    {showResults && (
+      <span className="text-xs text-gray-500 sm:hidden">
+        {total.toLocaleString()} part{total !== 1 ? 's' : ''} found
+      </span>
+    )}
+
     {/* Active filter chips */}
     {activeFilters.length > 0 && (
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
         {activeFilters.map((chip) => (
           <span
             key={chip.key}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-sm"
+            className="inline-flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[var(--color-primary-50)] text-[var(--color-primary-700)] text-xs sm:text-sm"
           >
             {chip.label}
             <button
@@ -111,36 +118,21 @@ const PartsToolbar: React.FC<Props> = ({
           </span>
         ))}
         {activeFilters.length > 1 && (
-          <button onClick={clearAllFilters} className="text-sm text-gray-500 hover:text-gray-700 underline">
+          <button onClick={clearAllFilters} className="text-xs sm:text-sm text-gray-500 hover:text-gray-700 underline">
             Clear all
           </button>
         )}
       </div>
     )}
 
-    {/* Mobile category selector */}
-    <div className="lg:hidden">
-      <SearchableCombobox
-        options={[
-          { value: '', label: 'All categories' },
-          ...orderedCategories.map((cat) => ({
-            value: cat.Category_ID,
-            label: '\u00A0\u00A0'.repeat(cat.depth) + cat.name,
-            count: cat.count != null && cat.count > 0 ? cat.count : undefined
-          }))
-        ]}
-        value={selectedCategory}
-        onChange={(val) => {
-          if (val === '') {
-            updateParams({ cat: '', page: '' });
-          } else {
-            toggleCategoryFilter(val);
-          }
-        }}
-        placeholderLabel="All categories"
-        isLoading={categoriesLoading}
-      />
-    </div>
+    {/* Mobile category drawer */}
+    <MobileCategoryDrawer
+      selectedCategories={selectedCategories}
+      toggleCategoryFilter={toggleCategoryFilter}
+      categoriesLoading={categoriesLoading}
+      orderedCategories={orderedCategories}
+      updateParams={updateParams}
+    />
   </div>
 );
 

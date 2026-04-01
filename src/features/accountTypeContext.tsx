@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/features/auth';
 
-export type AccountType = 'GOPA' | 'SELLER' | 'MEPA' | 'RIDER' | 'BUYER' | null;
+export type AccountType = 'GOPA' | 'SELLER' | 'BUYER' | null;
 
 type Ctx = {
   accountType: AccountType;
@@ -23,8 +23,9 @@ function getAvailableRoles(user: any | null): Exclude<AccountType, null>[] {
   const roles: Exclude<AccountType, null>[] = [];
   if (user?.gopa) roles.push('GOPA');
   if (user?.sellerDetails) roles.push('SELLER');
-  if (user?.deliver) roles.push('RIDER');
-  if (user?.mepa) roles.push('MEPA');
+  // MEPA and RIDER hidden for now
+  // if (user?.deliver) roles.push('RIDER');
+  // if (user?.mepa) roles.push('MEPA');
   // Everyone can browse/buy by default
   roles.push('BUYER');
   return roles;

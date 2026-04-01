@@ -7,13 +7,13 @@ import { useAccountType } from '@/features/accountTypeContext';
 import { useAuth } from '@/features/auth';
 
 import AddressDetails from './AddressDetails';
-import DeliverProfileTab from './DeliverProfileTab';
+// import DeliverProfileTab from './DeliverProfileTab';
 import GeneralDetails from './GeneralDetails';
 import GopaProfileTab from './GopaProfileTab';
 import GroupsRolesTab from './GroupsRolesTab';
-import MepaProfileTab from './MepaProfileTab';
+// import MepaProfileTab from './MepaProfileTab';
 import PaymentAccountsTab from './PaymentAccountsTab';
-import RiderDocumentsTab from './RiderDocumentsTab';
+// import RiderDocumentsTab from './RiderDocumentsTab';
 import SellerDetailsTab from './SellerDetailsTab';
 import SellerDocumentsTab from './SellerDocumentsTab';
 import WalletDetails from './WalletDetails';
@@ -31,13 +31,11 @@ type TabKey =
   | 'address'
   | 'wallet';
 
-type Role = 'GOPA' | 'MEPA' | 'SELLER' | 'RIDER' | 'BUYER';
+type Role = 'GOPA' | 'SELLER' | 'BUYER';
 
 const ROLE_LABELS: Record<Role, string> = {
   GOPA: 'GOPA',
-  MEPA: 'MEPA',
   SELLER: 'Seller',
-  RIDER: 'Rider',
   BUYER: 'Buyer'
 };
 
@@ -64,15 +62,12 @@ const MyAccount: React.FC = () => {
     if (user.gopa) {
       roles.push('GOPA');
     }
-    if (user.mepa) {
-      roles.push('MEPA');
-    }
     if (user.sellerDetails) {
       roles.push('SELLER');
     }
-    if (user.deliver) {
-      roles.push('RIDER');
-    }
+    // MEPA and RIDER hidden for now
+    // if (user.mepa) { roles.push('MEPA'); }
+    // if (user.deliver) { roles.push('RIDER'); }
     roles.push('BUYER');
     setAvailableRoles(roles);
   }, [user]);
@@ -80,11 +75,12 @@ const MyAccount: React.FC = () => {
   const allTabs: Array<{ key: TabKey; label: string }> = [
     { key: 'general', label: 'General Profile' },
     user.gopa && { key: 'gopa', label: 'GOPA Profile' },
-    user.mepa && { key: 'mepa', label: 'MEPA Profile' },
     user.sellerDetails && { key: 'seller', label: 'Seller Profile' },
     user.sellerDetails && { key: 'sellerDocs', label: 'Seller Documents' },
-    user.deliver && { key: 'deliver', label: 'Delivery Profile' },
-    user.deliver && { key: 'riderDocs', label: 'Rider Documents' },
+    // MEPA and RIDER tabs hidden for now
+    // user.mepa && { key: 'mepa', label: 'MEPA Profile' },
+    // user.deliver && { key: 'deliver', label: 'Delivery Profile' },
+    // user.deliver && { key: 'riderDocs', label: 'Rider Documents' },
     ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups & Roles' },
     (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments', label: 'Payment Accounts' },
     { key: 'address', label: 'Addresses' },
@@ -100,13 +96,7 @@ const MyAccount: React.FC = () => {
     if (accountType === 'GOPA' && key === 'gopa') {
       return true;
     }
-    if (accountType === 'MEPA' && key === 'mepa') {
-      return true;
-    }
     if (accountType === 'SELLER' && (key === 'seller' || key === 'sellerDocs' || key === 'wallet')) {
-      return true;
-    }
-    if (accountType === 'RIDER' && (key === 'deliver' || key === 'riderDocs')) {
       return true;
     }
     if (accountType === 'BUYER' && (key === 'address' || key === 'payments')) {
@@ -276,11 +266,12 @@ const MyAccount: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 xl:p-10">
               {activeTab === 'general' && <GeneralDetails user={user} />}
               {activeTab === 'gopa' && user.gopa && <GopaProfileTab profile={user.gopa} />}
-              {activeTab === 'mepa' && user.mepa && <MepaProfileTab profile={user.mepa} />}
+              {/* MEPA and RIDER tabs hidden for now */}
+              {/* {activeTab === 'mepa' && user.mepa && <MepaProfileTab profile={user.mepa} />} */}
               {activeTab === 'seller' && user.sellerDetails && <SellerDetailsTab details={user.sellerDetails} />}
               {activeTab === 'sellerDocs' && user.sellerDetails && <SellerDocumentsTab />}
-              {activeTab === 'deliver' && user.deliver && <DeliverProfileTab deliver={user.deliver} />}
-              {activeTab === 'riderDocs' && user.deliver && <RiderDocumentsTab />}
+              {/* {activeTab === 'deliver' && user.deliver && <DeliverProfileTab deliver={user.deliver} />} */}
+              {/* {activeTab === 'riderDocs' && user.deliver && <RiderDocumentsTab />} */}
               {activeTab === 'groups' && <GroupsRolesTab groups={user.user_groups ?? []} roles={user.user_roles ?? []} />}
               {activeTab === 'payments' && user.paymentAccounts && <PaymentAccountsTab accounts={user.paymentAccounts} />}
               {activeTab === 'address' && <AddressDetails />}

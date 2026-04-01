@@ -9,12 +9,10 @@ const RegistrationSelection: React.FC = () => {
   const user = authData?.user;
   const navigate = useNavigate();
 
-  // disable if user.gopa, user.mepa, etc. exist
+  // Only show Seller and GOPA profiles for now (MEPA and Rider hidden)
   const options = [
-    { label: 'GOPA Profile', path: '/95668339501103956045/gopa-registration', disabled: !!user?.gopa },
     { label: 'Seller Profile', path: '/95668339501103956045/seller-registration', disabled: !!user?.sellerDetails },
-    { label: 'MEPA Profile', path: '/95668339501103956045/mepa-registration', disabled: !!user?.mepa },
-    { label: 'Rider Profile', path: '/95668339501103956045/rider-registration', disabled: !!user?.deliver }
+    { label: 'GOPA Profile', path: '/95668339501103956045/gopa-registration', disabled: !!user?.gopa },
   ];
 
   return (
