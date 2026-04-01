@@ -12,6 +12,19 @@ const imageSchema = z.object({
   image_ob: z.any(),
 });
 
+const categoryRefSchema = z.object({
+  Category_ID: z.string(),
+  name: z.string(),
+  externalID: z.number().nullable().optional(),
+  level: z.number().nullable().optional(),
+}).passthrough();
+
+const supplierRefSchema = z.object({
+  Supplier_ID: z.string(),
+  name: z.string(),
+  externalID: z.number().nullable().optional(),
+}).passthrough();
+
 const sparePartSchema = z.object({
   id: z.number(),
   SparePart_ID: z.string(),
@@ -23,9 +36,12 @@ const sparePartSchema = z.object({
   category_ID: z.string().nullable(),
   carModel_ID: z.string().nullable().optional(),
   seller_ID: z.string().nullable(),
+  supplier_ID: z.string().nullable().optional(),
+  leafCategory_ID: z.string().nullable().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   externalID: z.number().nullable().optional(),
+  productId: z.number().nullable().optional(),
   // article number: live API returns articleNo (camelCase) + article_no alias; local mock returns article_no
   articleNo: z.string().nullable().optional(),
   article_no: z.string().nullable().optional(),
@@ -43,9 +59,9 @@ const sparePartSchema = z.object({
       driveTypes: z.array(z.string()).optional(),
     }).passthrough().optional(),
   }).passthrough()).optional(),
-  category: z.object({
-    name: z.string(),
-  }).passthrough().optional(),
+  category: categoryRefSchema.optional(),
+  leafCategory: categoryRefSchema.optional(),
+  supplier: supplierRefSchema.optional(),
 });
 
 const carModelSchema = z.object({
