@@ -62,9 +62,9 @@ const VehicleSelector: React.FC<Props> = ({
   updateParams
 }) => {
   return (
-    <div className="bg-white rounded-xl px-6 py-5 mb-6 shadow-sm">
+    <div className="bg-white rounded-xl px-4 sm:px-6 py-4 sm:py-5 mb-4 sm:mb-6 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-gray-700">Find parts for your vehicle</h2>
+        <h2 className="text-xs sm:text-sm font-semibold text-gray-700">Find parts for your vehicle</h2>
         {selectedMake && (
           <button
             onClick={() =>
@@ -89,7 +89,7 @@ const VehicleSelector: React.FC<Props> = ({
         )}
       </div>
 
-      <div className={`grid grid-cols-1 gap-3 ${hasYears ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
+      <div className={`grid grid-cols-2 gap-2 sm:gap-3 ${hasYears ? 'lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
         {hasYears && (
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Year</label>
@@ -152,8 +152,8 @@ const VehicleSelector: React.FC<Props> = ({
       {/* Attribute filter chips */}
       {selectedBrand &&
         (fuelTypeOptions.length > 0 || bodyTypeOptions.length > 0 || driveTypeOptions.length > 0 || engineOptions.length > 0) && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
+          <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-100">
+            <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-2">
               {fuelTypeOptions.length > 0 && (
                 <ChipGroup
                   label="Fuel"

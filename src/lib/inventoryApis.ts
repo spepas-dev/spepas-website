@@ -109,3 +109,9 @@ export const getSparePartDetailByCode = async (spare_part_code: string | number)
 export const getSparePartCategories = async (filters?: CategoryFilter) => {
   return fetchAllPages('/inventry/category-all', { limit: 100, ...filters }, sparePartCategoriesResponseSchema);
 };
+
+// GET: active categories only (categories that have spare parts)
+// Single lightweight endpoint — returns only categories with parts, no need to page through all
+export const getActiveCategories = async () => {
+  return fetchAllPages('/inventry/category-active', { limit: 100 }, sparePartCategoriesResponseSchema);
+};

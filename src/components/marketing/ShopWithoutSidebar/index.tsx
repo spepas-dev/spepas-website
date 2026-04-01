@@ -28,10 +28,10 @@ const ShopWithoutSidebar: React.FC = () => {
     <>
       <Breadcrumb title="Browse Spare Parts" pages={['shop']} />
 
-      <section className="py-8 lg:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-4 sm:py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex gap-6">
-            {/* Left column — categories */}
+            {/* Left column — categories (desktop only) */}
             <CategorySidebar
               selectedCategories={f.selectedCategories}
               toggleCategoryFilter={f.toggleCategoryFilter}
@@ -47,10 +47,10 @@ const ShopWithoutSidebar: React.FC = () => {
             {/* Right column — everything else */}
             <div className="flex-1 min-w-0">
               {/* Filters toggle button */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
                 <button
                   onClick={() => setFiltersOpen((prev) => !prev)}
-                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                     filtersOpen
                       ? 'bg-[var(--color-primary-500)] text-white shadow-sm'
                       : 'bg-white text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-50'
@@ -103,7 +103,7 @@ const ShopWithoutSidebar: React.FC = () => {
                     }
                     className="text-xs font-medium text-gray-400 hover:text-red-500 transition-colors"
                   >
-                    Clear all filters
+                    Clear all
                   </button>
                 )}
               </div>
@@ -153,7 +153,7 @@ const ShopWithoutSidebar: React.FC = () => {
                 clearAllFilters={f.clearAllFilters}
                 orderedCategories={f.orderedCategories}
                 categoriesLoading={f.categoriesLoading}
-                selectedCategory={f.selectedCategory}
+                selectedCategories={f.selectedCategories}
                 toggleCategoryFilter={f.toggleCategoryFilter}
               />
 

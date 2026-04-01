@@ -20,7 +20,9 @@ const OffersList: React.FC = () => {
     }
     setLoading(true);
     getRequestBidsAllAPI({ request_id: requestId })
-      .then((res) => setOffers(res.data))
+      .then((res) => setOffers(
+        (res.data ?? []).filter((o: any) => o.Seller_ID != null && o.seller) // eslint-disable-line @typescript-eslint/no-explicit-any
+      ))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [requestId]);

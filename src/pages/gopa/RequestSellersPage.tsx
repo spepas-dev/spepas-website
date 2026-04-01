@@ -35,7 +35,9 @@ const RequestSellersPage: React.FC = () => {
     queryFn: () => getRequestBidsAllAPI({ request_id: requestId! }),
     enabled: !!requestId && !!isAuthorized,
     staleTime: STALE_TIME,
-    select: (res) => (Array.isArray(res?.data) ? res.data : []) as any[], // eslint-disable-line @typescript-eslint/no-explicit-any
+    select: (res) => // eslint-disable-line @typescript-eslint/no-explicit-any
+      ((Array.isArray(res?.data) ? res.data : []) as any[])
+        .filter((b: any) => b.Seller_ID != null && b.seller?.storeName), // filter out unknown sellers
   });
 
   // ── Fetch available sellers ────────────────────────────────────
@@ -45,9 +47,8 @@ const RequestSellersPage: React.FC = () => {
     enabled: !!requestId && !!isAuthorized && !!gopaProfile?.Gopa_ID,
     staleTime: STALE_TIME,
     select: (res) => {
-      if (Array.isArray(res?.data)) return res.data;
-      if (res?.data) return [res.data];
-      return [];
+      const data = Array.isArray(res?.data) ? res.data : res?.data ? [res.data] : [];
+      return data.filter((s: any) => s.Seller_ID != null); // filter out unknown sellers // eslint-disable-line @typescript-eslint/no-explicit-any
     },
   });
 

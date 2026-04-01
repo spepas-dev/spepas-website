@@ -6,7 +6,7 @@ import { useAuth } from '@/features/auth';
 import { useAccountType } from '@/features/accountTypeContext';
 import { Eye, EyeOff } from 'lucide-react';
 
-type Role = 'GOPA' | 'MEPA' | 'SELLER' | 'RIDER' | 'BUYER';
+type Role = 'GOPA' | 'SELLER' | 'BUYER';
 
 const MIN_PW = 8;
 const pwLenMsg = `Password must be at least ${MIN_PW} characters long`;
@@ -104,9 +104,10 @@ const Signin: React.FC = () => {
 
     const roles: Role[] = [];
     if (user.gopa)          roles.push('GOPA');
-    if (user.mepa)          roles.push('MEPA');
     if (user.sellerDetails) roles.push('SELLER');
-    if (user.deliver)       roles.push('RIDER');
+    // MEPA and RIDER hidden for now
+    // if (user.mepa)          roles.push('MEPA');
+    // if (user.deliver)       roles.push('RIDER');
 
     if (roles.length > 0) {
       setAvailableRoles(['BUYER', ...roles]);
