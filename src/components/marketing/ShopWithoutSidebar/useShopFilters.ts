@@ -441,6 +441,9 @@ export function useShopFilters() {
         });
       }
     }
+    // When modelId is sent to the backend, skip client-side vehicle filtering
+    // since the server already filters by model (and we only have 5 partVehicles per part)
+    if (selectedModel) return all;
     const needsModelFilter = !!matchingModelIds;
     const needsYearFilter = hasYearFilter;
     if (!needsModelFilter && !needsYearFilter) return all;
@@ -464,7 +467,7 @@ export function useShopFilters() {
         return true;
       });
     });
-  }, [partsData, matchingModelIds, hasYearFilter, selectedYear]);
+  }, [partsData, matchingModelIds, hasYearFilter, selectedYear, selectedModel]);
 
   // ── Year options (merge endpoint + parts-derived) ───────────────────────
   const partsYearOptions = useMemo(() => {
