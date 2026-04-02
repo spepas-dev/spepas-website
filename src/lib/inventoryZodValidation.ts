@@ -2,15 +2,14 @@
 import { z } from 'zod';
 
 const imageSchema = z.object({
-  id: z.number(),
+  id: z.number().optional(),
   image_ID: z.string(),
   SparePart_ID: z.string(),
-  createdAt: z.string(),
-  status: z.number(),
-  // loosened: accept any string or undefined
+  createdAt: z.string().optional(),
+  status: z.number().optional(),
   image_url: z.string().optional(),
-  image_ob: z.any(),
-});
+  image_ob: z.any().optional(),
+}).passthrough();
 
 const categoryRefSchema = z.object({
   Category_ID: z.string(),
@@ -47,22 +46,38 @@ const sparePartSchema = z.object({
   article_no: z.string().nullable().optional(),
   typeEngineName: z.string().nullable().optional(),
   supplier_name: z.string().nullable().optional(),
+  supplierName: z.string().nullable().optional(),
+  supplierId: z.string().nullable().optional(),
   images: z.array(imageSchema),
   // partVehicles: list of compatible vehicles (included in list + detail responses)
   partVehicles: z.array(z.object({
+    SparePart_ID: z.string().optional(),
+    CarModel_ID: z.string().optional(),
     carModel_ID: z.string().optional(),
     carModel: z.object({
       CarModel_ID: z.string(),
       name: z.string(),
+      yearOfMake: z.number().optional(),
+      constructionStart: z.number().nullable().optional(),
+      constructionEnd: z.number().nullable().optional(),
       fuelTypes: z.array(z.string()).optional(),
       bodyTypes: z.array(z.string()).optional(),
       driveTypes: z.array(z.string()).optional(),
+      carBrand: z.object({
+        CarBrand_ID: z.string(),
+        name: z.string(),
+        manufacturer: z.object({
+          Manufacturer_ID: z.string(),
+          name: z.string(),
+        }).passthrough().optional(),
+      }).passthrough().optional(),
     }).passthrough().optional(),
   }).passthrough()).optional(),
-  category: categoryRefSchema.optional(),
-  leafCategory: categoryRefSchema.optional(),
-  supplier: supplierRefSchema.optional(),
-});
+  _count: z.object({ partVehicles: z.number() }).optional(),
+  category: categoryRefSchema.nullable().optional(),
+  leafCategory: categoryRefSchema.nullable().optional(),
+  supplier: supplierRefSchema.nullable().optional(),
+}).passthrough();
 
 const carModelSchema = z.object({
   id: z.number(),
