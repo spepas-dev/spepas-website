@@ -360,17 +360,17 @@ export function useShopFilters() {
   });
   const partsFilters = useMemo(
     () => ({
-      ...(selectedBrand ? { brandId: selectedBrand } : {}),
+      ...(selectedModel ? { modelId: selectedModel } : selectedBrand ? { brandId: selectedBrand } : {}),
       ...(categoryForApi ? { categoryId: categoryForApi } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
       limit: PAGE_SIZE,
       page
     }),
-    [selectedBrand, categoryForApi, search, page]
+    [selectedBrand, selectedModel, categoryForApi, search, page]
   );
 
   const vehicleSelected = !!selectedBrand;
-  const showResults = !!(selectedBrand || selectedCategories.length > 0 || search.trim());
+  const showResults = !!(selectedBrand || selectedModel || selectedCategories.length > 0 || search.trim());
 
   const {
     data: partsData,

@@ -13,6 +13,7 @@ import {
 // Filter interfaces — query params forwarded to the API (see docs/issue-tracking.md INV-3..5)
 export interface SparePartsFilter {
   brandId?: string;
+  modelId?: string;
   categoryId?: string;
   fuelType?: string;
   bodyType?: string;
