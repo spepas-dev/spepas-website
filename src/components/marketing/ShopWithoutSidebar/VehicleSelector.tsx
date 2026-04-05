@@ -136,7 +136,7 @@ const VehicleSelector: React.FC<Props> = ({
           <SearchableCombobox
             options={(modelOptions as any[]).map((m) => ({
               value: m.CarModel_ID,
-              label: `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`
+              label: selectedYear ? m.name : `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`
             }))}
             value={selectedModel}
             onChange={onChangeModel}

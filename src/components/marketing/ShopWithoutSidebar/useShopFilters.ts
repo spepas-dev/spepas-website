@@ -264,16 +264,15 @@ export function useShopFilters() {
         });
       }
     }
-    // Deduplicate by display label (name + yearOfMake) — merge spare part counts
+    // Deduplicate by display label — merge spare part counts.
+    // When a year is selected, deduplicate by name only (omit yearOfMake)
+    // since the year context is already established by the filter and showing
+    // a different year (e.g. "(2019)" when 2020 is selected) is confusing.
     const labelMap = new Map<string, any>();
     for (const m of models) {
-      const label = `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`;
+      const label = selectedYear ? m.name : `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`;
       const existing = labelMap.get(label);
       if (existing) {
-        // Merge: keep the one with the higher spare part count, sum the counts
-        const existingCount = existing.sparePartCount ?? existing.spareParts?.length ?? 0;
-        const currentCount = m.sparePartCount ?? m.spareParts?.length ?? 0;
-        existing.sparePartCount = existingCount + currentCount;
         // Track all merged model IDs for filtering
         if (!existing._mergedIds) existing._mergedIds = [existing.CarModel_ID];
         existing._mergedIds.push(m.CarModel_ID);
