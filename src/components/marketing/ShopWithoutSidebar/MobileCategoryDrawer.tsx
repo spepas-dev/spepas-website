@@ -4,7 +4,7 @@ import { ShopFilters } from './useShopFilters';
 
 type Props = Pick<
   ShopFilters,
-  'selectedCategories' | 'toggleCategoryFilter' | 'categoriesLoading' | 'orderedCategories' | 'updateParams'
+  'selectedCategories' | 'toggleCategoryFilter' | 'categoriesLoading' | 'orderedCategories' | 'updateParams' | 'dynamicCategoryCounts' | 'hasActiveFilters'
 >;
 
 const MobileCategoryDrawer: React.FC<Props> = ({
@@ -12,7 +12,9 @@ const MobileCategoryDrawer: React.FC<Props> = ({
   toggleCategoryFilter,
   categoriesLoading,
   orderedCategories,
-  updateParams
+  updateParams,
+  dynamicCategoryCounts,
+  hasActiveFilters
 }) => {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -123,7 +125,9 @@ const MobileCategoryDrawer: React.FC<Props> = ({
                             {isSelected && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>}
                           </span>
                           <span className={`flex-1 text-left text-sm truncate ${isSelected ? 'text-[var(--color-primary-600)] font-medium' : 'text-gray-700'}`}>{cat.name}</span>
-                          {cat.count > 0 && <span className="shrink-0 text-xs text-gray-400">{cat.count.toLocaleString()}</span>}
+                          {hasActiveFilters && (dynamicCategoryCounts.get(cat.Category_ID) ?? 0) > 0 && (
+                            <span className="shrink-0 text-xs text-gray-400">{(dynamicCategoryCounts.get(cat.Category_ID) ?? 0).toLocaleString()}</span>
+                          )}
                         </button>
                       );
                     })
@@ -193,8 +197,8 @@ const MobileCategoryDrawer: React.FC<Props> = ({
                       {cat.name}
                     </button>
 
-                    {cat.count > 0 && (
-                      <span className="shrink-0 text-xs text-gray-400">{cat.count}</span>
+                    {hasActiveFilters && (dynamicCategoryCounts.get(cat.Category_ID) ?? 0) > 0 && (
+                      <span className="shrink-0 text-xs text-gray-400">{dynamicCategoryCounts.get(cat.Category_ID)}</span>
                     )}
                   </div>
                 );

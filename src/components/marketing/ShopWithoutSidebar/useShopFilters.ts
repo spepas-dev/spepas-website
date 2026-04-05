@@ -551,6 +551,19 @@ export function useShopFilters() {
     return ids;
   }, [filteredParts, showResults]);
 
+  // ── Dynamic category counts (from filtered parts) ─────────────────────
+  const hasActiveFilters = !!(selectedYear || selectedMake || selectedBrand || selectedModel ||
+    selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine || search.trim());
+  const dynamicCategoryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    if (!showResults || !hasActiveFilters) return counts;
+    for (const sp of filteredParts as any[]) {
+      const catId = sp.category_ID ?? sp.category?.Category_ID;
+      if (catId) counts.set(catId, (counts.get(catId) ?? 0) + 1);
+    }
+    return counts;
+  }, [filteredParts, showResults, hasActiveFilters]);
+
   // ── Items view model ────────────────────────────────────────────────────
   const catNameById = useMemo(() => {
     const map = new Map<string, string>();
@@ -651,6 +664,8 @@ export function useShopFilters() {
     toggleCategory,
     isExpanded,
     matchingCategoryIds,
+    dynamicCategoryCounts,
+    hasActiveFilters,
 
     // Cascade handlers
     onChangeYear,

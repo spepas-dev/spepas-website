@@ -13,6 +13,8 @@ type Props = Pick<
   | 'toggleCategory'
   | 'updateParams'
   | 'matchingCategoryIds'
+  | 'dynamicCategoryCounts'
+  | 'hasActiveFilters'
 >;
 
 const CategorySidebar: React.FC<Props> = ({
@@ -24,7 +26,9 @@ const CategorySidebar: React.FC<Props> = ({
   isExpanded,
   toggleCategory,
   updateParams,
-  matchingCategoryIds
+  matchingCategoryIds,
+  dynamicCategoryCounts,
+  hasActiveFilters
 }) => {
   const hasMatches = matchingCategoryIds.size > 0;
   const selectedSet = useMemo(() => new Set(selectedCategories), [selectedCategories]);
@@ -131,7 +135,7 @@ const CategorySidebar: React.FC<Props> = ({
             </svg>
           )}
           <span className="text-left flex-1">All Categories</span>
-          {total > 0 && selectedCategories.length === 0 && (
+          {hasActiveFilters && total > 0 && selectedCategories.length === 0 && (
             <span className="shrink-0 text-xs text-gray-400">{total}</span>
           )}
         </button>
@@ -186,7 +190,9 @@ const CategorySidebar: React.FC<Props> = ({
                         )}
                       </span>
                       <span className="text-left truncate flex-1">{cat.name}</span>
-                      {cat.count > 0 && <span className="shrink-0 text-xs text-gray-400">{cat.count.toLocaleString()}</span>}
+                      {hasActiveFilters && (dynamicCategoryCounts.get(cat.Category_ID) ?? 0) > 0 && (
+                        <span className="shrink-0 text-xs text-gray-400">{(dynamicCategoryCounts.get(cat.Category_ID) ?? 0).toLocaleString()}</span>
+                      )}
                     </button>
                   );
                 })
@@ -292,8 +298,8 @@ const CategorySidebar: React.FC<Props> = ({
                       >
                         {cat.name}
                       </button>
-                      {cat.count > 0 && (
-                        <span className="shrink-0 text-xs text-gray-400 font-normal">{cat.count}</span>
+                      {hasActiveFilters && (dynamicCategoryCounts.get(cat.Category_ID) ?? 0) > 0 && (
+                        <span className="shrink-0 text-xs text-gray-400 font-normal">{dynamicCategoryCounts.get(cat.Category_ID)}</span>
                       )}
                     </div>
                   </div>
@@ -313,8 +319,8 @@ const CategorySidebar: React.FC<Props> = ({
                     <span className="text-left truncate flex-1" title={cat.name}>
                       {cat.name}
                     </span>
-                    {cat.count > 0 && (
-                      <span className="shrink-0 text-xs text-gray-400">{cat.count}</span>
+                    {hasActiveFilters && (dynamicCategoryCounts.get(cat.Category_ID) ?? 0) > 0 && (
+                      <span className="shrink-0 text-xs text-gray-400">{dynamicCategoryCounts.get(cat.Category_ID)}</span>
                     )}
                   </button>
                 )}

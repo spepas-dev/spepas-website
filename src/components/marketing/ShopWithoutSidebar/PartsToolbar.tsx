@@ -17,6 +17,8 @@ type Props = Pick<
   | 'categoriesLoading'
   | 'selectedCategories'
   | 'toggleCategoryFilter'
+  | 'dynamicCategoryCounts'
+  | 'hasActiveFilters'
 > & {
   view: ViewMode;
   setView: (v: ViewMode) => void;
@@ -34,7 +36,9 @@ const PartsToolbar: React.FC<Props> = ({
   orderedCategories,
   categoriesLoading,
   selectedCategories,
-  toggleCategoryFilter
+  toggleCategoryFilter,
+  dynamicCategoryCounts,
+  hasActiveFilters
 }) => (
   <div className="flex flex-col gap-2 sm:gap-3 mb-4 sm:mb-6">
     {/* Row: search + result count + view toggle */}
@@ -132,6 +136,8 @@ const PartsToolbar: React.FC<Props> = ({
       categoriesLoading={categoriesLoading}
       orderedCategories={orderedCategories}
       updateParams={updateParams}
+      dynamicCategoryCounts={dynamicCategoryCounts}
+      hasActiveFilters={hasActiveFilters}
     />
   </div>
 );

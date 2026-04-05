@@ -44,6 +44,8 @@ const ShopWithoutSidebar: React.FC = () => {
               toggleCategory={f.toggleCategory}
               updateParams={f.updateParams}
               matchingCategoryIds={f.matchingCategoryIds}
+              dynamicCategoryCounts={f.dynamicCategoryCounts}
+              hasActiveFilters={f.hasActiveFilters}
             />
 
             {/* Right column — everything else */}
@@ -157,6 +159,8 @@ const ShopWithoutSidebar: React.FC = () => {
                 categoriesLoading={f.categoriesLoading}
                 selectedCategories={f.selectedCategories}
                 toggleCategoryFilter={f.toggleCategoryFilter}
+                dynamicCategoryCounts={f.dynamicCategoryCounts}
+                hasActiveFilters={f.hasActiveFilters}
               />
 
               <PartsContent
