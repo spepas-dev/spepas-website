@@ -12,17 +12,19 @@ const ShopWithoutSidebar: React.FC = () => {
   const f = useShopFilters();
   const [filtersOpen, setFiltersOpen] = useState(true);
 
-  // Count how many vehicle filters are active (for the badge)
-  const activeFilterCount = [
-    f.selectedYear,
-    f.selectedMake,
-    f.selectedBrand,
-    f.selectedModel,
-    f.selectedFuelType,
-    f.selectedBodyType,
-    f.selectedDriveType,
-    f.selectedEngine
-  ].filter(Boolean).length;
+  // Count how many filters are active (for the badge)
+  const activeFilterCount =
+    [
+      f.selectedYear,
+      f.selectedMake,
+      f.selectedBrand,
+      f.selectedModel,
+      f.selectedFuelType,
+      f.selectedBodyType,
+      f.selectedDriveType,
+      f.selectedEngine,
+      f.search.trim()
+    ].filter(Boolean).length + f.selectedCategories.length;
 
   return (
     <>

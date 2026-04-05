@@ -235,7 +235,15 @@ export function useShopFilters() {
     });
   }, [brandsForMake, selectedYear]);
 
-  const modelOptions = useMemo(() => modelsForBrand, [modelsForBrand]);
+  const modelOptions = useMemo(() => {
+    // Deduplicate models by CarModel_ID to avoid repeated entries in the dropdown
+    const seen = new Set<string>();
+    return modelsForBrand.filter((m: any) => {
+      if (seen.has(m.CarModel_ID)) return false;
+      seen.add(m.CarModel_ID);
+      return true;
+    });
+  }, [modelsForBrand]);
 
   // ── Query — active categories (fetched once, cached 30 min) ────────────
   const { data: allCategoriesData, isLoading: categoriesLoading } = useQuery({
@@ -353,11 +361,6 @@ export function useShopFilters() {
     return '';
   }, [selectedCategories, allCategoriesData]);
 
-  console.log('[PARTS QUERY]', {
-    selectedCategories,
-    categoryForApi: categoryForApi || '(none - multi or empty)',
-    selectedBrand: selectedBrand || '(none)',
-  });
   const partsFilters = useMemo(
     () => ({
       ...(selectedModel ? { modelId: selectedModel } : selectedBrand ? { brandId: selectedBrand } : {}),
@@ -388,11 +391,6 @@ export function useShopFilters() {
 
   // Don't show error state if we still have placeholder data to display
   const partsError = partsErrorRaw && !isPlaceholderData && !partsData;
-
-  if (partsData?.data) {
-    const sample = partsData.data.slice(0, 3).map((p: any) => ({ name: p.name, category_ID: p.category_ID, catName: p.category?.name, catLevel: p.category?.level })); // eslint-disable-line @typescript-eslint/no-explicit-any
-    console.log('[PARTS RESPONSE]', { totalFromServer: partsData.meta?.total ?? partsData.data.length, sampleParts: sample });
-  }
 
   // ── Client-side attribute filtering ─────────────────────────────────────
   const hasAttributeFilters = !!(selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine || selectedModel);
@@ -441,6 +439,18 @@ export function useShopFilters() {
         });
       }
     }
+
+    // Client-side search filter: the API may not filter by search text in all
+    // combinations (e.g. when modelId is provided), so enforce it client-side too.
+    const searchTerm = search.trim().toLowerCase();
+    if (searchTerm) {
+      all = all.filter((sp: any) => {
+        const name = (sp.name ?? '').toLowerCase();
+        const articleNo = (sp.article_no ?? sp.articleNo ?? '').toLowerCase();
+        return name.includes(searchTerm) || articleNo.includes(searchTerm);
+      });
+    }
+
     // When modelId is sent to the backend, skip client-side vehicle filtering
     // since the server already filters by model (and we only have 5 partVehicles per part)
     if (selectedModel) return all;
@@ -467,7 +477,7 @@ export function useShopFilters() {
         return true;
       });
     });
-  }, [partsData, matchingModelIds, hasYearFilter, selectedYear, selectedModel]);
+  }, [partsData, matchingModelIds, hasYearFilter, selectedYear, selectedModel, search]);
 
   // ── Year options (merge endpoint + parts-derived) ───────────────────────
   const partsYearOptions = useMemo(() => {
@@ -481,13 +491,17 @@ export function useShopFilters() {
     return [...years].sort((a, b) => b - a).map(String);
   }, [partsData]);
 
-  const allYearOptions = useMemo(() => (yearOptions.length > 0 ? yearOptions : partsYearOptions), [yearOptions, partsYearOptions]);
+  const allYearOptions = useMemo(() => {
+    const opts = yearOptions.length > 0 ? yearOptions : partsYearOptions;
+    // Filter out invalid years (e.g. "0")
+    return opts.filter((y) => { const n = Number(y); return Number.isFinite(n) && n > 0; });
+  }, [yearOptions, partsYearOptions]);
   hasYears = hasYearsEndpoint || allYearOptions.length > 0;
 
   // ── Totals & pagination ─────────────────────────────────────────────────
   const serverTotal = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
   const hasAnyCategoryChild = selectedCategories.length > 0 && selectedCategories.some((id) => categoryParentMap.has(id));
-  const hasClientFilter = hasAttributeFilters || hasYearFilter || selectedCategories.length > 1 || hasAnyCategoryChild;
+  const hasClientFilter = hasAttributeFilters || hasYearFilter || selectedCategories.length > 1 || hasAnyCategoryChild || !!search.trim();
   const total = hasClientFilter ? filteredParts.length : serverTotal;
   const totalPages = hasClientFilter
     ? Math.max(1, Math.ceil(total / PAGE_SIZE))
