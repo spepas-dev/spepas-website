@@ -555,29 +555,40 @@ export function useShopFilters() {
     ? Math.max(1, Math.ceil(total / PAGE_SIZE))
     : (partsData?.meta?.totalPages ?? Math.max(1, Math.ceil(serverTotal / PAGE_SIZE)));
 
-  // ── Category IDs that contain matching results ─────────────────────────
-  const matchingCategoryIds = useMemo(() => {
-    if (!showResults || filteredParts.length === 0) return new Set<string>();
-    const ids = new Set<string>();
-    for (const sp of filteredParts as any[]) {
-      const catId = sp.category_ID ?? sp.category?.Category_ID;
-      if (catId) ids.add(catId);
-    }
-    return ids;
-  }, [filteredParts, showResults]);
-
-  // ── Dynamic category counts (from filtered parts) ─────────────────────
+  // ── Category counts from server (across ALL matching results, not just current page)
   const hasActiveFilters = !!(selectedYear || selectedMake || selectedBrand || selectedModel ||
     selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine || search.trim());
-  const dynamicCategoryCounts = useMemo(() => {
+
+  const serverCategoryCounts = useMemo(() => {
+    const raw = (partsData as any)?.meta?.categoryCounts ?? {};
     const counts = new Map<string, number>();
-    if (!showResults || !hasActiveFilters) return counts;
-    for (const sp of filteredParts as any[]) {
-      const catId = sp.category_ID ?? sp.category?.Category_ID;
-      if (catId) counts.set(catId, (counts.get(catId) ?? 0) + 1);
+    for (const [catId, count] of Object.entries(raw)) {
+      if (catId && typeof count === 'number' && count > 0) counts.set(catId, count);
     }
     return counts;
-  }, [filteredParts, showResults, hasActiveFilters]);
+  }, [partsData]);
+
+  // Dynamic category counts: prefer server counts, fall back to client-side for attribute-filtered results
+  const dynamicCategoryCounts = useMemo(() => {
+    if (!showResults || !hasActiveFilters) return new Map<string, number>();
+    // If we have client-side attribute filters active, recount from filteredParts
+    // (server doesn't know about fuel/body/drive/engine filters)
+    if (hasAttributeFilters) {
+      const counts = new Map<string, number>();
+      for (const sp of filteredParts as any[]) {
+        const catId = sp.category_ID ?? sp.category?.Category_ID;
+        if (catId) counts.set(catId, (counts.get(catId) ?? 0) + 1);
+      }
+      return counts;
+    }
+    return serverCategoryCounts;
+  }, [showResults, hasActiveFilters, hasAttributeFilters, filteredParts, serverCategoryCounts]);
+
+  // Matching categories: derived from dynamic counts
+  const matchingCategoryIds = useMemo(() => {
+    if (!showResults || dynamicCategoryCounts.size === 0) return new Set<string>();
+    return new Set(dynamicCategoryCounts.keys());
+  }, [showResults, dynamicCategoryCounts]);
 
   // ── Items view model ────────────────────────────────────────────────────
   const catNameById = useMemo(() => {
