@@ -238,12 +238,27 @@ export function useShopFilters() {
   const modelOptions = useMemo(() => {
     // Deduplicate models by CarModel_ID to avoid repeated entries in the dropdown
     const seen = new Set<string>();
-    return modelsForBrand.filter((m: any) => {
+    let models = modelsForBrand.filter((m: any) => {
       if (seen.has(m.CarModel_ID)) return false;
       seen.add(m.CarModel_ID);
       return true;
     });
-  }, [modelsForBrand]);
+    // Filter by year if selected (same logic as brandOptions)
+    if (selectedYear) {
+      const yr = Number(selectedYear);
+      if (!Number.isNaN(yr)) {
+        models = models.filter((m: any) => {
+          const start = m.constructionStart ?? m.yearOfMake ?? null;
+          const end = m.constructionEnd ?? null;
+          if (start === null && end === null) return true;
+          if (start !== null && yr < start) return false;
+          if (end !== null && yr > end) return false;
+          return true;
+        });
+      }
+    }
+    return models;
+  }, [modelsForBrand, selectedYear]);
 
   // ── Query — active categories (fetched once, cached 30 min) ────────────
   const { data: allCategoriesData, isLoading: categoriesLoading } = useQuery({
@@ -451,9 +466,26 @@ export function useShopFilters() {
       });
     }
 
-    // When modelId is sent to the backend, skip client-side vehicle filtering
-    // since the server already filters by model (and we only have 5 partVehicles per part)
-    if (selectedModel) return all;
+    // When modelId is sent to the backend, the server already filters by model.
+    // We only need to validate model-level attribute filters (fuel, body, drive, engine).
+    // We skip per-part vehicle checks because we only get 5 partVehicles per part
+    // and the selected model's entry may not be among them.
+    if (selectedModel) {
+      const hasSpecificAttributes = !!(selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine);
+      if (hasSpecificAttributes) {
+        const model = modelsForBrand.find((m: any) => m.CarModel_ID === selectedModel);
+        if (model) {
+          const fuelTypes: string[] = model.fuelTypes ?? (model.fuelType ? [model.fuelType] : []);
+          const bodyTypes: string[] = model.bodyTypes ?? (model.bodyType ? [model.bodyType] : []);
+          const driveTypes: string[] = model.driveTypes ?? (model.driveType ? [model.driveType] : []);
+          if (selectedFuelType && !fuelTypes.includes(selectedFuelType)) return [];
+          if (selectedBodyType && !bodyTypes.includes(selectedBodyType)) return [];
+          if (selectedDriveType && !driveTypes.includes(selectedDriveType)) return [];
+          if (selectedEngine && model.name !== selectedEngine) return [];
+        }
+      }
+      return all;
+    }
     const needsModelFilter = !!matchingModelIds;
     const needsYearFilter = hasYearFilter;
     if (!needsModelFilter && !needsYearFilter) return all;
@@ -477,7 +509,8 @@ export function useShopFilters() {
         return true;
       });
     });
-  }, [partsData, matchingModelIds, hasYearFilter, selectedYear, selectedModel, search]);
+  }, [partsData, matchingModelIds, hasYearFilter, selectedYear, selectedModel, search,
+      selectedCategories, categoryParentMap, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, modelsForBrand]);
 
   // ── Year options (merge endpoint + parts-derived) ───────────────────────
   const partsYearOptions = useMemo(() => {
