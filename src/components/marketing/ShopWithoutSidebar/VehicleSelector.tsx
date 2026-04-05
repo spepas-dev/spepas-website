@@ -123,7 +123,7 @@ const VehicleSelector: React.FC<Props> = ({
             options={(brandOptions as any[]).map((b) => ({
               value: b.CarBrand_ID,
               label: b.name,
-              count: b._count?.models ?? b.modelCount ?? (b.models?.length > 0 ? b.models.length : undefined)
+              count: b.filteredModelCount ?? b._count?.models ?? b.modelCount ?? (b.models?.length > 0 ? b.models.length : undefined)
             }))}
             value={selectedBrand}
             onChange={onChangeBrand}
