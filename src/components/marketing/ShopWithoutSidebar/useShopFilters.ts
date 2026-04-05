@@ -404,10 +404,11 @@ export function useShopFilters() {
       ...(selectedModel ? { modelId: selectedModel } : selectedBrand ? { brandId: selectedBrand } : {}),
       ...(categoryForApi ? { categoryId: categoryForApi } : {}),
       ...(search.trim() ? { search: search.trim() } : {}),
+      ...(selectedYear ? { year: selectedYear } : {}),
       limit: PAGE_SIZE,
       page
     }),
-    [selectedBrand, selectedModel, categoryForApi, search, page]
+    [selectedBrand, selectedModel, categoryForApi, search, selectedYear, page]
   );
 
   const vehicleSelected = !!selectedBrand;
@@ -432,7 +433,7 @@ export function useShopFilters() {
 
   // ── Client-side attribute filtering ─────────────────────────────────────
   const hasAttributeFilters = !!(selectedFuelType || selectedBodyType || selectedDriveType || selectedEngine || selectedModel);
-  const hasYearFilter = !!selectedYear;
+
 
   const matchingModelIds = useMemo(() => {
     if (!hasAttributeFilters) return null;
@@ -509,30 +510,21 @@ export function useShopFilters() {
       }
       return all;
     }
+    // Year filtering is now handled server-side — no client-side year filter needed.
+    // Only apply client-side attribute model filtering if needed.
     const needsModelFilter = !!matchingModelIds;
-    const needsYearFilter = hasYearFilter;
-    if (!needsModelFilter && !needsYearFilter) return all;
-    const yearNum = needsYearFilter ? parseInt(selectedYear, 10) : NaN;
+    if (!needsModelFilter) return all;
     return all.filter((sp: any) => {
       const pvs: any[] = sp.partVehicles ?? [];
       if (pvs.length === 0) {
-        if (needsYearFilter) return false;
-        return !needsModelFilter || (sp.carModel_ID && matchingModelIds!.has(sp.carModel_ID));
+        return sp.carModel_ID && matchingModelIds!.has(sp.carModel_ID);
       }
       return pvs.some((pv: any) => {
         const modelId = pv.carModel?.CarModel_ID ?? pv.carModel_ID;
-        if (needsModelFilter && !(modelId && matchingModelIds!.has(modelId))) return false;
-        if (needsYearFilter) {
-          const start = pv.carModel?.constructionStart ?? pv.carModel?.yearOfMake;
-          const end = pv.carModel?.constructionEnd;
-          if (start != null && start > yearNum) return false;
-          if (end != null && end < yearNum) return false;
-          if (start == null && end == null) return false;
-        }
-        return true;
+        return modelId && matchingModelIds!.has(modelId);
       });
     });
-  }, [partsData, matchingModelIds, hasYearFilter, selectedYear, selectedModel, search,
+  }, [partsData, matchingModelIds, selectedModel, search,
       selectedCategories, categoryParentMap, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, modelsForBrand]);
 
   // ── Year options (merge endpoint + parts-derived) ───────────────────────
@@ -557,7 +549,7 @@ export function useShopFilters() {
   // ── Totals & pagination ─────────────────────────────────────────────────
   const serverTotal = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
   const hasAnyCategoryChild = selectedCategories.length > 0 && selectedCategories.some((id) => categoryParentMap.has(id));
-  const hasClientFilter = hasAttributeFilters || hasYearFilter || selectedCategories.length > 1 || hasAnyCategoryChild || !!search.trim();
+  const hasClientFilter = hasAttributeFilters || selectedCategories.length > 1 || hasAnyCategoryChild || !!search.trim();
   const total = hasClientFilter ? filteredParts.length : serverTotal;
   const totalPages = hasClientFilter
     ? Math.max(1, Math.ceil(total / PAGE_SIZE))
