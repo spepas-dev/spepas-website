@@ -108,7 +108,7 @@ const VehicleSelector: React.FC<Props> = ({
             options={(makeOptions as any[]).map((m) => ({
               value: m.Manufacturer_ID,
               label: m.name,
-              count: m._count?.brands ?? m.brandCount ?? (m.brands?.length > 0 ? m.brands.length : undefined)
+              count: m.filteredBrandCount ?? m._count?.brands ?? m.brandCount ?? (m.brands?.length > 0 ? m.brands.length : undefined)
             }))}
             value={selectedMake}
             onChange={onChangeMake}
@@ -122,8 +122,7 @@ const VehicleSelector: React.FC<Props> = ({
           <SearchableCombobox
             options={(brandOptions as any[]).map((b) => ({
               value: b.CarBrand_ID,
-              label: b.name,
-              count: b.filteredModelCount ?? b._count?.models ?? b.modelCount ?? (b.models?.length > 0 ? b.models.length : undefined)
+              label: b.name
             }))}
             value={selectedBrand}
             onChange={onChangeBrand}
@@ -137,8 +136,7 @@ const VehicleSelector: React.FC<Props> = ({
           <SearchableCombobox
             options={(modelOptions as any[]).map((m) => ({
               value: m.CarModel_ID,
-              label: `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`,
-              count: m.sparePartCount ?? (m.spareParts?.length > 0 ? m.spareParts.length : undefined)
+              label: `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`
             }))}
             value={selectedModel}
             onChange={onChangeModel}

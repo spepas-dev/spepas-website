@@ -207,26 +207,11 @@ export function useShopFilters() {
     if (!selectedYear) return all;
     const yr = Number(selectedYear);
     if (Number.isNaN(yr)) return all;
-    return all.filter((m: any) => {
-      const brands = m.brands ?? [];
-      if (brands.length === 0) return true;
-      return brands.some((b: any) => {
-        const from = b.yearFrom ?? null;
-        const to = b.yearTo ?? null;
-        if (from === null && to === null) return true;
-        if (from !== null && yr < from) return false;
-        if (to !== null && yr > to) return false;
-        return true;
-      });
-    });
-  }, [manufacturersData, selectedYear]);
-
-  const brandOptions = useMemo(() => {
-    let brands = brandsForMake;
-    if (selectedYear) {
-      const yr = Number(selectedYear);
-      if (!Number.isNaN(yr)) {
-        brands = brands.filter((b: any) => {
+    return all
+      .map((m: any) => {
+        const brands = m.brands ?? [];
+        // Count how many brands match the selected year
+        const yearFilteredBrands = brands.filter((b: any) => {
           const from = b.yearFrom ?? null;
           const to = b.yearTo ?? null;
           if (from === null && to === null) return true;
@@ -234,30 +219,28 @@ export function useShopFilters() {
           if (to !== null && yr > to) return false;
           return true;
         });
-      }
-    }
-    // Enrich each brand with a year-filtered model count when models are loaded
-    if (selectedYear && modelsForBrand.length > 0) {
-      const yr = Number(selectedYear);
-      return brands.map((b: any) => {
-        const brandModels = modelsForBrand.filter((m: any) => m.carBrand_ID === b.CarBrand_ID || m.CarBrand_ID === b.CarBrand_ID);
-        // Deduplicate by display label
-        const labels = new Set<string>();
-        let count = 0;
-        for (const m of brandModels) {
-          const start = m.constructionStart ?? m.yearOfMake ?? null;
-          const end = m.constructionEnd ?? null;
-          const inYear = (start === null && end === null) || (!(start !== null && yr < start) && !(end !== null && yr > end));
-          if (inYear) {
-            const label = `${m.name}${m.yearOfMake ? ` (${m.yearOfMake})` : ''}`;
-            if (!labels.has(label)) { labels.add(label); count++; }
-          }
-        }
-        return { ...b, filteredModelCount: count };
+        return { ...m, filteredBrandCount: yearFilteredBrands.length };
+      })
+      .filter((m: any) => {
+        const brands = m.brands ?? [];
+        // Keep manufacturer if it has no brands data or has year-matching brands
+        return brands.length === 0 || m.filteredBrandCount > 0;
       });
-    }
-    return brands;
-  }, [brandsForMake, selectedYear, modelsForBrand]);
+  }, [manufacturersData, selectedYear]);
+
+  const brandOptions = useMemo(() => {
+    if (!selectedYear) return brandsForMake;
+    const yr = Number(selectedYear);
+    if (Number.isNaN(yr)) return brandsForMake;
+    return brandsForMake.filter((b: any) => {
+      const from = b.yearFrom ?? null;
+      const to = b.yearTo ?? null;
+      if (from === null && to === null) return true;
+      if (from !== null && yr < from) return false;
+      if (to !== null && yr > to) return false;
+      return true;
+    });
+  }, [brandsForMake, selectedYear]);
 
   const modelOptions = useMemo(() => {
     // First: deduplicate by CarModel_ID
