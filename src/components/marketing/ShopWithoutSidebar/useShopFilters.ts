@@ -375,28 +375,29 @@ export function useShopFilters() {
   const isExpanded = useCallback((catId: string) => expandedCategories.has(catId), [expandedCategories]);
 
   // ── Query — parts ───────────────────────────────────────────────────────
-  // For the API, resolve all selected categories to their root ancestors.
-  // If they all share the same root, send that root. Otherwise send nothing and filter client-side.
+  // Send all selected category IDs (plus their ancestors) to the API as comma-separated values.
+  // Parts may be tagged with a parent category_ID even when a child is selected,
+  // so we include ancestors to catch those.
   const categoryForApi = useMemo(() => {
     if (selectedCategories.length === 0) return '';
     const allCats = allCategoriesData?.data;
-    if (!allCats) return selectedCategories[0]; // data not loaded yet, send as-is
+    if (!allCats) return selectedCategories.join(',');
 
     const parentMap = new Map<string, string>();
     for (const cat of allCats) {
       if (cat.parent_ID) parentMap.set(cat.Category_ID, cat.parent_ID);
     }
-    const toRoot = (id: string) => {
-      let c = id;
-      while (parentMap.has(c)) c = parentMap.get(c)!;
-      return c;
-    };
 
-    const roots = new Set(selectedCategories.map(toRoot));
-    // All selected categories share the same root → send that root to API
-    if (roots.size === 1) return [...roots][0];
-    // Different roots → can't use a single categoryId, omit and filter client-side
-    return '';
+    // Build full set: selected categories + all their ancestors
+    const catSet = new Set(selectedCategories);
+    for (const catId of selectedCategories) {
+      let current = parentMap.get(catId);
+      while (current) {
+        catSet.add(current);
+        current = parentMap.get(current);
+      }
+    }
+    return [...catSet].join(',');
   }, [selectedCategories, allCategoriesData]);
 
   const partsFilters = useMemo(
@@ -446,38 +447,9 @@ export function useShopFilters() {
     return new Set(variants.map((v: any) => v.CarModel_ID as string));
   }, [modelsForBrand, selectedModel, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, hasAttributeFilters]);
 
-  // Build parent lookup from raw category data for ancestor expansion
-  const categoryParentMap = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const cat of allCategoriesData?.data ?? []) {
-      if (cat.parent_ID) map.set(cat.Category_ID, cat.parent_ID);
-    }
-    return map;
-  }, [allCategoriesData]);
-
   const filteredParts = useMemo(() => {
     let all = partsData?.data ?? [];
-    // Client-side category filter: expand selected categories to include their ancestors
-    // (parts may be tagged with parent category_ID even when child is selected)
-    if (selectedCategories.length > 0) {
-      const catSet = new Set(selectedCategories);
-      for (const catId of selectedCategories) {
-        let current = categoryParentMap.get(catId);
-        while (current) {
-          catSet.add(current);
-          current = categoryParentMap.get(current);
-        }
-      }
-      // Only filter if the set doesn't just contain a single root category that was sent to API directly
-      // (i.e., skip filtering when user selected a root category — API already handles it)
-      const isJustOneRoot = selectedCategories.length === 1 && !categoryParentMap.has(selectedCategories[0]);
-      if (!isJustOneRoot) {
-        all = all.filter((sp: any) => {
-          const catId = sp.category_ID ?? sp.category?.Category_ID;
-          return catId && catSet.has(catId);
-        });
-      }
-    }
+    // Category filtering is now handled server-side (supports multi-category via comma-separated IDs)
 
     // Client-side search filter: the API may not filter by search text in all
     // combinations (e.g. when modelId is provided), so enforce it client-side too.
@@ -525,7 +497,7 @@ export function useShopFilters() {
       });
     });
   }, [partsData, matchingModelIds, selectedModel, search,
-      selectedCategories, categoryParentMap, selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, modelsForBrand]);
+      selectedFuelType, selectedBodyType, selectedDriveType, selectedEngine, modelsForBrand]);
 
   // ── Year options (merge endpoint + parts-derived) ───────────────────────
   const partsYearOptions = useMemo(() => {
@@ -548,8 +520,7 @@ export function useShopFilters() {
 
   // ── Totals & pagination ─────────────────────────────────────────────────
   const serverTotal = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
-  const hasAnyCategoryChild = selectedCategories.length > 0 && selectedCategories.some((id) => categoryParentMap.has(id));
-  const hasClientFilter = hasAttributeFilters || selectedCategories.length > 1 || hasAnyCategoryChild || !!search.trim();
+  const hasClientFilter = hasAttributeFilters || !!search.trim();
   const total = hasClientFilter ? filteredParts.length : serverTotal;
   const totalPages = hasClientFilter
     ? Math.max(1, Math.ceil(total / PAGE_SIZE))
