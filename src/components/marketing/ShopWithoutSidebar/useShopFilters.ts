@@ -520,7 +520,7 @@ export function useShopFilters() {
 
   // ── Totals & pagination ─────────────────────────────────────────────────
   const serverTotal = partsData?.meta?.total ?? partsData?.total ?? partsData?.data?.length ?? 0;
-  const hasClientFilter = hasAttributeFilters || !!search.trim();
+  const hasClientFilter = hasAttributeFilters;
   const total = hasClientFilter ? filteredParts.length : serverTotal;
   const totalPages = hasClientFilter
     ? Math.max(1, Math.ceil(total / PAGE_SIZE))
