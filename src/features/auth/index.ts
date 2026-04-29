@@ -21,6 +21,7 @@ import {
   resendActivationAPI,
   setupPinAPI,
   pinStatusAPI,
+  setPasswordAPI,
   // refreshTokenAPI,        // ❌ no longer used
 } from "../../lib/auth";
 
@@ -44,8 +45,11 @@ export type SignupPayload = {
 };
 
 // For Signin (User Login)
+//
+// `identifier` is either an email or a digit-only phone number. The backend
+// auto-detects which side it is and matches against the User row.
 export type SigninPayload = {
-  email: string;
+  identifier: string;
   password: string;
 };
 
@@ -72,6 +76,11 @@ export type ResendActivationPayload = {
 export type SetupPinPayload = {
   pin: string;
   confirmPin: string;
+};
+
+// For Setting an initial password (admin-onboarded users)
+export type SetPasswordPayload = {
+  newPassword: string;
 };
 
 // For Forgot Password
@@ -215,6 +224,7 @@ export type AuthContextType = {
   activateAccount: (payload: ActivateAccountPayload) => Promise<PostAuthFlags>;
   resendActivation: (payload: ResendActivationPayload) => Promise<any>;
   setupPin: (payload: SetupPinPayload) => Promise<any>;
+  setPassword: (payload: SetPasswordPayload) => Promise<any>;
   refreshPinStatus: () => Promise<{ pinSet: boolean } | null>;
   logout: () => Promise<void>;
   forgotPassword: (payload: ForgotPasswordPayload) => Promise<any>;
@@ -407,6 +417,10 @@ export const AuthProvider = ({
     return await setupPinAPI(payload);
   };
 
+  const setPassword = async (payload: SetPasswordPayload): Promise<any> => {
+    return await setPasswordAPI(payload);
+  };
+
   const refreshPinStatus = async (): Promise<{ pinSet: boolean } | null> => {
     try {
       const res: any = await pinStatusAPI();
@@ -540,6 +554,7 @@ export const AuthProvider = ({
     activateAccount,
     resendActivation,
     setupPin,
+    setPassword,
     refreshPinStatus,
     logout,
     forgotPassword,

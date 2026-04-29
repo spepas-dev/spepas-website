@@ -22,9 +22,23 @@ export const signupRequestSchema = z.object({
 });
 
 
+// Helper: an identifier is a valid email OR a 10-15 digit phone number.
+const identifierSchema = z
+  .string()
+  .nonempty("Email or phone number is required")
+  .refine(
+    (val) => {
+      const trimmed = val.trim();
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+      const isPhone = /^\+?\d{10,15}$/.test(trimmed.replace(/\s/g, ""));
+      return isEmail || isPhone;
+    },
+    { message: "Enter a valid email address or phone number" }
+  );
+
 // 2. Signin Request Schema
 export const signinRequestSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  identifier: identifierSchema,
   password: z.string().min(8, "Password must be at least 8 characters long"),
 });
 

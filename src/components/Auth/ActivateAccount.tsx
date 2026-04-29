@@ -113,7 +113,10 @@ const ActivateAccount: React.FC = () => {
         position: 'bottom-center',
       });
 
-      if (flags.pinRequired) {
+      // Priority order: password → PIN → identification/home.
+      if (flags.passwordRequired) {
+        navigate('/95668339501103956045/auth/setup-password');
+      } else if (flags.pinRequired) {
         navigate('/95668339501103956045/auth/setup-pin');
       } else {
         navigate('/95668339501103956045/add-identification');

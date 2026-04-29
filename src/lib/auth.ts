@@ -30,9 +30,13 @@ export const signupAPI = async (payload: {
 
 /**
  * 2. User Sign-In
+ *
+ * The backend accepts an `identifier` (phone or email) plus the password and
+ * auto-detects which side it is. Callers pass either an email or a digit-only
+ * phone number — anything else is rejected by the Zod validator.
  */
 export const signinAPI = async (payload: {
-  email: string;
+  identifier: string;
   password: string;
 }) => {
   signinRequestSchema.parse(payload);
@@ -153,5 +157,15 @@ export const verifyPinAPI = async (payload: { pin: string }) => {
  */
 export const pinStatusAPI = async () => {
   const response = await apiClient.get('/auth/pin-status');
+  return response.data;
+};
+
+/**
+ * 13. Set Initial Password (admin-onboarded users)
+ *     Refuses if the user already has a password — use changePasswordAPI
+ *     instead.
+ */
+export const setPasswordAPI = async (payload: { newPassword: string }) => {
+  const response = await apiClient.post('/auth/set-password', payload);
   return response.data;
 };

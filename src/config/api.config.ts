@@ -17,6 +17,7 @@ export const API_ROUTES = {
     SETUP_PIN: `${BASE_PATH}/auth/setup-pin`,
     VERIFY_PIN: `${BASE_PATH}/auth/verify-pin`,
     PIN_STATUS: `${BASE_PATH}/auth/pin-status`,
+    SET_PASSWORD: `${BASE_PATH}/auth/set-password`,
   },
   REQUEST: {
     INVENTORY_SPARE_PART: `${BASE_PATH}/request/inventory-spare-part-request`,

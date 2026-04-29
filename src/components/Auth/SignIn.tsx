@@ -10,8 +10,10 @@ type Role = 'GOPA' | 'SELLER' | 'BUYER';
 
 const MIN_PW = 8;
 const pwLenMsg = `Password must be at least ${MIN_PW} characters long`;
-const emailMsg = 'Invalid email address';
+const identifierMsg = 'Enter a valid email address or phone number';
 const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+const isValidPhone = (val: string) => /^\+?\d{10,15}$/.test(val.replace(/\s/g, ''));
+const isValidIdentifier = (val: string) => isValidEmail(val) || isValidPhone(val);
 
 const Signin: React.FC = () => {
   const { login, authData } = useAuth();
@@ -20,8 +22,8 @@ const Signin: React.FC = () => {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirect');
 
-  // Form state
-  const [email, setEmail] = useState('');
+  // Form state — `identifier` accepts either an email or a phone number.
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,9 +31,9 @@ const Signin: React.FC = () => {
   const [showPw, setShowPw] = useState(false);
 
   // Inline error state + touched tracking
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-  const [touched, setTouched] = useState<{ email: boolean; password: boolean }>({
-    email: false,
+  const [errors, setErrors] = useState<{ identifier?: string; password?: string }>({});
+  const [touched, setTouched] = useState<{ identifier: boolean; password: boolean }>({
+    identifier: false,
     password: false,
   });
 
@@ -40,12 +42,16 @@ const Signin: React.FC = () => {
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [didLogin, setDidLogin] = useState(false);
   const [pinRequired, setPinRequired] = useState(false);
+  const [passwordRequired, setPasswordRequired] = useState(false);
 
   // Validate on change
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleIdentifierChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setEmail(val);
-    setErrors((prev) => ({ ...prev, email: val && !isValidEmail(val) ? emailMsg : undefined }));
+    setIdentifier(val);
+    setErrors((prev) => ({
+      ...prev,
+      identifier: val && !isValidIdentifier(val) ? identifierMsg : undefined,
+    }));
   };
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -58,10 +64,13 @@ const Signin: React.FC = () => {
   };
 
   // Validate on blur
-  const handleBlur = (field: 'email' | 'password') => {
+  const handleBlur = (field: 'identifier' | 'password') => {
     setTouched((prev) => ({ ...prev, [field]: true }));
-    if (field === 'email') {
-      setErrors((prev) => ({ ...prev, email: email && !isValidEmail(email) ? emailMsg : undefined }));
+    if (field === 'identifier') {
+      setErrors((prev) => ({
+        ...prev,
+        identifier: identifier && !isValidIdentifier(identifier) ? identifierMsg : undefined,
+      }));
     } else {
       setErrors((prev) => ({
         ...prev,
@@ -75,18 +84,23 @@ const Signin: React.FC = () => {
     e.preventDefault();
 
     // Final client-side validation gate
-    setTouched({ email: true, password: true });
-    const emailErr = email && !isValidEmail(email) ? emailMsg : undefined;
+    setTouched({ identifier: true, password: true });
+    const idErr = !isValidIdentifier(identifier) ? identifierMsg : undefined;
     const pwErr = password.length < MIN_PW ? pwLenMsg : undefined;
-    setErrors({ email: emailErr, password: pwErr });
-    if (emailErr || pwErr) return;
+    setErrors({ identifier: idErr, password: pwErr });
+    if (idErr || pwErr) return;
+
+    // Normalise: trim + strip spaces from phones; leave email as-is.
+    const trimmed = identifier.trim();
+    const normalised = isValidPhone(trimmed) ? trimmed.replace(/\s/g, '') : trimmed;
 
     setLoading(true);
     const toastId = toast.loading('Signing in…', { position: 'bottom-center' });
     try {
-      const flags = await login({ email, password });
+      const flags = await login({ identifier: normalised, password });
       toast.success('Signed in!', { id: toastId, position: 'bottom-center' });
       setPinRequired(Boolean(flags?.pinRequired));
+      setPasswordRequired(Boolean(flags?.passwordRequired));
       setDidLogin(true);
     } catch {
       toast.error('Invalid credentials. Please try again.', {
@@ -104,7 +118,15 @@ const Signin: React.FC = () => {
     const user = authData.user;
     if (!user) return;
 
-    // PIN setup takes precedence — checkout and other secure actions need it.
+    // Onboarding completion takes precedence over role selection / home.
+    // Order: password → PIN → home. (Sign-in only succeeds if a password
+    // exists, but a user mid-flow could still have passwordRequired === true
+    // after re-activating without finishing setup.)
+    if (passwordRequired) {
+      setAccountType('BUYER');
+      navigate('/95668339501103956045/auth/setup-password');
+      return;
+    }
     if (pinRequired) {
       setAccountType('BUYER');
       navigate('/95668339501103956045/auth/setup-pin');
@@ -125,7 +147,7 @@ const Signin: React.FC = () => {
       setAccountType('BUYER');
       navigate(redirectTo || '/95668339501103956045/home');
     }
-  }, [didLogin, authData.user, navigate, setAccountType, pinRequired, redirectTo]);
+  }, [didLogin, authData.user, navigate, setAccountType, pinRequired, passwordRequired, redirectTo]);
 
   // 3️⃣ Handle role selection
   const handleRoleSelect = (role: Role) => {
@@ -134,7 +156,7 @@ const Signin: React.FC = () => {
     navigate(redirectTo || '/95668339501103956045/home');
   };
 
-  const emailInvalid = touched.email && Boolean(errors.email);
+  const idInvalid = touched.identifier && Boolean(errors.identifier);
   const pwInvalid = touched.password && Boolean(errors.password);
 
   return (
@@ -150,26 +172,32 @@ const Signin: React.FC = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="mb-5">
-              <label htmlFor="email" className="block mb-2.5">
-                Email Address <span className="text-red">*</span>
+              <label htmlFor="identifier" className="block mb-2.5">
+                Email or Phone Number <span className="text-red">*</span>
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                onBlur={() => handleBlur('email')}
+                id="identifier"
+                type="text"
+                inputMode="email"
+                autoComplete="username"
+                value={identifier}
+                onChange={handleIdentifierChange}
+                onBlur={() => handleBlur('identifier')}
                 required
                 className={`w-full rounded-lg border ${
-                  emailInvalid ? 'border-red-500' : 'border-gray-300'
+                  idInvalid ? 'border-red-500' : 'border-gray-300'
                 } bg-gray-100 py-3 px-5`}
-                placeholder="you@example.com"
-                aria-invalid={emailInvalid}
-                aria-describedby={emailInvalid ? 'signin-email-error' : undefined}
+                placeholder="you@example.com or 0554340244"
+                aria-invalid={idInvalid}
+                aria-describedby={idInvalid ? 'signin-identifier-error' : 'signin-identifier-hint'}
               />
-              {emailInvalid && (
-                <p id="signin-email-error" className="mt-1 text-sm text-red-600">
-                  {errors.email}
+              {idInvalid ? (
+                <p id="signin-identifier-error" className="mt-1 text-sm text-red-600">
+                  {errors.identifier}
+                </p>
+              ) : (
+                <p id="signin-identifier-hint" className="mt-1 text-xs text-gray-400">
+                  Use the email or phone number from your account.
                 </p>
               )}
             </div>
