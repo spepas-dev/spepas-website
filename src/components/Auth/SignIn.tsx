@@ -39,6 +39,7 @@ const Signin: React.FC = () => {
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [didLogin, setDidLogin] = useState(false);
+  const [pinRequired, setPinRequired] = useState(false);
 
   // Validate on change
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -83,8 +84,9 @@ const Signin: React.FC = () => {
     setLoading(true);
     const toastId = toast.loading('Signing in…', { position: 'bottom-center' });
     try {
-      await login({ email, password });
+      const flags = await login({ email, password });
       toast.success('Signed in!', { id: toastId, position: 'bottom-center' });
+      setPinRequired(Boolean(flags?.pinRequired));
       setDidLogin(true);
     } catch {
       toast.error('Invalid credentials. Please try again.', {
@@ -102,6 +104,13 @@ const Signin: React.FC = () => {
     const user = authData.user;
     if (!user) return;
 
+    // PIN setup takes precedence — checkout and other secure actions need it.
+    if (pinRequired) {
+      setAccountType('BUYER');
+      navigate('/95668339501103956045/auth/setup-pin');
+      return;
+    }
+
     const roles: Role[] = [];
     if (user.gopa)          roles.push('GOPA');
     if (user.sellerDetails) roles.push('SELLER');
@@ -116,7 +125,7 @@ const Signin: React.FC = () => {
       setAccountType('BUYER');
       navigate(redirectTo || '/95668339501103956045/home');
     }
-  }, [didLogin, authData.user, navigate, setAccountType]);
+  }, [didLogin, authData.user, navigate, setAccountType, pinRequired, redirectTo]);
 
   // 3️⃣ Handle role selection
   const handleRoleSelect = (role: Role) => {
@@ -218,6 +227,12 @@ const Signin: React.FC = () => {
               Don’t have an account?{' '}
               <Link to="/95668339501103956045/auth/signup" className="text-blue hover:underline">
                 Sign Up
+              </Link>
+            </p>
+            <p className="text-center mt-2 text-sm">
+              Onboarded by an admin?{' '}
+              <Link to="/95668339501103956045/auth/activate" className="text-blue hover:underline">
+                Activate your account
               </Link>
             </p>
             <p className="text-center mt-2 text-sm">

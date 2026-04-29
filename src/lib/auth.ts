@@ -114,3 +114,44 @@ export const refreshTokenAPI = async () => {
   // console.log('Response from Refresh Token API:', response.data);
   return response.data;
 };
+
+/**
+ * 9. Resend Activation OTP
+ *    Used to (a) re-send the OTP after self-signup, and (b) let admin-onboarded
+ *    users obtain an OTP from just their phone or email.
+ */
+export const resendActivationAPI = async (payload: {
+  phoneNumber?: string;
+  email?: string;
+  identifier?: string;
+}) => {
+  const response = await apiClient.post('/auth/resend-activation', payload);
+  return response.data;
+};
+
+/**
+ * 10. Set Transaction PIN
+ */
+export const setupPinAPI = async (payload: {
+  pin: string;
+  confirmPin: string;
+}) => {
+  const response = await apiClient.post('/auth/setup-pin', payload);
+  return response.data;
+};
+
+/**
+ * 11. Verify Transaction PIN
+ */
+export const verifyPinAPI = async (payload: { pin: string }) => {
+  const response = await apiClient.post('/auth/verify-pin', payload);
+  return response.data;
+};
+
+/**
+ * 12. Transaction PIN Status
+ */
+export const pinStatusAPI = async () => {
+  const response = await apiClient.get('/auth/pin-status');
+  return response.data;
+};

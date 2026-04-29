@@ -8,7 +8,8 @@ import ActivateAccountPage from '@/pages/auth/activate';
 import ForgotPasswordPage from '@/pages/auth/forgot-password';
 import ResetPasswordPage from '@/pages/auth/reset-password';
 import ChangePasswordPage from '@/pages/auth/change-password';
-import ProfileSwitchOtpPage from '@/pages/auth/profile-switch-otp'; // ← NEW
+import ProfileSwitchOtpPage from '@/pages/auth/profile-switch-otp';
+import SetupPinPage from '@/pages/auth/setup-pin';
 
 export const authRoutes: RouteObject[] = [
   { index: true, element: <SignInPage /> },
@@ -18,5 +19,6 @@ export const authRoutes: RouteObject[] = [
   { path: 'forgot-password', element: <ForgotPasswordPage /> },
   { path: 'reset-password', element: <ResetPasswordPage /> },
   { path: 'change-password', element: <ChangePasswordPage /> },
-  { path: 'profile-switch-otp', element: <ProfileSwitchOtpPage /> }, // ← NEW
+  { path: 'profile-switch-otp', element: <ProfileSwitchOtpPage /> },
+  { path: 'setup-pin', element: <SetupPinPage /> },
 ];

@@ -272,6 +272,7 @@ export const checkoutWithExistingAddressAPI = async (payload: {
     walletNumber: string;
     network: string;
   };
+  pin: string;
 }) => {
   checkoutWithExistingAddressSchema.parse(payload);
   const response = await apiClient.post('/checkout/with-existing-address', payload);
@@ -295,6 +296,7 @@ export const checkoutWithNewAddressAPI = async (payload: {
     walletNumber: string;
     network: string;
   };
+  pin: string;
 }) => {
   checkoutWithNewAddressSchema.parse(payload);
   const response = await apiClient.post('/checkout/with-new-address', payload);

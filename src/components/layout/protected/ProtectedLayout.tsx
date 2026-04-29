@@ -1,7 +1,6 @@
 // src/components/layout/protected/ProtectedLayout.tsx
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import ChatWidget from '@/components/chat/ChatWidget';
 
 const SIGNIN_PATH = '/95668339501103956045/auth/signin';
 

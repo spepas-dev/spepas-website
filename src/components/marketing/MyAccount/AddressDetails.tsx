@@ -1,33 +1,45 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 
 import MapPicker from '@/components/common/MapPicker';
 import SpepasLoader from '@/components/common/SpepasLoader';
-import { addAddress, getMyAddresses } from '@/lib/addressApis';
+import { addAddress, getMyAddresses, type Address } from '@/lib/addressApis';
 
-interface Address {
-  address_id: string;
-  title: string;
-  addressDetails: string;
-  location: { coordinates: [number, number] };
-  date_added: string;
-  status: number;
-}
+const formatCoord = (n: number | null) => (n === null ? '—' : n.toFixed(4));
 
 const AddressDetails: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | undefined>();
   const [form, setForm] = useState({ title: '', addressDetails: '', longitude: '', latitude: '' });
   const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  const latNum = useMemo(() => { const n = parseFloat(form.latitude); return Number.isFinite(n) ? n : null; }, [form.latitude]);
-  const lngNum = useMemo(() => { const n = parseFloat(form.longitude); return Number.isFinite(n) ? n : null; }, [form.longitude]);
+  const latNum = useMemo(() => {
+    const n = parseFloat(form.latitude);
+    return Number.isFinite(n) ? n : null;
+  }, [form.latitude]);
+  const lngNum = useMemo(() => {
+    const n = parseFloat(form.longitude);
+    return Number.isFinite(n) ? n : null;
+  }, [form.longitude]);
 
   const fetchAddresses = async () => {
     setLoading(true);
+    setLoadError(undefined);
     try {
       const res = await getMyAddresses();
-      setAddresses(res.data);
+      // Server-level non-success (e.g. status: 0) — surface message but don't crash.
+      if (res.status !== 1 && res.data.length === 0) {
+        setAddresses([]);
+        if (res.message) setLoadError(res.message);
+      } else {
+        setAddresses(res.data);
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to load addresses.';
+      setLoadError(msg);
+      setAddresses([]);
     } finally {
       setLoading(false);
     }
@@ -42,17 +54,35 @@ const AddressDetails: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Guard against NaN reaching the API.
+    if (latNum === null || lngNum === null) {
+      toast.error('Pick a valid location on the map (or enter latitude and longitude).', {
+        position: 'bottom-center'
+      });
+      return;
+    }
+    if (!form.title.trim() || !form.addressDetails.trim()) {
+      toast.error('Title and address details are required.', { position: 'bottom-center' });
+      return;
+    }
+
     setSaving(true);
+    const toastId = toast.loading('Saving address…', { position: 'bottom-center' });
     try {
       await addAddress({
-        title: form.title,
-        addressDetails: form.addressDetails,
-        longitude: parseFloat(form.longitude),
-        latitude: parseFloat(form.latitude)
+        title: form.title.trim(),
+        addressDetails: form.addressDetails.trim(),
+        longitude: lngNum,
+        latitude: latNum
       });
+      toast.success('Address saved.', { id: toastId, position: 'bottom-center' });
       setForm({ title: '', addressDetails: '', longitude: '', latitude: '' });
       setShowForm(false);
       fetchAddresses();
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to save address.';
+      toast.error(msg, { id: toastId, position: 'bottom-center' });
     } finally {
       setSaving(false);
     }
@@ -76,6 +106,12 @@ const AddressDetails: React.FC = () => {
           {showForm ? 'Cancel' : 'Add Address'}
         </button>
       </div>
+
+      {loadError && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          {loadError}
+        </div>
+      )}
 
       {/* Add form (collapsible) */}
       {showForm && (
@@ -112,6 +148,7 @@ const AddressDetails: React.FC = () => {
               showSearch
               defaultZoom={12}
             />
+            <p className="mt-1 text-[11px] text-gray-400">Drop a pin on the map or use "Locate me".</p>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -168,7 +205,20 @@ const AddressDetails: React.FC = () => {
             </svg>
           </div>
           <p className="text-gray-500 text-sm">No addresses added yet.</p>
-          <p className="text-gray-400 text-xs mt-1">Click "Add Address" to get started.</p>
+          <p className="text-gray-400 text-xs mt-1">
+            Add your first delivery address so we know where to send your orders.
+          </p>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-2 px-5 rounded-xl shadow-sm hover:opacity-90 transition"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              Add your first address
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
@@ -186,10 +236,10 @@ const AddressDetails: React.FC = () => {
                   </svg>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-800">{addr.title}</p>
-                  <p className="text-sm text-gray-600 mt-0.5">{addr.addressDetails}</p>
+                  <p className="text-sm font-semibold text-gray-800">{addr.title || 'Untitled'}</p>
+                  <p className="text-sm text-gray-600 mt-0.5">{addr.addressDetails || '—'}</p>
                   <p className="text-xs text-gray-400 mt-2">
-                    {addr.location.coordinates[1].toFixed(4)}, {addr.location.coordinates[0].toFixed(4)}
+                    {formatCoord(addr.location.lat)}, {formatCoord(addr.location.lng)}
                   </p>
                 </div>
               </div>

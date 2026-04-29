@@ -92,6 +92,7 @@ export const checkoutWithExistingAddressSchema = z.object({
     walletNumber: z.string().min(1),
     network: z.string().min(1),
   }),
+  pin: z.string().regex(/^[0-9]{4,6}$/, 'PIN must be 4 to 6 digits'),
 });
 
 /** POST /checkout/with-new-address */
@@ -108,6 +109,7 @@ export const checkoutWithNewAddressSchema = z.object({
     walletNumber: z.string().min(1),
     network: z.string().min(1),
   }),
+  pin: z.string().regex(/^[0-9]{4,6}$/, 'PIN must be 4 to 6 digits'),
 });
 
 /** GET /charge/get-user-charges/{aggeagate} */

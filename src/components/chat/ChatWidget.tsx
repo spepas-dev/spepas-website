@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import ChatLayout from '@/components/chat/ChatLayout';
-import { CHATS, MESSAGES } from '@/components/chat/mockData';
+import { CHATS } from '@/components/chat/mockData';
 
 type Props = {
   initialOpen?: boolean;

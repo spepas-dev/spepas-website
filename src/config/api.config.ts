@@ -13,6 +13,10 @@ export const API_ROUTES = {
     FORGOT_PASSWORD: `${BASE_PATH}/auth/forgot-password`,
     RESET_PASSWORD: `${BASE_PATH}/auth/reset-password`,
     CHANGE_PASSWORD: `${BASE_PATH}/auth/change-password`,
+    RESEND_ACTIVATION: `${BASE_PATH}/auth/resend-activation`,
+    SETUP_PIN: `${BASE_PATH}/auth/setup-pin`,
+    VERIFY_PIN: `${BASE_PATH}/auth/verify-pin`,
+    PIN_STATUS: `${BASE_PATH}/auth/pin-status`,
   },
   REQUEST: {
     INVENTORY_SPARE_PART: `${BASE_PATH}/request/inventory-spare-part-request`,

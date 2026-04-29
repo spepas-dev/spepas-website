@@ -117,7 +117,7 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
   // Build final data with bid counts
   const currentData = useMemo(
     () =>
-      groupedRequests.map(([reqId, request], i) => ({
+      groupedRequests.map(([, request], i) => ({
         ...request,
         _totalBids: bidCountQueries[i]?.data?.total ?? 0,
         _submittedBids: bidCountQueries[i]?.data?.submitted ?? 0,

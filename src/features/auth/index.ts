@@ -18,6 +18,9 @@ import {
   forgotPasswordAPI,
   resetPasswordAPI,
   changePasswordAPI,
+  resendActivationAPI,
+  setupPinAPI,
+  pinStatusAPI,
   // refreshTokenAPI,        // ❌ no longer used
 } from "../../lib/auth";
 
@@ -50,6 +53,25 @@ export type SigninPayload = {
 export type ActivateAccountPayload = {
   otp: string;
   otpID: string;
+};
+
+// Returned by activateAccount + login so callers can route correctly.
+export type PostAuthFlags = {
+  pinRequired: boolean;
+  passwordRequired: boolean;
+};
+
+// For Resend Activation OTP (admin-onboarded users land here)
+export type ResendActivationPayload = {
+  phoneNumber?: string;
+  email?: string;
+  identifier?: string;
+};
+
+// For Setup PIN
+export type SetupPinPayload = {
+  pin: string;
+  confirmPin: string;
 };
 
 // For Forgot Password
@@ -189,8 +211,11 @@ export type AuthContextType = {
   authData: AuthData;
   isAuthenticated: boolean;
   signup: (payload: SignupPayload) => Promise<any>;
-  login: (payload: SigninPayload) => Promise<void>;
-  activateAccount: (payload: ActivateAccountPayload) => Promise<void>;
+  login: (payload: SigninPayload) => Promise<PostAuthFlags>;
+  activateAccount: (payload: ActivateAccountPayload) => Promise<PostAuthFlags>;
+  resendActivation: (payload: ResendActivationPayload) => Promise<any>;
+  setupPin: (payload: SetupPinPayload) => Promise<any>;
+  refreshPinStatus: () => Promise<{ pinSet: boolean } | null>;
   logout: () => Promise<void>;
   forgotPassword: (payload: ForgotPasswordPayload) => Promise<any>;
   resetPassword: (payload: ResetPasswordPayload) => Promise<void>;
@@ -324,18 +349,21 @@ export const AuthProvider = ({
    *   "filtered": { "user": { ...full user... } }
    * }
    */
-  const login = async (payload: SigninPayload): Promise<void> => {
+  const login = async (payload: SigninPayload): Promise<PostAuthFlags> => {
     try {
       const apiData: any = await signinAPI(payload); // signinAPI already returns response.data
 
-      const filtered = apiData.filtered || {};
+      const filtered = apiData.filtered || apiData.data || {};
       const nextAuth: AuthData = {
         user: (filtered.user as UserType) ?? null,
       };
 
       setAuthData(nextAuth);
-      // optional: if you later add a /profiling/:id that needs more data, refetchUser() can stay
-      // await refetchUser();
+
+      return {
+        pinRequired: Boolean(filtered.pinRequired),
+        passwordRequired: Boolean(filtered.passwordRequired),
+      };
     } catch (error) {
       // console.error("Signin failed:", error);
       throw error;
@@ -348,7 +376,7 @@ export const AuthProvider = ({
    */
   const activateAccount = async (
     payload: ActivateAccountPayload
-  ): Promise<void> => {
+  ): Promise<PostAuthFlags> => {
     try {
       const apiData: any = await activateAccountAPI(payload);
 
@@ -358,10 +386,35 @@ export const AuthProvider = ({
       };
 
       setAuthData(nextAuth);
-      // await refetchUser(); // optional
+
+      return {
+        pinRequired: Boolean(filtered.pinRequired),
+        passwordRequired: Boolean(filtered.passwordRequired),
+      };
     } catch (error) {
       // console.error("Activate account failed:", error);
       throw error;
+    }
+  };
+
+  const resendActivation = async (
+    payload: ResendActivationPayload
+  ): Promise<any> => {
+    return await resendActivationAPI(payload);
+  };
+
+  const setupPin = async (payload: SetupPinPayload): Promise<any> => {
+    return await setupPinAPI(payload);
+  };
+
+  const refreshPinStatus = async (): Promise<{ pinSet: boolean } | null> => {
+    try {
+      const res: any = await pinStatusAPI();
+      const data = res?.data ?? res ?? null;
+      if (!data) return null;
+      return { pinSet: Boolean(data.pinSet) };
+    } catch {
+      return null;
     }
   };
 
@@ -485,6 +538,9 @@ export const AuthProvider = ({
     signup,
     login,
     activateAccount,
+    resendActivation,
+    setupPin,
+    refreshPinStatus,
     logout,
     forgotPassword,
     resetPassword,

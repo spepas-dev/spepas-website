@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/marketing/ShopDetails/index.tsx
 import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Breadcrumb from '../Common/Breadcrumb';
 import { getSparePartDetailByCode, getSpareParts } from '@/lib/inventoryApis';

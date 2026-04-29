@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Services() {
   return (
     <section className="max-w-[1170px] w-full mx-auto px-4 py-8 sm:px-6 sm:py-10 md:px-8 md:py-12 xl:px-0 bg-gray-50 shadow-xl rounded-xl mt-8 lg:mt-10">

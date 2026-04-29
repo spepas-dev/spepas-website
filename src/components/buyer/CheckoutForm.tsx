@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import MapPicker from '@/components/common/MapPicker';
 import SpepasLoader from '@/components/common/SpepasLoader';
+import PinConfirmModal from '@/components/buyer/PinConfirmModal';
 import { checkoutWithExistingAddressAPI, checkoutWithNewAddressAPI } from '@/lib/orderBidsApis';
 
 const inputClass =
@@ -16,6 +17,10 @@ const CheckoutForm: React.FC = () => {
   const { charges, aggeagate } = location.state || {};
   const [submitting, setSubmitting] = useState(false);
   const [mode, setMode] = useState<'existing' | 'new'>('existing');
+
+  // PIN confirmation state
+  const [pinModalOpen, setPinModalOpen] = useState(false);
+  const [pinError, setPinError] = useState<string | undefined>();
 
   // New address form state
   const [title, setTitle] = useState('');
@@ -49,51 +54,81 @@ const CheckoutForm: React.FC = () => {
     );
   }
 
-  const handleExisting = async () => {
+  // Translate the order-service PIN-gate response (which always returns HTTP 200)
+  // into a user-facing error message in the modal.
+  const extractPinError = (resp: any): string | undefined => {
+    if (!resp || typeof resp !== 'object') return undefined;
+    if (resp.status === 1) return undefined; // success
+    if (resp.code === 'PIN_REQUIRED') return 'Transaction PIN required.';
+    if (resp.code === 'PIN_NOT_SET') return 'PIN not set';
+    if (resp.code === 'PIN_INVALID') return resp.message || 'Invalid PIN.';
+    return undefined;
+  };
+
+  const submitWithPin = async (pin: string) => {
     setSubmitting(true);
+    setPinError(undefined);
     try {
-      const address_id = 'ADDRESS_ID_HERE'; // TODO: let user pick from saved addresses
-      await checkoutWithExistingAddressAPI({
-        address_id,
-        aggeagate: Number(aggeagate),
-        paymentDetails: {
-          paymentMode: 'WALLET',
-          walletNumber: '233554340244',
-          network: 'MTN'
-        }
-      });
+      let result: any;
+      if (mode === 'existing') {
+        const address_id = 'ADDRESS_ID_HERE'; // TODO: let user pick from saved addresses
+        result = await checkoutWithExistingAddressAPI({
+          address_id,
+          aggeagate: Number(aggeagate),
+          paymentDetails: {
+            paymentMode: 'WALLET',
+            walletNumber: '233554340244',
+            network: 'MTN'
+          },
+          pin,
+        });
+      } else {
+        const address = {
+          title: title || 'My Address',
+          addressDetails: addressDetails || 'Address details',
+          longitude: lngNum ?? 0,
+          latitude: latNum ?? 0,
+        };
+        result = await checkoutWithNewAddressAPI({
+          address,
+          aggeagate: Number(aggeagate),
+          paymentDetails: {
+            paymentMode: 'WALLET',
+            walletNumber: '233554340244',
+            network: 'MTN'
+          },
+          pin,
+        });
+      }
+
+      const pinErr = extractPinError(result);
+      if (pinErr) {
+        setPinError(pinErr);
+        return;
+      }
+
+      setPinModalOpen(false);
       toast.success('Order placed successfully!', { position: 'bottom-center' });
-    } catch {
-      toast.error('Checkout failed. Please try again.', { position: 'bottom-center' });
+    } catch (err: any) {
+      const apiMsg = err?.response?.data?.message;
+      // Backend can also signal PIN failures via thrown errors depending on mood;
+      // treat anything matching 'pin' as a modal-level message instead of a toast.
+      if (typeof apiMsg === 'string' && /pin/i.test(apiMsg)) {
+        setPinError(apiMsg);
+      } else {
+        setPinModalOpen(false);
+        toast.error(apiMsg || 'Checkout failed. Please try again.', {
+          position: 'bottom-center',
+        });
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleNew = async () => {
-    setSubmitting(true);
-    try {
-      const address = {
-        title: title || 'My Address',
-        addressDetails: addressDetails || 'Address details',
-        longitude: lngNum ?? 0,
-        latitude: latNum ?? 0,
-      };
-      await checkoutWithNewAddressAPI({
-        address,
-        aggeagate: Number(aggeagate),
-        paymentDetails: {
-          paymentMode: 'WALLET',
-          walletNumber: '233554340244',
-          network: 'MTN'
-        }
-      });
-      toast.success('Order placed successfully!', { position: 'bottom-center' });
-    } catch {
-      toast.error('Checkout failed. Please try again.', { position: 'bottom-center' });
-    } finally {
-      setSubmitting(false);
-    }
+  const openPinModal = () => {
+    setPinError(undefined);
+    setPinModalOpen(true);
   };
 
   const chargeRows = [
@@ -232,7 +267,7 @@ const CheckoutForm: React.FC = () => {
           </div>
 
           <button
-            onClick={mode === 'existing' ? handleExisting : handleNew}
+            onClick={openPinModal}
             disabled={submitting}
             className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
           >
@@ -254,6 +289,19 @@ const CheckoutForm: React.FC = () => {
           </button>
         </div>
       </div>
+
+      <PinConfirmModal
+        open={pinModalOpen}
+        submitting={submitting}
+        amountLabel={`GH₵ ${grandTotal.toFixed(2)}`}
+        errorMessage={pinError}
+        onCancel={() => {
+          if (submitting) return;
+          setPinModalOpen(false);
+          setPinError(undefined);
+        }}
+        onConfirm={submitWithPin}
+      />
     </div>
   );
 };
