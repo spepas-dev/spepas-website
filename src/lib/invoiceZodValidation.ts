@@ -23,6 +23,12 @@ export const invoiceItemSchema = z.object({
   rider_user_id: z.string().nullable().optional(),
   delivered_by: z.string().nullable().optional(),
   date_delivered: z.string().nullable().optional(),
+  // Handshake codes from the order service. pickup_code is set after a rider
+  // is assigned (until the seller hands off); delivery_code is set after the
+  // seller hands off (until delivery is confirmed). The buyer cares about the
+  // delivery_code — that's the one they read out to the rider on arrival.
+  pickup_code: z.string().nullable().optional(),
+  delivery_code: z.string().nullable().optional(),
   cart: z.any().optional(),
   tracker: z.array(z.any()).optional(),
   rider: z.any().optional(),

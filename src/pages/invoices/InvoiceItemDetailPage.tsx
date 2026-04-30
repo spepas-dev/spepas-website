@@ -66,6 +66,29 @@ const InvoiceItemDetailPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Delivery code: shown to the buyer once the seller has handed
+                  off to the rider, until delivery is confirmed. The buyer
+                  reads this aloud to the rider on arrival to authorise the
+                  handoff. */}
+              {item.delivery_code && (
+                <div className="mt-4 pt-4 border-t">
+                  <div className="rounded-xl border border-blue/20 bg-blue/5 p-4 flex items-start gap-3">
+                    <svg className="w-5 h-5 text-blue mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">Your delivery code</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Read this code to the rider when they arrive to confirm delivery.
+                      </p>
+                      <p className="mt-2 text-2xl font-mono font-bold tracking-widest text-blue">
+                        {item.delivery_code}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* QR value */}
               {item.qr_value && (
                 <div className="mt-4 pt-4 border-t">

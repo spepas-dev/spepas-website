@@ -99,15 +99,27 @@ const InvoiceDetailPage: React.FC = () => {
                     <div
                       key={item.item_id}
                       onClick={() => navigate(`/95668339501103956045/invoices/${invoice.invoice_id}/items/${item.item_id}`)}
-                      className="flex items-center justify-between bg-gray-50 rounded-lg p-4 border cursor-pointer hover:bg-gray-100 transition"
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-50 rounded-lg p-4 border cursor-pointer hover:bg-gray-100 transition gap-2"
                     >
-                      <div>
-                        <p className="text-xs font-mono text-gray-400">{item.item_id}</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-mono text-gray-400 truncate">{item.item_id}</p>
                         <p className="font-medium mt-1">
                           {item.total_items} item{item.total_items !== 1 ? 's' : ''} — GH₵ {item.total_amount?.toFixed(2)}
                         </p>
+                        {/* Show the delivery code inline when one is active —
+                            saves the buyer drilling in to the item-detail page. */}
+                        {item.delivery_code && (
+                          <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-blue/10 border border-blue/20 px-2.5 py-1">
+                            <span className="text-[10px] uppercase tracking-wide text-blue font-medium">
+                              Delivery code
+                            </span>
+                            <span className="font-mono text-sm font-bold tracking-widest text-blue">
+                              {item.delivery_code}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 self-start sm:self-auto">
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${
                             item.statusMessage === 'PENDING'
