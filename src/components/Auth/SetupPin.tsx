@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 
 import { useAuth } from '@/features/auth';
+import { HOME_PATH, resolveNextOnboardingStep } from '@/lib/onboardingFlow';
 
 const PIN_REGEX = /^[0-9]{4,6}$/;
 
@@ -61,11 +62,13 @@ const SetupPin: React.FC = () => {
         position: 'bottom-center',
       });
 
-      // After PIN, complete the buyer journey.
-      const next = isAuthenticated
-        ? '/95668339501103956045/home'
-        : '/95668339501103956045/auth/signin';
-      navigate(next);
+      // After PIN, route to delivery-address setup if the buyer doesn't have
+      // one yet, otherwise drop them on home.
+      const next = await resolveNextOnboardingStep();
+      navigate(
+        next ||
+          (isAuthenticated ? HOME_PATH : '/95668339501103956045/auth/signin')
+      );
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||

@@ -5,12 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 
 import { useAuth } from '@/features/auth';
+import { HOME_PATH, resolveNextOnboardingStep } from '@/lib/onboardingFlow';
 
 const MIN_PW = 8;
 
 const SetupPassword: React.FC = () => {
   const navigate = useNavigate();
-  const { setPassword, refreshPinStatus, isAuthenticated } = useAuth();
+  const { setPassword, isAuthenticated } = useAuth();
 
   const [password, setPasswordValue] = useState('');
   const [confirmPassword, setConfirmPasswordValue] = useState('');
@@ -56,19 +57,12 @@ const SetupPassword: React.FC = () => {
         position: 'bottom-center',
       });
 
-      // Decide what to do next: PIN setup if needed, otherwise home.
-      const pinStatus = await refreshPinStatus();
-      const pinNeeded = !pinStatus || pinStatus.pinSet === false;
-
-      if (pinNeeded) {
-        navigate('/95668339501103956045/auth/setup-pin');
-      } else {
-        navigate(
-          isAuthenticated
-            ? '/95668339501103956045/home'
-            : '/95668339501103956045/auth/signin'
-        );
-      }
+      // Continue through whatever onboarding steps remain (PIN, address).
+      const next = await resolveNextOnboardingStep();
+      navigate(
+        next ||
+          (isAuthenticated ? HOME_PATH : '/95668339501103956045/auth/signin')
+      );
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||

@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth';
+import { resolveNextOnboardingStep } from '@/lib/onboardingFlow';
 
 const ActivateAccount: React.FC = () => {
   const navigate = useNavigate();
@@ -113,14 +114,12 @@ const ActivateAccount: React.FC = () => {
         position: 'bottom-center',
       });
 
-      // Priority order: password → PIN → identification/home.
-      if (flags.passwordRequired) {
-        navigate('/95668339501103956045/auth/setup-password');
-      } else if (flags.pinRequired) {
-        navigate('/95668339501103956045/auth/setup-pin');
-      } else {
-        navigate('/95668339501103956045/add-identification');
-      }
+      // Priority chain: password → PIN → delivery address → home.
+      const next = await resolveNextOnboardingStep({
+        passwordRequired: flags.passwordRequired,
+        pinRequired: flags.pinRequired,
+      });
+      navigate(next || '/95668339501103956045/add-identification');
     } catch {
       toast.error('Activation failed. Please check your OTP and try again.', {
         id: toastId,

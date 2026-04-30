@@ -11,6 +11,7 @@ import ChangePasswordPage from '@/pages/auth/change-password';
 import ProfileSwitchOtpPage from '@/pages/auth/profile-switch-otp';
 import SetupPinPage from '@/pages/auth/setup-pin';
 import SetupPasswordPage from '@/pages/auth/setup-password';
+import SetupAddressPage from '@/pages/auth/setup-address';
 
 export const authRoutes: RouteObject[] = [
   { index: true, element: <SignInPage /> },
@@ -23,4 +24,5 @@ export const authRoutes: RouteObject[] = [
   { path: 'profile-switch-otp', element: <ProfileSwitchOtpPage /> },
   { path: 'setup-pin', element: <SetupPinPage /> },
   { path: 'setup-password', element: <SetupPasswordPage /> },
+  { path: 'setup-address', element: <SetupAddressPage /> },
 ];

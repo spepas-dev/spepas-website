@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
 import { useAccountType } from '@/features/accountTypeContext';
+import { resolveNextOnboardingStep } from '@/lib/onboardingFlow';
 import { Eye, EyeOff } from 'lucide-react';
 
 type Role = 'GOPA' | 'SELLER' | 'BUYER';
@@ -112,41 +113,47 @@ const Signin: React.FC = () => {
     }
   };
 
-  // 2️⃣ After login, detect available roles
+  // 2️⃣ After login, route through any unfinished onboarding step (password
+  //    → PIN → delivery address) before falling through to role selection.
   useEffect(() => {
     if (!didLogin) return;
     const user = authData.user;
     if (!user) return;
 
-    // Onboarding completion takes precedence over role selection / home.
-    // Order: password → PIN → home. (Sign-in only succeeds if a password
-    // exists, but a user mid-flow could still have passwordRequired === true
-    // after re-activating without finishing setup.)
-    if (passwordRequired) {
-      setAccountType('BUYER');
-      navigate('/95668339501103956045/auth/setup-password');
-      return;
-    }
-    if (pinRequired) {
-      setAccountType('BUYER');
-      navigate('/95668339501103956045/auth/setup-pin');
-      return;
-    }
+    let cancelled = false;
 
-    const roles: Role[] = [];
-    if (user.gopa)          roles.push('GOPA');
-    if (user.sellerDetails) roles.push('SELLER');
-    // MEPA and RIDER hidden for now
-    // if (user.mepa)          roles.push('MEPA');
-    // if (user.deliver)       roles.push('RIDER');
+    (async () => {
+      const next = await resolveNextOnboardingStep({
+        passwordRequired,
+        pinRequired,
+      });
+      if (cancelled) return;
 
-    if (roles.length > 0) {
-      setAvailableRoles(['BUYER', ...roles]);
-      setShowRoleSelector(true);
-    } else {
-      setAccountType('BUYER');
-      navigate(redirectTo || '/95668339501103956045/home');
-    }
+      if (next) {
+        setAccountType('BUYER');
+        navigate(next);
+        return;
+      }
+
+      const roles: Role[] = [];
+      if (user.gopa)          roles.push('GOPA');
+      if (user.sellerDetails) roles.push('SELLER');
+      // MEPA and RIDER hidden for now
+      // if (user.mepa)          roles.push('MEPA');
+      // if (user.deliver)       roles.push('RIDER');
+
+      if (roles.length > 0) {
+        setAvailableRoles(['BUYER', ...roles]);
+        setShowRoleSelector(true);
+      } else {
+        setAccountType('BUYER');
+        navigate(redirectTo || '/95668339501103956045/home');
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [didLogin, authData.user, navigate, setAccountType, pinRequired, passwordRequired, redirectTo]);
 
   // 3️⃣ Handle role selection
