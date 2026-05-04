@@ -4,6 +4,7 @@ import ActiveBidsPage from '@/pages/seller/ActiveBidsPage';
 import BidHistoryPage from '@/pages/seller/BidHistoryPage';
 import RequestDetailPage from '@/pages/seller/RequestDetailPage';
 import SellerInvoicesPage from '@/pages/seller/InvoicesPage';
+import SellerWalletPage from '@/pages/seller/WalletPage';
 
 export const sellerRoutes: RouteObject[] = [
   {
@@ -21,5 +22,9 @@ export const sellerRoutes: RouteObject[] = [
   {
     path: 'seller/:sellerId/invoices',
     element: <SellerInvoicesPage />,
+  },
+  {
+    path: 'seller/wallet',
+    element: <SellerWalletPage />,
   },
 ];
