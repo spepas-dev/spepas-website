@@ -1,10 +1,11 @@
 // src/components/Auth/SetupPin.tsx
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 
 import { useAuth } from '@/features/auth';
+import { pinStatusAPI } from '@/lib/auth';
 import { HOME_PATH, resolveNextOnboardingStep } from '@/lib/onboardingFlow';
 
 const PIN_REGEX = /^[0-9]{4,6}$/;
@@ -19,6 +20,34 @@ const SetupPin: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  // checking → we don't render the form until we've confirmed the user has
+  // no PIN. Prevents the silent-overwrite trap when something in the
+  // onboarding pipeline routes a user with an existing PIN through here.
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const resp: any = await pinStatusAPI();
+        if (cancelled) return;
+        if (resp?.data?.pinSet) {
+          // User already has a PIN — bounce to the reset/change flow which
+          // requires the old PIN + OTP gates. Never silently overwrite.
+          navigate('/95668339501103956045/auth/manage-pin', { replace: true });
+          return;
+        }
+      } catch {
+        // pin-status lookup failed. Fall through to first-time setup; the
+        // backend setupPin endpoint is the final guard, and the audit SMS on
+        // every successful change gives the legitimate owner visibility if
+        // anything sneaks through.
+      } finally {
+        if (!cancelled) setChecking(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   const onlyDigits = (val: string) => val.replace(/\D/g, '').slice(0, 6);
 
@@ -80,6 +109,16 @@ const SetupPin: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <section className="overflow-hidden bg-white">
+        <div className="max-w-[570px] w-full mx-auto rounded-xl bg-white shadow-md p-6 sm:p-7.5 xl:p-11 text-center">
+          <p className="text-gray-500">Loading…</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="overflow-hidden bg-white">

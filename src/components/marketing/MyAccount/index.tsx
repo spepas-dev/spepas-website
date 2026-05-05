@@ -41,7 +41,7 @@ const ROLE_LABELS: Record<Role, string> = {
 
 const MyAccount: React.FC = () => {
   const { authData, logout, refetchUser } = useAuth();
-  const { accountType } = useAccountType();
+  const { accountType, setAccountType } = useAccountType();
   const user = authData!.user!;
   const navigate = useNavigate();
 
@@ -133,6 +133,15 @@ const MyAccount: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
               Add Profile
+            </button>
+            <button
+              onClick={() => navigate('/95668339501103956045/auth/manage-pin')}
+              className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium py-2.5 px-5 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0-1.657 1.343-3 3-3s3 1.343 3 3v2H9v-2c0-1.657 1.343-3 3-3z M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2z" />
+              </svg>
+              Manage PIN
             </button>
             <button
               onClick={() => setShowSwitcher(true)}
@@ -306,8 +315,16 @@ const MyAccount: React.FC = () => {
                 <li key={role}>
                   <button
                     onClick={() => {
-                      localStorage.setItem('pendingAccountType', role);
                       setShowSwitcher(false);
+                      // BUYER is the default profile every user has — no PIN
+                      // required to step down to it. Elevated profiles
+                      // (SELLER / RIDER / GOPA / MEPA) go through the PIN gate.
+                      if (role === 'BUYER') {
+                        setAccountType('BUYER');
+                        navigate('/95668339501103956045/home');
+                        return;
+                      }
+                      localStorage.setItem('pendingAccountType', role);
                       navigate('/95668339501103956045/auth/profile-switch-otp');
                     }}
                     className={`w-full flex items-center justify-between py-3 px-4 rounded-xl text-sm font-medium transition ${
