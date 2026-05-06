@@ -116,12 +116,7 @@ const MyWallet: React.FC<MyWalletProps> = ({ role, queryKey }) => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: copy.label },
-        ]}
-      />
+      <Breadcrumb title={copy.label} pages={[copy.label]} />
 
       <h1 className="text-2xl font-semibold text-gray-900 mb-6 mt-4">{copy.label}</h1>
 
