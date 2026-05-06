@@ -22,8 +22,9 @@ export const riderRoutes: RouteObject[] = [
   // Invoices
   { path: 'invoices', element: <RiderInvoicesPage /> },
 
-  // Wallet + withdrawal
-  { path: 'rider/wallet', element: <RiderWalletPage /> },
+  // Wallet + withdrawal. Path is relative to the parent `path: 'rider'`
+  // mount in routes/index.tsx, so the full URL is /rider/wallet.
+  { path: 'wallet', element: <RiderWalletPage /> },
 
   // Details
   { path: 'orders/:orderId', element: <RiderOrderDetailPage /> },
