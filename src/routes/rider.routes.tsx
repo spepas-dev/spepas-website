@@ -12,6 +12,7 @@ import RiderProofPage from '@/pages/rider/proof';
 import RiderProofSubmitPage from '@/pages/rider/proof-submit';
 import RiderDeliveredSuccessPage from '@/pages/rider/delivered-success';
 import RiderInvoicesPage from '@/pages/rider/invoices';
+import RiderWalletPage from '@/pages/rider/wallet';
 
 export const riderRoutes: RouteObject[] = [
   // Lists
@@ -20,6 +21,9 @@ export const riderRoutes: RouteObject[] = [
 
   // Invoices
   { path: 'invoices', element: <RiderInvoicesPage /> },
+
+  // Wallet + withdrawal
+  { path: 'rider/wallet', element: <RiderWalletPage /> },
 
   // Details
   { path: 'orders/:orderId', element: <RiderOrderDetailPage /> },

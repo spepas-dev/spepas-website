@@ -28,7 +28,16 @@ const SellerHome: React.FC<{ name: string; sellerId?: string }> = ({ name, selle
 
   return (
     <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0 py-6 pt-28">
-      <h1 className="text-2xl font-semibold mb-5">Home</h1>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-2xl font-semibold">Home</h1>
+        <button
+          type="button"
+          onClick={() => navigate('/95668339501103956045/seller/wallet')}
+          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          My Wallet
+        </button>
+      </div>
 
       {/* Brand / rating card */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 mb-5">

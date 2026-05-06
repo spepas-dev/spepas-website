@@ -5,8 +5,14 @@ import AssignedHistoryPage from '@/pages/gopa/AssignedHistoryPage';
 import UnassignedActiveRequestsPage from '@/pages/gopa/UnassignedActiveRequestsPage';
 import UnassignedHistoryPage from '@/pages/gopa/UnassignedHistoryPage';
 import RequestSellersPage from '@/pages/gopa/RequestSellersPage';
+import GopaWalletPage from '@/pages/gopa/WalletPage';
 
 export const gopaRoutes: RouteObject[] = [
+  // Wallet + withdrawal (no gopaId param — uses the authenticated user)
+  {
+    path: 'gopa/wallet',
+    element: <GopaWalletPage />,
+  },
   {
     path: 'gopa/:gopaId/assigned/active',
     element: <AssignedActiveRequestsPage />,

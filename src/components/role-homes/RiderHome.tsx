@@ -82,6 +82,7 @@ const EmptyLine: React.FC<{ text: string }> = ({ text }) => (
 );
 
 const RiderHome: React.FC<{ riderName: string }> = ({ riderName }) => {
+  const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(false);
   const [tab, setTab] = useState<'new' | 'accepted'>('new');
 
@@ -113,7 +114,16 @@ const RiderHome: React.FC<{ riderName: string }> = ({ riderName }) => {
 
   return (
     <div className="max-w-[1170px] mx-auto px-4 sm:px-7.5 xl:px-0 py-6 pt-28">
-      <h1 className="text-2xl font-semibold mb-4">Home</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-semibold">Home</h1>
+        <button
+          type="button"
+          onClick={() => navigate('/95668339501103956045/rider/wallet')}
+          className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          My Wallet
+        </button>
+      </div>
 
       {!isOnline && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 text-center mb-5">

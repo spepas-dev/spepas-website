@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/role-homes/GopaHome.tsx
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useQuery, useQueries } from '@tanstack/react-query';
 
@@ -36,6 +37,7 @@ const fetchers: Record<TabKey, (user_id: string) => Promise<any>> = {
 };
 
 const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId }) => {
+  const navigate = useNavigate();
   const { authData } = useAuth();
   const effectiveGopaId = gopaId ?? authData?.user?.gopa?.User_ID ?? null;
   const specialties = authData?.user?.gopa?.Specialties ?? [];
@@ -157,9 +159,20 @@ const GopaHome: React.FC<{ name: string; gopaId?: string }> = ({ name, gopaId })
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
       {/* ── Header ─────────────────────────────────────────────── */}
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Welcome back, {name}</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage your spare part requests and seller assignments</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/95668339501103956045/gopa/wallet')}
+          className="shrink-0 inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          My Wallet
+        </button>
+      </div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back, {name}</h1>
-        <p className="text-sm text-gray-500 mt-1">Manage your spare part requests and seller assignments</p>
         {specialties.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {specialties.map((s: string) => (
