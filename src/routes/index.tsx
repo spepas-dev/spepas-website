@@ -15,6 +15,7 @@ import { sellerRoutes }        from './seller.routes';
 import { buyerRoutes }         from './buyer.routes';
 import { gopaRoutes }          from './gopa.routes';
 import { gopaInvoiceRoutes }   from './gopaInvoices.routes';
+import { mepaRoutes }          from './mepa.routes';
 
 
 import { riderRoutes }         from './rider.routes';
@@ -36,6 +37,7 @@ const protectedChildren = [
   ...sellerRoutes,
   ...gopaRoutes,
   ...gopaInvoiceRoutes,
+  ...mepaRoutes,
 
 
   { path: 'rider', children: riderRoutes },

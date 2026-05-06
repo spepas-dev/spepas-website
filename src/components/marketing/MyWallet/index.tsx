@@ -27,7 +27,7 @@ interface WalletData {
 const cedi = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'GHS' }).format(n);
 
-export type WalletRole = 'SELLER' | 'RIDER' | 'GOPA';
+export type WalletRole = 'SELLER' | 'RIDER' | 'GOPA' | 'MEPA';
 
 // Map the page-level role to the backend USER_TYPE enum that scopes the
 // wallet lookup. Rider profile is "DELIVERY" in USER_TYPE.
@@ -35,6 +35,7 @@ const ROLE_TO_PROFILE: Record<WalletRole, WalletProfile> = {
   SELLER: 'SELLER',
   RIDER: 'DELIVERY',
   GOPA: 'GOPA',
+  MEPA: 'MEPA',
 };
 
 interface MyWalletProps {
@@ -66,6 +67,11 @@ const ROLE_COPY: Record<WalletRole, {
       'No wallet found yet. A wallet is created automatically the first time you complete a delivery handshake.',
   },
   GOPA: {
+    label: 'My Wallet',
+    emptyMessage:
+      'No wallet found yet. A wallet is created automatically when commissions or earnings post to your account.',
+  },
+  MEPA: {
     label: 'My Wallet',
     emptyMessage:
       'No wallet found yet. A wallet is created automatically when commissions or earnings post to your account.',
