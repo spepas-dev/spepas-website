@@ -9,10 +9,14 @@ const RegistrationSelection: React.FC = () => {
   const user = authData?.user;
   const navigate = useNavigate();
 
-  // Only show Seller and GOPA profiles for now (MEPA and Rider hidden)
+  // Available add-on profiles for self-onboarding. MEPA still hidden until
+  // its registration flow ships. Each option disables itself when the
+  // current user already has that profile attached, so a seller doesn't
+  // see "Seller Profile" as an active button on a return visit.
   const options = [
     { label: 'Seller Profile', path: '/95668339501103956045/seller-registration', disabled: !!user?.sellerDetails },
     { label: 'GOPA Profile', path: '/95668339501103956045/gopa-registration', disabled: !!user?.gopa },
+    { label: 'Rider Profile', path: '/95668339501103956045/rider-registration', disabled: !!user?.deliver },
   ];
 
   return (

@@ -7,13 +7,13 @@ import { useAccountType } from '@/features/accountTypeContext';
 import { useAuth } from '@/features/auth';
 
 import AddressDetails from './AddressDetails';
-// import DeliverProfileTab from './DeliverProfileTab';
+import DeliverProfileTab from './DeliverProfileTab';
 import GeneralDetails from './GeneralDetails';
 import GopaProfileTab from './GopaProfileTab';
 import GroupsRolesTab from './GroupsRolesTab';
 // import MepaProfileTab from './MepaProfileTab';
 import PaymentAccountsTab from './PaymentAccountsTab';
-// import RiderDocumentsTab from './RiderDocumentsTab';
+import RiderDocumentsTab from './RiderDocumentsTab';
 import SellerDetailsTab from './SellerDetailsTab';
 import SellerDocumentsTab from './SellerDocumentsTab';
 import WalletDetails from './WalletDetails';
@@ -31,17 +31,21 @@ type TabKey =
   | 'address'
   | 'wallet';
 
-type Role = 'GOPA' | 'SELLER' | 'BUYER';
+type Role = 'GOPA' | 'SELLER' | 'RIDER' | 'BUYER';
 
 const ROLE_LABELS: Record<Role, string> = {
   GOPA: 'GOPA',
   SELLER: 'Seller',
+  RIDER: 'Rider',
   BUYER: 'Buyer'
 };
 
 const MyAccount: React.FC = () => {
   const { authData, logout, refetchUser } = useAuth();
-  const { accountType, setAccountType } = useAccountType();
+  // availableRoles comes from the AccountTypeContext so this list stays in
+  // lockstep with the context's role-detection rules (any role added via
+  // admin or self-registration shows up here without a duplicate gate).
+  const { accountType, setAccountType, availableRoles: contextAvailableRoles } = useAccountType();
   const user = authData!.user!;
   const navigate = useNavigate();
 
@@ -55,32 +59,20 @@ const MyAccount: React.FC = () => {
     year: 'numeric'
   });
 
-  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [showSwitcher, setShowSwitcher] = useState(false);
-  useEffect(() => {
-    const roles: Role[] = [];
-    if (user.gopa) {
-      roles.push('GOPA');
-    }
-    if (user.sellerDetails) {
-      roles.push('SELLER');
-    }
-    // MEPA and RIDER hidden for now
-    // if (user.mepa) { roles.push('MEPA'); }
-    // if (user.deliver) { roles.push('RIDER'); }
-    roles.push('BUYER');
-    setAvailableRoles(roles);
-  }, [user]);
+  // Single source of truth — pulled from context so any role detection
+  // change there (e.g. enabling MEPA later) propagates without an edit here.
+  const availableRoles = contextAvailableRoles as Role[];
 
   const allTabs: Array<{ key: TabKey; label: string }> = [
     { key: 'general', label: 'General Profile' },
     user.gopa && { key: 'gopa', label: 'GOPA Profile' },
     user.sellerDetails && { key: 'seller', label: 'Seller Profile' },
     user.sellerDetails && { key: 'sellerDocs', label: 'Seller Documents' },
-    // MEPA and RIDER tabs hidden for now
+    user.deliver && { key: 'deliver', label: 'Delivery Profile' },
+    user.deliver && { key: 'riderDocs', label: 'Rider Documents' },
+    // MEPA still hidden — its profile flow isn't shipped yet.
     // user.mepa && { key: 'mepa', label: 'MEPA Profile' },
-    // user.deliver && { key: 'deliver', label: 'Delivery Profile' },
-    // user.deliver && { key: 'riderDocs', label: 'Rider Documents' },
     ((user.user_groups?.length ?? 0) > 0 || (user.user_roles?.length ?? 0) > 0) && { key: 'groups', label: 'Groups & Roles' },
     (user.paymentAccounts?.length ?? 0) > 0 && { key: 'payments', label: 'Payment Accounts' },
     { key: 'address', label: 'Addresses' },
@@ -93,10 +85,13 @@ const MyAccount: React.FC = () => {
     if (key === 'general') {
       return true;
     }
-    if (accountType === 'GOPA' && key === 'gopa') {
+    if (accountType === 'GOPA' && (key === 'gopa' || key === 'wallet')) {
       return true;
     }
     if (accountType === 'SELLER' && (key === 'seller' || key === 'sellerDocs' || key === 'wallet')) {
+      return true;
+    }
+    if (accountType === 'RIDER' && (key === 'deliver' || key === 'riderDocs' || key === 'wallet')) {
       return true;
     }
     if (accountType === 'BUYER' && (key === 'address' || key === 'payments')) {
@@ -279,8 +274,8 @@ const MyAccount: React.FC = () => {
               {/* {activeTab === 'mepa' && user.mepa && <MepaProfileTab profile={user.mepa} />} */}
               {activeTab === 'seller' && user.sellerDetails && <SellerDetailsTab details={user.sellerDetails} />}
               {activeTab === 'sellerDocs' && user.sellerDetails && <SellerDocumentsTab />}
-              {/* {activeTab === 'deliver' && user.deliver && <DeliverProfileTab deliver={user.deliver} />} */}
-              {/* {activeTab === 'riderDocs' && user.deliver && <RiderDocumentsTab />} */}
+              {activeTab === 'deliver' && user.deliver && <DeliverProfileTab deliver={user.deliver} />}
+              {activeTab === 'riderDocs' && user.deliver && <RiderDocumentsTab />}
               {activeTab === 'groups' && <GroupsRolesTab groups={user.user_groups ?? []} roles={user.user_roles ?? []} />}
               {activeTab === 'payments' && user.paymentAccounts && <PaymentAccountsTab accounts={user.paymentAccounts} />}
               {activeTab === 'address' && <AddressDetails />}
