@@ -48,6 +48,8 @@ export const API_ROUTES = {
   CHECKOUT: {
     WITH_EXISTING_ADDRESS: `${BASE_PATH}/checkout/with-existing-address`,
     WITH_NEW_ADDRESS: `${BASE_PATH}/checkout/with-new-address`,
+    GENERATE_INVOICE: `${BASE_PATH}/checkout/generate-invoice`,
+    PAY_GENERATED_INVOICE: `${BASE_PATH}/checkout/pay-generated-invoice`,
   },
   INVOICE: {
     ACCEPT_BY_GOPA: `${BASE_PATH}/invoice/accept-invoice-by-gopa`,
@@ -57,6 +59,7 @@ export const API_ROUTES = {
     ITEM_DETAILS: `${BASE_PATH}/invoice/get-invoice-item-details`,
     MY_PENDING: `${BASE_PATH}/invoice/get-my-pending-invoices`,
     MY_HISTORY: `${BASE_PATH}/invoice/get-my-history-invoices`,
+    GENERATED_FOR_ME: `${BASE_PATH}/invoice/generated-for-me`,
     SELLER_PENDING: `${BASE_PATH}/invoice/get-seller-pending-invoices`,
     SELLER_HISTORY: `${BASE_PATH}/invoice/get-seller-history-invoices`,
     SET_READY_FOR_PICKUP: `${BASE_PATH}/invoice/set-orderitem-ready-for-pickup`,

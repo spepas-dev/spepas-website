@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 import emptyCartAnimation from '@/assets/lottie/empty-cart.json';
 import SpepasLoader from '@/components/common/SpepasLoader';
-import { getItemsInCartAll, getUserChargesAPI, removeBidFromCartAPI } from '@/lib/orderBidsApis';
+import { useAccountType } from '@/features/accountTypeContext';
+import { generateInvoiceAPI, getItemsInCartAll, getUserChargesAPI, removeBidFromCartAPI } from '@/lib/orderBidsApis';
 
 import CartItem from './CartItem';
 
@@ -14,7 +15,16 @@ const CartList: React.FC = () => {
   const [items, setItems] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [loading, setLoading] = useState(true);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [showGenerate, setShowGenerate] = useState(false);
+  const [genPhone, setGenPhone] = useState('');
+  const [genPin, setGenPin] = useState('');
+  const [genAgg, setGenAgg] = useState<'1' | '0'>('1');
+  const [genSubmitting, setGenSubmitting] = useState(false);
   const navigate = useNavigate();
+  // Generate-invoice is Mepa-only — only buyers with the Mepa profile can
+  // create an invoice for someone else to pay.
+  const { availableRoles } = useAccountType();
+  const canGenerateInvoice = availableRoles.includes('MEPA');
 
   useEffect(() => {
     getItemsInCartAll()
@@ -139,26 +149,117 @@ const CartList: React.FC = () => {
             </span>
             <span className="text-2xl font-bold text-gray-900">GH₵ {total.toFixed(2)}</span>
           </div>
-          <button
-            onClick={handleCheckout}
-            disabled={checkingOut}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 px-8 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
-          >
-            {checkingOut ? (
-              <SpepasLoader size="sm" className="inline-flex" />
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-                />
-              </svg>
+          <div className="flex flex-col sm:flex-row gap-2">
+            {canGenerateInvoice && (
+              <button
+                onClick={() => setShowGenerate(true)}
+                className="inline-flex items-center justify-center gap-2 bg-white text-blue border border-blue/30 text-sm font-medium py-3 px-6 rounded-xl shadow-sm hover:bg-blue/5 transition"
+              >
+                Generate Invoice
+              </button>
             )}
-            Proceed to Checkout
-          </button>
+            <button
+              onClick={handleCheckout}
+              disabled={checkingOut}
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 px-8 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
+            >
+              {checkingOut ? <SpepasLoader size="sm" className="inline-flex" /> : null}
+              Proceed to Checkout
+            </button>
+          </div>
         </div>
       </div>
+
+      {showGenerate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-gray-900">Generate Invoice</h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Create an invoice from your cart for another buyer to pay. Your Mepa
+                commission will apply when the order is delivered.
+              </p>
+            </div>
+
+            <label className="block text-xs font-medium text-gray-700">
+              Recipient phone number
+              <input
+                type="tel"
+                value={genPhone}
+                onChange={(e) => setGenPhone(e.target.value)}
+                placeholder="e.g. 0241234567"
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30"
+              />
+            </label>
+
+            <label className="block text-xs font-medium text-gray-700">
+              Aggregate items into a single delivery?
+              <select
+                value={genAgg}
+                onChange={(e) => setGenAgg(e.target.value as '1' | '0')}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30"
+              >
+                <option value="1">Yes, aggregate</option>
+                <option value="0">No, separate</option>
+              </select>
+            </label>
+
+            <label className="block text-xs font-medium text-gray-700">
+              Your transaction PIN
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                value={genPin}
+                onChange={(e) => setGenPin(e.target.value.replace(/\D/g, ''))}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30 tracking-widest"
+              />
+            </label>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                disabled={genSubmitting}
+                onClick={() => {
+                  setShowGenerate(false);
+                  setGenPhone('');
+                  setGenPin('');
+                }}
+                className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={genSubmitting || !genPhone || genPin.length < 4}
+                onClick={async () => {
+                  setGenSubmitting(true);
+                  try {
+                    const resp = await generateInvoiceAPI({
+                      pin: genPin,
+                      recipientPhone: genPhone.trim(),
+                      aggeagate: Number(genAgg)
+                    });
+                    if (resp?.status === 1) {
+                      toast.success('Invoice generated. Recipient can now pay.');
+                      setShowGenerate(false);
+                      setGenPhone('');
+                      setGenPin('');
+                    } else {
+                      toast.error(resp?.message || 'Failed to generate invoice');
+                    }
+                  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                    toast.error(err?.response?.data?.message || 'Failed to generate invoice');
+                  } finally {
+                    setGenSubmitting(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm text-white bg-gradient-to-r from-blue to-blue-500 rounded-xl hover:opacity-90 disabled:opacity-40"
+              >
+                {genSubmitting ? 'Submitting…' : 'Generate Invoice'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

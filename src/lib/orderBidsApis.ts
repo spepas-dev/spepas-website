@@ -305,6 +305,44 @@ export const checkoutWithNewAddressAPI = async (payload: {
 };
 
 /**
+ * Generate Invoice — Mepa-buyer creates an invoice for another buyer to pay.
+ * The Mepa-buyer earns the broker commission at delivery time. Recipient
+ * must already have a saved delivery address.
+ */
+export const generateInvoiceAPI = async (payload: {
+  pin: string;
+  recipientPhone: string;
+  aggeagate: number;
+}) => {
+  const response = await apiClient.post('/checkout/generate-invoice', payload);
+  return response.data;
+};
+
+/**
+ * Pay Generated Invoice — recipient pays an invoice generated for them.
+ */
+export const payGeneratedInvoiceAPI = async (payload: {
+  pin: string;
+  invoice_id: string;
+  paymentDetails: {
+    paymentMode: string;
+    walletNumber: string;
+    network: string;
+  };
+}) => {
+  const response = await apiClient.post('/checkout/pay-generated-invoice', payload);
+  return response.data;
+};
+
+/**
+ * Lists invoices another (Mepa) buyer generated FOR the calling user to pay.
+ */
+export const getInvoicesGeneratedForMeAPI = async () => {
+  const response = await apiClient.get('/invoice/generated-for-me');
+  return response.data;
+};
+
+/**
  * 16. Get User Charges
  */
 export const getUserChargesAPI = async (params: { aggeagate: string }) => {
