@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAccountType } from '@/features/accountTypeContext';
 import { useAuth } from '@/features/auth';
 
+import MyWallet, { WalletRole } from '@/components/marketing/MyWallet';
+
 import AddressDetails from './AddressDetails';
 import DeliverProfileTab from './DeliverProfileTab';
 import GeneralDetails from './GeneralDetails';
@@ -16,7 +18,6 @@ import PaymentAccountsTab from './PaymentAccountsTab';
 import RiderDocumentsTab from './RiderDocumentsTab';
 import SellerDetailsTab from './SellerDetailsTab';
 import SellerDocumentsTab from './SellerDocumentsTab';
-import WalletDetails from './WalletDetails';
 
 type TabKey =
   | 'general'
@@ -282,7 +283,10 @@ const MyAccount: React.FC = () => {
               {activeTab === 'groups' && <GroupsRolesTab groups={user.user_groups ?? []} roles={user.user_roles ?? []} />}
               {activeTab === 'payments' && user.paymentAccounts && <PaymentAccountsTab accounts={user.paymentAccounts} />}
               {activeTab === 'address' && <AddressDetails />}
-              {activeTab === 'wallet' && user.sellerDetails && <WalletDetails />}
+              {activeTab === 'wallet' &&
+                (['SELLER', 'RIDER', 'GOPA', 'MEPA'] as WalletRole[]).includes(accountType as WalletRole) && (
+                  <MyWallet role={accountType as WalletRole} />
+                )}
             </div>
           </main>
         </div>
