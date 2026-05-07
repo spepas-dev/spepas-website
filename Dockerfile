@@ -3,7 +3,9 @@ FROM node:21-alpine3.18 AS builder
 WORKDIR /app
 COPY package.json ./
 COPY tsconfig*.json ./
-RUN npm install -g pnpm
+# Pin pnpm to v10 — pnpm 11+ requires Node >=22.13 and the base image is
+# still on Node 21. Bump both together when we move to Node 22 LTS.
+RUN npm install -g pnpm@10
 COPY pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
