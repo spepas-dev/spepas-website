@@ -7,12 +7,68 @@ import { useNavigate } from 'react-router-dom';
 import emptyCartAnimation from '@/assets/lottie/empty-cart.json';
 import SpepasLoader from '@/components/common/SpepasLoader';
 import { useAccountType } from '@/features/accountTypeContext';
-import { generateInvoiceAPI, getItemsInCartAll, getUserChargesAPI, removeBidFromCartAPI } from '@/lib/orderBidsApis';
+import {
+  generateInvoiceAPI,
+  getInvoicesGeneratedForMeAPI,
+  getItemsInCartAll,
+  getUserChargesAPI,
+  payGeneratedInvoiceAPI,
+  removeBidFromCartAPI,
+} from '@/lib/orderBidsApis';
 
 import CartItem from './CartItem';
 
+interface GeneratedInvoiceItem {
+  cart?: {
+    bid?: {
+      totalPrice?: number;
+      orderRequest?: {
+        quantity?: number;
+        sparePart?: {
+          name?: string;
+          images?: { url?: string }[];
+        };
+      };
+    };
+  };
+}
+
+interface GeneratedInvoice {
+  invoice_id: string;
+  total_amount: number;
+  total_items: number;
+  generator?: { User_ID: string; name: string; phoneNumber: string };
+  paymentStatus?: number;
+  items?: GeneratedInvoiceItem[];
+}
+
+// Walks the eager-loaded items[].cart.bid.orderRequest.sparePart chain to
+// produce a short, user-friendly summary like "2× Brake Pad, 1× Oil Filter".
+// Falls back gracefully when the relation chain is partially populated.
+const summariseInvoiceParts = (inv: GeneratedInvoice): string => {
+  const parts = (inv.items || [])
+    .map((it) => {
+      const qty = it.cart?.bid?.orderRequest?.quantity ?? 1;
+      const name = it.cart?.bid?.orderRequest?.sparePart?.name?.trim();
+      return name ? `${qty}× ${name}` : null;
+    })
+    .filter(Boolean) as string[];
+  if (parts.length === 0) return '';
+  if (parts.length <= 2) return parts.join(', ');
+  return `${parts.slice(0, 2).join(', ')} +${parts.length - 2} more`;
+};
+
+interface PayState {
+  invoice_id: string;
+  paymentMode: 'MOMO';
+  walletNumber: string;
+  network: string;
+  pin: string;
+}
+
 const CartList: React.FC = () => {
   const [items, setItems] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [generatedInvoices, setGeneratedInvoices] = useState<GeneratedInvoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkingOut, setCheckingOut] = useState(false);
   const [showGenerate, setShowGenerate] = useState(false);
@@ -20,6 +76,8 @@ const CartList: React.FC = () => {
   const [genPin, setGenPin] = useState('');
   const [genAgg, setGenAgg] = useState<'1' | '0'>('1');
   const [genSubmitting, setGenSubmitting] = useState(false);
+  const [payTarget, setPayTarget] = useState<PayState | null>(null);
+  const [paySubmitting, setPaySubmitting] = useState(false);
   const navigate = useNavigate();
   // Generate-invoice is Mepa-only — only buyers with the Mepa profile can
   // create an invoice for someone else to pay.
@@ -27,9 +85,17 @@ const CartList: React.FC = () => {
   const canGenerateInvoice = availableRoles.includes('MEPA');
 
   useEffect(() => {
-    getItemsInCartAll()
-      .then((res) => setItems(res.data))
-      .catch(console.error)
+    // Two parallel reads: own cart + invoices a Mepa-buyer generated for
+    // me to pay. Both surfaces are rendered together — the recipient sees
+    // their pending invoices in the same cart screen.
+    Promise.all([
+      getItemsInCartAll().catch(() => ({ data: [] })),
+      getInvoicesGeneratedForMeAPI().catch(() => ({ data: [] })),
+    ])
+      .then(([cartRes, genRes]) => {
+        setItems(cartRes?.data || []);
+        setGeneratedInvoices(genRes?.data || []);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -106,7 +172,10 @@ const CartList: React.FC = () => {
     return <SpepasLoader size="lg" label="Loading cart..." />;
   }
 
-  if (items.length === 0) {
+  // Only render the empty-cart screen when BOTH the user's own cart AND
+  // their pending generated invoices are empty — a recipient with no items
+  // of their own but a pending invoice still needs to reach the cart.
+  if (items.length === 0 && generatedInvoices.length === 0) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 flex flex-col items-center text-center space-y-4">
         <Lottie animationData={emptyCartAnimation} loop autoplay className="w-48 h-48 sm:w-56 sm:h-56" />
@@ -133,42 +202,101 @@ const CartList: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Cart Items */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
-        {items.map((i) => (
-          <CartItem key={i.cart_ID} item={i} onRemove={handleRemove} />
-        ))}
-      </div>
+      {/* Cart Items (only when the user has their own items). */}
+      {items.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100">
+          {items.map((i) => (
+            <CartItem key={i.cart_ID} item={i} onRemove={handleRemove} />
+          ))}
+        </div>
+      )}
 
-      {/* Summary & Checkout */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm text-gray-500">
-              Total ({items.length} {items.length === 1 ? 'item' : 'items'}):
-            </span>
-            <span className="text-2xl font-bold text-gray-900">GH₵ {total.toFixed(2)}</span>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            {canGenerateInvoice && (
+      {/* Summary + own-cart checkout actions. Hidden when the cart is empty
+          but the user has generated invoices waiting — there's no own-cart
+          total to settle in that case. */}
+      {items.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm text-gray-500">
+                Total ({items.length} {items.length === 1 ? 'item' : 'items'}):
+              </span>
+              <span className="text-2xl font-bold text-gray-900">GH₵ {total.toFixed(2)}</span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {canGenerateInvoice && (
+                <button
+                  onClick={() => setShowGenerate(true)}
+                  className="inline-flex items-center justify-center gap-2 bg-white text-blue border border-blue/30 text-sm font-medium py-3 px-6 rounded-xl shadow-sm hover:bg-blue/5 transition"
+                >
+                  Generate Invoice
+                </button>
+              )}
               <button
-                onClick={() => setShowGenerate(true)}
-                className="inline-flex items-center justify-center gap-2 bg-white text-blue border border-blue/30 text-sm font-medium py-3 px-6 rounded-xl shadow-sm hover:bg-blue/5 transition"
+                onClick={handleCheckout}
+                disabled={checkingOut}
+                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 px-8 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
               >
-                Generate Invoice
+                {checkingOut ? <SpepasLoader size="sm" className="inline-flex" /> : null}
+                Proceed to Checkout
               </button>
-            )}
-            <button
-              onClick={handleCheckout}
-              disabled={checkingOut}
-              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium py-3 px-8 rounded-xl shadow-sm hover:opacity-90 transition disabled:opacity-40"
-            >
-              {checkingOut ? <SpepasLoader size="sm" className="inline-flex" /> : null}
-              Proceed to Checkout
-            </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Invoices another buyer (with Mepa profile) generated FOR me to
+          pay. Shown alongside (or instead of) the user's own cart items so
+          a recipient with no items of their own still finds them here. */}
+      {generatedInvoices.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-baseline justify-between mb-4">
+            <h3 className="text-base font-semibold text-gray-900">Invoices generated for you</h3>
+            <span className="text-xs text-gray-500">
+              {generatedInvoices.length} pending
+            </span>
+          </div>
+          <div className="divide-y divide-gray-100">
+            {generatedInvoices.map((inv) => {
+              const partsSummary = summariseInvoiceParts(inv);
+              return (
+                <div key={inv.invoice_id} className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    {partsSummary && (
+                      <p className="font-medium text-sm text-gray-900 truncate">{partsSummary}</p>
+                    )}
+                    <p className={`${partsSummary ? 'text-base mt-1' : 'text-lg'} font-semibold text-gray-900`}>
+                      GH₵ {Number(inv.total_amount).toFixed(2)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {inv.total_items} item{inv.total_items !== 1 ? 's' : ''}
+                    </p>
+                    {inv.generator && (
+                      <p className="text-xs text-blue mt-1">
+                        From {inv.generator.name} ({inv.generator.phoneNumber})
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() =>
+                      setPayTarget({
+                        invoice_id: inv.invoice_id,
+                        paymentMode: 'MOMO',
+                        walletNumber: '',
+                        network: '',
+                        pin: ''
+                      })
+                    }
+                    className="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-gradient-to-r from-blue to-blue-500 text-white text-sm font-medium hover:opacity-90 flex-shrink-0"
+                  >
+                    Pay
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {showGenerate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -255,6 +383,94 @@ const CartList: React.FC = () => {
                 className="px-4 py-2 text-sm text-white bg-gradient-to-r from-blue to-blue-500 rounded-xl hover:opacity-90 disabled:opacity-40"
               >
                 {genSubmitting ? 'Submitting…' : 'Generate Invoice'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {payTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+            <h3 className="text-base font-semibold text-gray-900">Pay Generated Invoice</h3>
+            <p className="text-xs text-gray-500 -mt-2">Invoice {payTarget.invoice_id}</p>
+
+            <label className="block text-xs font-medium text-gray-700">
+              Mobile money number
+              <input
+                type="tel"
+                value={payTarget.walletNumber}
+                onChange={(e) => setPayTarget({ ...payTarget, walletNumber: e.target.value })}
+                placeholder="0241234567"
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30"
+              />
+            </label>
+
+            <label className="block text-xs font-medium text-gray-700">
+              Network
+              <select
+                value={payTarget.network}
+                onChange={(e) => setPayTarget({ ...payTarget, network: e.target.value })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30"
+              >
+                <option value="">Select network…</option>
+                <option value="MTN">MTN</option>
+                <option value="VODAFONE">Telecel (Vodafone)</option>
+                <option value="AIRTELTIGO">AirtelTigo</option>
+              </select>
+            </label>
+
+            <label className="block text-xs font-medium text-gray-700">
+              Your transaction PIN
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={6}
+                value={payTarget.pin}
+                onChange={(e) => setPayTarget({ ...payTarget, pin: e.target.value.replace(/\D/g, '') })}
+                className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30 tracking-widest"
+              />
+            </label>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                disabled={paySubmitting}
+                onClick={() => setPayTarget(null)}
+                className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={paySubmitting || !payTarget.walletNumber || !payTarget.network || payTarget.pin.length < 4}
+                onClick={async () => {
+                  setPaySubmitting(true);
+                  try {
+                    const resp = await payGeneratedInvoiceAPI({
+                      pin: payTarget.pin,
+                      invoice_id: payTarget.invoice_id,
+                      paymentDetails: {
+                        paymentMode: payTarget.paymentMode,
+                        walletNumber: payTarget.walletNumber,
+                        network: payTarget.network
+                      }
+                    });
+                    if (resp?.status === 1) {
+                      toast.success('Payment submitted. Approve on your phone.');
+                      // Remove from local list — recipient just paid it.
+                      setGeneratedInvoices((prev) => prev.filter((i) => i.invoice_id !== payTarget.invoice_id));
+                      setPayTarget(null);
+                    } else {
+                      toast.error(resp?.message || 'Payment failed');
+                    }
+                  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+                    toast.error(err?.response?.data?.message || 'Payment failed');
+                  } finally {
+                    setPaySubmitting(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm text-white bg-gradient-to-r from-blue to-blue-500 rounded-xl hover:opacity-90 disabled:opacity-40"
+              >
+                {paySubmitting ? 'Submitting…' : 'Pay'}
               </button>
             </div>
           </div>
