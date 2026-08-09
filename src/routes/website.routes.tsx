@@ -10,6 +10,8 @@ import TermsOfUsePage from '@/pages/marketing/terms/page';
 import ShopWithoutSidebarPage from '@/pages/marketing/shop-without-sidebar/page';
 import ShopDetailsPage from '@/pages/marketing/shop-details/page';
 import AboutUsPage from '@/pages/marketing/about-us/page';
+import PaymentCompletePage from '@/pages/payment/PaymentCompletePage';
+import PaymentCancelledPage from '@/pages/payment/PaymentCancelledPage';
 // import AltHomePage from '@/pages/marketing/home/alt-home/page';
 
 // import ProtectedRoute from '@/components/common/ProtectedRoute'; // *adjusted* (removed; now using ProtectedLayout in routes/index)
@@ -24,6 +26,13 @@ export const websiteRoutes: RouteObject[] = [
   { path: 'shop',            element: <ShopWithoutSidebarPage /> },
   { path: 'shop/:id',        element: <ShopDetailsPage /> },
   { path: 'about-us',        element: <AboutUsPage /> },
+
+  // Payment gateway redirect targets (PAYMENT_GATEWAY_COMPLETURL /
+  // PAYMENT_GATEWAY_CANCELTURL in sporderservices). Public because the
+  // redirect can arrive in a tab whose session has lapsed — see
+  // src/config/payment.config.ts.
+  { path: 'payment/complete',  element: <PaymentCompletePage /> },
+  { path: 'payment/cancelled', element: <PaymentCancelledPage /> },
 
   // NOTE: The `my-account` route has been moved under ProtectedLayout in routes/index.tsx  // *adjusted*
   // to avoid using the old ProtectedRoute wrapper.

@@ -10,10 +10,14 @@ import OffersPage from '@/pages/buyer/OffersPage';
 // NEW
 import OfferBidDetailPage from '@/pages/buyer/OfferBidDetailPage';
 import BuyerInvoicesPage from '@/pages/buyer/InvoicesPage';
+import PaymentProcessingPage from '@/pages/buyer/PaymentProcessingPage';
 
 export const buyerRoutes: RouteObject[] = [
   { path: 'buyer/cart', element: <CartPage /> },
   { path: 'buyer/checkout', element: <CheckoutPage /> },
+
+  // Waiting room while the buyer approves the mobile-money push prompt.
+  { path: 'buyer/payment/processing/:invoiceId', element: <PaymentProcessingPage /> },
   { path: 'buyer/post-request', element: <PostRequestPage /> },
   { path: 'buyer/requests', element: <MyRequestsPage /> },
   { path: 'buyer/requests/offers-all', element: <MyRequestsOffersPage /> },

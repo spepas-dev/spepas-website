@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 import emptyCartAnimation from '@/assets/lottie/empty-cart.json';
 import SpepasLoader from '@/components/common/SpepasLoader';
+import { PAYMENT_ROUTES } from '@/config/payment.config';
+import { MOMO_NETWORKS, normaliseMsisdn } from '@/lib/msisdn';
 import { useAccountType } from '@/features/accountTypeContext';
 import {
   generateInvoiceAPI,
@@ -60,7 +62,9 @@ const summariseInvoiceParts = (inv: GeneratedInvoice): string => {
 
 interface PayState {
   invoice_id: string;
-  paymentMode: 'MOMO';
+  // Matches cart checkout — the invoice's paymentMode is stored as WALLET
+  // across every mobile-money payment path (web and USSD).
+  paymentMode: 'WALLET';
   walletNumber: string;
   network: string;
   pin: string;
@@ -281,7 +285,7 @@ const CartList: React.FC = () => {
                     onClick={() =>
                       setPayTarget({
                         invoice_id: inv.invoice_id,
-                        paymentMode: 'MOMO',
+                        paymentMode: 'WALLET',
                         walletNumber: '',
                         network: '',
                         pin: ''
@@ -404,6 +408,11 @@ const CartList: React.FC = () => {
                 placeholder="0241234567"
                 className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30"
               />
+              {payTarget.walletNumber && !normaliseMsisdn(payTarget.walletNumber) && (
+                <p className="mt-1.5 text-xs font-normal text-red-600">
+                  Enter a valid Ghana number, e.g. 0241234567.
+                </p>
+              )}
             </label>
 
             <label className="block text-xs font-medium text-gray-700">
@@ -414,9 +423,11 @@ const CartList: React.FC = () => {
                 className="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue/30"
               >
                 <option value="">Select network…</option>
-                <option value="MTN">MTN</option>
-                <option value="VODAFONE">Telecel (Vodafone)</option>
-                <option value="AIRTELTIGO">AirtelTigo</option>
+                {MOMO_NETWORKS.map((n) => (
+                  <option key={n.value} value={n.value}>
+                    {n.label}
+                  </option>
+                ))}
               </select>
             </label>
 
@@ -441,8 +452,15 @@ const CartList: React.FC = () => {
                 Cancel
               </button>
               <button
-                disabled={paySubmitting || !payTarget.walletNumber || !payTarget.network || payTarget.pin.length < 4}
+                disabled={
+                  paySubmitting ||
+                  !normaliseMsisdn(payTarget.walletNumber) ||
+                  !payTarget.network ||
+                  payTarget.pin.length < 4
+                }
                 onClick={async () => {
+                  // Guarded by `disabled` above, so this always resolves.
+                  const msisdn = normaliseMsisdn(payTarget.walletNumber) as string;
                   setPaySubmitting(true);
                   try {
                     const resp = await payGeneratedInvoiceAPI({
@@ -450,15 +468,21 @@ const CartList: React.FC = () => {
                       invoice_id: payTarget.invoice_id,
                       paymentDetails: {
                         paymentMode: payTarget.paymentMode,
-                        walletNumber: payTarget.walletNumber,
+                        walletNumber: msisdn,
                         network: payTarget.network
                       }
                     });
                     if (resp?.status === 1) {
-                      toast.success('Payment submitted. Approve on your phone.');
                       // Remove from local list — recipient just paid it.
                       setGeneratedInvoices((prev) => prev.filter((i) => i.invoice_id !== payTarget.invoice_id));
+                      const { invoice_id, network } = payTarget;
                       setPayTarget(null);
+                      // Same push-prompt mechanism as cart checkout — hand off to
+                      // the processing page so the buyer sees it settle. It reads
+                      // the amount off the invoice itself.
+                      navigate(PAYMENT_ROUTES.processing(invoice_id), {
+                        state: { walletNumber: msisdn, network }
+                      });
                     } else {
                       toast.error(resp?.message || 'Payment failed');
                     }
